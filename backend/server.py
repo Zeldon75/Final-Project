@@ -427,20 +427,57 @@ async def get_chat_history(user: dict = Depends(require_auth), limit: int = 50):
 
 # ==================== MARKETPLACE ENDPOINTS ====================
 
+class MarketplaceItemCreateWithImages(BaseModel):
+    title: str
+    title_ar: str
+    description: str
+    description_ar: str
+    category: str
+    price: float
+    currency: str = "KWD"
+    images: List[str] = []  # Base64 encoded images or URLs
+
 @api_router.post("/marketplace/items", response_model=MarketplaceItem)
-async def create_item(item: MarketplaceItemCreate, user: dict = Depends(require_auth)):
+async def create_item(item: MarketplaceItemCreateWithImages, user: dict = Depends(require_auth)):
     item_id = f"item_{uuid.uuid4().hex[:12]}"
+    
+    # Process images - store base64 data or URLs
+    processed_images = []
+    for img in item.images[:5]:  # Limit to 5 images
+        if img.startswith('data:image') or img.startswith('http'):
+            processed_images.append(img)
+    
     item_doc = {
         "item_id": item_id,
         "seller_id": user["user_id"],
-        **item.model_dump(),
+        "seller_name": user.get("name", "Anonymous"),
+        "title": item.title,
+        "title_ar": item.title_ar,
+        "description": item.description,
+        "description_ar": item.description_ar,
+        "category": item.category,
+        "price": item.price,
+        "currency": item.currency,
+        "images": processed_images,
         "is_authenticated": False,
         "status": "active",
+        "views": 0,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.marketplace_items.insert_one(item_doc)
     item_doc["created_at"] = datetime.fromisoformat(item_doc["created_at"])
     return MarketplaceItem(**item_doc)
+
+@api_router.delete("/marketplace/items/{item_id}")
+async def delete_item(item_id: str, user: dict = Depends(require_auth)):
+    item = await db.marketplace_items.find_one({"item_id": item_id}, {"_id": 0})
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    if item["seller_id"] != user["user_id"]:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this item")
+    
+    await db.marketplace_items.delete_one({"item_id": item_id})
+    return {"message": "Item deleted successfully"}
 
 @api_router.get("/marketplace/items")
 async def get_items(category: Optional[str] = None, limit: int = 20, skip: int = 0):
@@ -468,14 +505,20 @@ async def get_item(item_id: str):
 @api_router.post("/councils", response_model=LiveCouncil)
 async def create_council(council: LiveCouncilCreate, user: dict = Depends(require_auth)):
     council_id = f"council_{uuid.uuid4().hex[:12]}"
+    # Generate a unique stream key for the host
+    stream_key = f"stream_{uuid.uuid4().hex[:16]}"
+    
     council_doc = {
         "council_id": council_id,
         "host_id": user["user_id"],
+        "host_name": user.get("name", "Anonymous Host"),
         **council.model_dump(),
         "scheduled_time": council.scheduled_time.isoformat(),
         "status": "scheduled",
         "viewers": [],
+        "stream_key": stream_key,
         "stream_url": None,
+        "chat_messages": [],
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.live_councils.insert_one(council_doc)
@@ -489,7 +532,7 @@ async def get_councils(status: Optional[str] = None, limit: int = 20):
     if status:
         query["status"] = status
     
-    councils = await db.live_councils.find(query, {"_id": 0}).sort("scheduled_time", 1).limit(limit).to_list(limit)
+    councils = await db.live_councils.find(query, {"_id": 0, "stream_key": 0}).sort("scheduled_time", 1).limit(limit).to_list(limit)
     for council in councils:
         if isinstance(council.get("scheduled_time"), str):
             council["scheduled_time"] = datetime.fromisoformat(council["scheduled_time"])
@@ -497,16 +540,21 @@ async def get_councils(status: Optional[str] = None, limit: int = 20):
             council["created_at"] = datetime.fromisoformat(council["created_at"])
     return {"councils": councils}
 
-@api_router.get("/councils/{council_id}", response_model=LiveCouncil)
-async def get_council(council_id: str):
+@api_router.get("/councils/{council_id}")
+async def get_council(council_id: str, user: dict = Depends(get_current_user)):
     council = await db.live_councils.find_one({"council_id": council_id}, {"_id": 0})
     if not council:
         raise HTTPException(status_code=404, detail="Council not found")
+    
+    # Only show stream_key to the host
+    if not user or user.get("user_id") != council.get("host_id"):
+        council.pop("stream_key", None)
+    
     if isinstance(council.get("scheduled_time"), str):
         council["scheduled_time"] = datetime.fromisoformat(council["scheduled_time"])
     if isinstance(council.get("created_at"), str):
         council["created_at"] = datetime.fromisoformat(council["created_at"])
-    return LiveCouncil(**council)
+    return council
 
 @api_router.post("/councils/{council_id}/join")
 async def join_council(council_id: str, user: dict = Depends(require_auth)):
@@ -521,7 +569,81 @@ async def join_council(council_id: str, user: dict = Depends(require_auth)):
         {"council_id": council_id},
         {"$addToSet": {"viewers": user["user_id"]}}
     )
-    return {"message": "Joined council successfully"}
+    return {"message": "Joined council successfully", "council_id": council_id}
+
+@api_router.post("/councils/{council_id}/leave")
+async def leave_council(council_id: str, user: dict = Depends(require_auth)):
+    await db.live_councils.update_one(
+        {"council_id": council_id},
+        {"$pull": {"viewers": user["user_id"]}}
+    )
+    return {"message": "Left council successfully"}
+
+@api_router.post("/councils/{council_id}/start")
+async def start_council(council_id: str, user: dict = Depends(require_auth)):
+    """Start a live stream - only the host can do this"""
+    council = await db.live_councils.find_one({"council_id": council_id}, {"_id": 0})
+    if not council:
+        raise HTTPException(status_code=404, detail="Council not found")
+    if council["host_id"] != user["user_id"]:
+        raise HTTPException(status_code=403, detail="Only the host can start the stream")
+    
+    await db.live_councils.update_one(
+        {"council_id": council_id},
+        {"$set": {"status": "live", "started_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    return {"message": "Council is now live", "stream_key": council.get("stream_key")}
+
+@api_router.post("/councils/{council_id}/end")
+async def end_council(council_id: str, user: dict = Depends(require_auth)):
+    """End a live stream"""
+    council = await db.live_councils.find_one({"council_id": council_id}, {"_id": 0})
+    if not council:
+        raise HTTPException(status_code=404, detail="Council not found")
+    if council["host_id"] != user["user_id"]:
+        raise HTTPException(status_code=403, detail="Only the host can end the stream")
+    
+    await db.live_councils.update_one(
+        {"council_id": council_id},
+        {"$set": {"status": "ended", "ended_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    return {"message": "Council ended"}
+
+@api_router.post("/councils/{council_id}/chat")
+async def send_chat_message(council_id: str, request: Request, user: dict = Depends(require_auth)):
+    """Send a chat message in the council"""
+    body = await request.json()
+    message = body.get("message", "").strip()
+    
+    if not message:
+        raise HTTPException(status_code=400, detail="Message cannot be empty")
+    
+    chat_msg = {
+        "message_id": f"msg_{uuid.uuid4().hex[:8]}",
+        "user_id": user["user_id"],
+        "user_name": user.get("name", "Anonymous"),
+        "message": message[:500],  # Limit message length
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.live_councils.update_one(
+        {"council_id": council_id},
+        {"$push": {"chat_messages": {"$each": [chat_msg], "$slice": -100}}}  # Keep last 100 messages
+    )
+    return chat_msg
+
+@api_router.get("/councils/{council_id}/chat")
+async def get_chat_messages(council_id: str, since: Optional[str] = None):
+    """Get chat messages for a council"""
+    council = await db.live_councils.find_one({"council_id": council_id}, {"_id": 0, "chat_messages": 1})
+    if not council:
+        raise HTTPException(status_code=404, detail="Council not found")
+    
+    messages = council.get("chat_messages", [])
+    if since:
+        messages = [m for m in messages if m.get("timestamp", "") > since]
+    
+    return {"messages": messages[-50:]}  # Return last 50 messages
 
 # ==================== SUBSCRIPTIONS ====================
 
