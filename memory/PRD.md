@@ -47,7 +47,9 @@ Build a massive, multi-generational cultural platform with:
 - [x] Cooking Corner with recipe cards
 - [x] Tourists Hub with guides and phrases
 - [x] Pan-Arab Wing with country selector
-- [x] Subscriptions page with 3 tiers
+- [x] Subscriptions page with 4 tiers (Free, Family 10 KWD, Heritage 25 KWD, Premium 55 KWD)
+- [x] **Stripe payment integration** (Visa/MasterCard)
+- [x] **K-NET payment option** (placeholder - requires merchant account)
 - [x] Authentication (JWT + Google OAuth)
 - [x] Multilingual support (8 languages)
 - [x] Dark/Light mode toggle
@@ -58,7 +60,9 @@ Build a massive, multi-generational cultural platform with:
 ## Prioritized Backlog
 
 ### P0 (Critical)
-- [ ] Payment integration (Stripe) for subscriptions
+- [x] ~~Payment integration (Stripe) for subscriptions~~ ✅ DONE
+- [x] ~~K-NET payment option~~ ✅ DONE (placeholder - needs merchant account)
+- [ ] K-NET full integration (requires Kuwaiti bank merchant account)
 - [ ] Live streaming infrastructure for Tale Councils
 - [ ] AR viewer integration for 3D heritage models
 
