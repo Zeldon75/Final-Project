@@ -1,0 +1,111 @@
+{
+  "project_name": "Darwaza (دروازة)",
+  "identity": "E1: The Anti-AI Designer",
+  "vision": "The Time Traveler's Majlis - A bridge between the tactile warmth of the past and the crystalline clarity of the future.",
+  "core_concept": "Dual-Nature Interface",
+  "modes": {
+    "traditional": {
+      "name": "Al-Turath (Heritage)",
+      "vibe": "Tactile, Warm, Storyteller, Sadu-Weaved",
+      "visuals": "Paper textures, serif fonts, skeuomorphic patterns, warm lighting.",
+      "primary_color": "#8D1C1C",
+      "background": "#FDF6E3"
+    },
+    "modern": {
+      "name": "Al-Mustaqbal (Future)",
+      "vibe": "Sleek, Glass, Neon-Sadu, Holographic",
+      "visuals": "Glassmorphism, clean lines, floating elements, dark mode default.",
+      "primary_color": "#0D9488",
+      "background": "#0F172A"
+    }
+  },
+  "design_system": {
+    "typography": {
+      "font_family_arabic": "IBM Plex Sans Arabic, sans-serif",
+      "font_family_english_heritage": "Crimson Pro, serif",
+      "font_family_english_modern": "Space Grotesk, sans-serif",
+      "scale": {
+        "h1": "text-5xl md:text-7xl font-bold tracking-tight",
+        "h2": "text-3xl md:text-5xl font-semibold",
+        "body": "text-lg leading-relaxed",
+        "senior_body": "text-xl leading-loose font-medium"
+      }
+    },
+    "colors": {
+      "palette": {
+        "sadu_red": "#8D1C1C",
+        "sadu_black": "#1A1A1A",
+        "sadu_white": "#F9FAFB",
+        "desert_sand": "#E8DCCA",
+        "saffron": "#D97706",
+        "persian_teal": "#0D9488",
+        "midnight_blue": "#0F172A",
+        "gold_accent": "#F59E0B"
+      },
+      "usage": {
+        "primary_action": "Use sadu_red (Heritage) or persian_teal (Modern)",
+        "background_layer": "Use desert_sand (Heritage) or midnight_blue (Modern)",
+        "text_main": "Use sadu_black (Heritage) or sadu_white (Modern)"
+      }
+    },
+    "layout": {
+      "grid_system": "Bento Grid (Modern) vs. Scroll Tapestry (Heritage)",
+      "spacing": "Generous (p-8 to p-12)",
+      "container": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+      "direction": "RTL-first (Right-to-Left) design logic"
+    },
+    "components": {
+      "buttons": {
+        "senior_accessible": "h-16 text-xl rounded-xl shadow-md active:scale-95 transition-transform",
+        "modern_sleek": "h-12 text-sm uppercase tracking-widest border border-white/20 hover:bg-white/10 backdrop-blur-md rounded-full"
+      },
+      "cards": {
+        "heritage": "bg-[#FDF6E3] border-2 border-[#8D1C1C] rounded-lg shadow-[4px_4px_0px_0px_#8D1C1C]",
+        "modern": "bg-white/5 border border-white/10 backdrop-blur-xl rounded-2xl shadow-2xl"
+      },
+      "sadu_pattern": "Use a repeating SVG pattern of diamonds and triangles. In Heritage mode, opacity 100%. In Modern mode, opacity 5% as a texture overlay."
+    }
+  },
+  "visual_assets": {
+    "images": {
+      "hero_modern": "https://images.unsplash.com/photo-1674654561955-c5a4fa89d446",
+      "hero_heritage": "https://images.unsplash.com/photo-xwxI-UdQEs",
+      "elderly_senior": "https://images.unsplash.com/photo-i108Hir_sY0",
+      "kuwait_towers": "https://images.unsplash.com/photo-1571986204936-76077adb51f9",
+      "sadu_texture": "https://images.unsplash.com/photo-zNT736PjClk"
+    },
+    "icons": {
+      "library": "Lucide React",
+      "style": "Stroke width 1.5px (Modern) vs 2.5px (Heritage)"
+    }
+  },
+  "accessibility_rules": {
+    "senior_mode": {
+      "contrast": "AAA (Strict High Contrast)",
+      "touch_target": "Min 60x60px",
+      "font_size_boost": "125%"
+    },
+    "general": {
+      "focus_states": "Visible thick outline (Orange in Heritage, Cyan in Modern)",
+      "screen_reader": "All images must have cultural context in alt text"
+    }
+  },
+  "instructions_to_main_agent": [
+    "CRITICAL: You MUST implement the 'Dual Interface' using a React Context (ThemeContext) that wraps the entire app.",
+    "The ThemeContext must expose: theme ('heritage' | 'modern'), toggleTheme(), and specific derived values like 'primaryColor'.",
+    "For the 'Sadu Pattern', create a CSS-in-JS or SVG component that draws a geometric strip (Triangle-Diamond-Triangle) to use as borders/dividers.",
+    "For the 'Senior Gateway', force the layout to be simpler: 1 column, huge cards, clear icons.",
+    "For 'Kids World', switch to a 'Gamified' sub-theme: brighter colors, rounded-3xl corners, bouncy animations.",
+    "Ensure RTL is handled correctly using 'dir=rtl' on the root and logical CSS properties (ms-, me- instead of ml-, mr-).",
+    "Do not use gradients for backgrounds in Heritage mode. Use solid warm colors + noise texture.",
+    "In Modern mode, use 'backdrop-filter: blur(12px)' for all overlays.",
+    "Use 'sonner' for all notifications."
+  ],
+  "UNIVERSAL_GUIDELINES": [
+    "Avoid generic 'Middle Eastern' tropes. No camels unless specifically relevant.",
+    "Use 'Lucide-React' for icons.",
+    "All interactive elements must have 'data-testid'.",
+    "Animation: Use 'framer-motion' for page transitions.",
+    "Never center text in long paragraphs. Always justify or align-start."
+  ]
+}
