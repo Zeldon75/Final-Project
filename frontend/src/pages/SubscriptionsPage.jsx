@@ -1,15 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/button';
 import { SaduCard, SaduDivider } from '../components/SaduPattern';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Switch } from '../components/ui/switch';
-import { Check, Star, Zap, Crown, Gift, Users, Shield } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group';
+import { Label } from '../components/ui/label';
+import { Check, Star, Zap, Crown, Gift, Users, Shield, CreditCard, Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { toast } from 'sonner';
+import axios from 'axios';
 
-const PlanCard = ({ plan, isYearly, isArabic, isPopular }) => {
-  const { isHeritage, darkMode, themeColors } = useTheme();
+const API_URL = process.env.REACT_APP_BACKEND_URL;
+
+const PlanCard = ({ plan, isYearly, isArabic, isPopular, onSubscribe, loading, currentPlan }) => {
+  const { isHeritage, darkMode } = useTheme();
   const price = isYearly ? plan.price_yearly : plan.price_monthly;
   const period = isYearly 
     ? (isArabic ? '/سنة' : '/year') 
@@ -20,11 +27,13 @@ const PlanCard = ({ plan, isYearly, isArabic, isPopular }) => {
       case 'free': return Gift;
       case 'family': return Users;
       case 'heritage': return Crown;
+      case 'premium': return Star;
       default: return Star;
     }
   };
 
   const Icon = getIcon();
+  const isCurrentPlan = currentPlan === plan.plan_id;
 
   return (
     <motion.div
@@ -36,6 +45,11 @@ const PlanCard = ({ plan, isYearly, isArabic, isPopular }) => {
       {isPopular && (
         <div className={`absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-sm font-bold text-white ${isHeritage ? 'bg-[#D97706]' : 'bg-[#F59E0B]'}`}>
           {isArabic ? 'الأكثر شعبية' : 'Most Popular'}
+        </div>
+      )}
+      {isCurrentPlan && (
+        <div className="absolute -top-4 right-4 px-3 py-1 rounded-full text-xs font-bold bg-green-500 text-white">
+          {isArabic ? 'خطتك الحالية' : 'Current Plan'}
         </div>
       )}
       <SaduCard className={`h-full ${isPopular ? 'scale-105' : ''}`}>
@@ -69,7 +83,7 @@ const PlanCard = ({ plan, isYearly, isArabic, isPopular }) => {
           </div>
           {isYearly && price > 0 && (
             <p className="text-sm text-green-600 mt-1">
-              {isArabic ? 'وفر 17%' : 'Save 17%'}
+              {isArabic ? 'وفر حتى 20%' : 'Save up to 20%'}
             </p>
           )}
         </div>
@@ -84,8 +98,10 @@ const PlanCard = ({ plan, isYearly, isArabic, isPopular }) => {
         </ul>
 
         <Button
+          onClick={() => onSubscribe(plan.plan_id)}
+          disabled={loading || plan.plan_id === 'free' || isCurrentPlan}
           className={`w-full h-12 ${
-            plan.plan_id === 'free'
+            plan.plan_id === 'free' || isCurrentPlan
               ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               : isHeritage 
                 ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' 
@@ -93,64 +109,159 @@ const PlanCard = ({ plan, isYearly, isArabic, isPopular }) => {
           }`}
           data-testid={`subscribe-${plan.plan_id}`}
         >
-          {plan.plan_id === 'free' 
-            ? (isArabic ? 'الخطة الحالية' : 'Current Plan')
-            : (isArabic ? 'اشترك الآن' : 'Subscribe Now')}
+          {loading ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : isCurrentPlan ? (
+            isArabic ? 'الخطة الحالية' : 'Current Plan'
+          ) : plan.plan_id === 'free' ? (
+            isArabic ? 'الخطة الحالية' : 'Current Plan'
+          ) : (
+            isArabic ? 'اشترك الآن' : 'Subscribe Now'
+          )}
         </Button>
       </SaduCard>
     </motion.div>
   );
 };
 
+const PaymentSuccess = ({ isArabic, onClose }) => (
+  <motion.div
+    initial={{ opacity: 0, scale: 0.9 }}
+    animate={{ opacity: 1, scale: 1 }}
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+  >
+    <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl max-w-md w-full mx-4 text-center">
+      <CheckCircle className="w-16 h-16 mx-auto mb-4 text-green-500" />
+      <h2 className="text-2xl font-bold mb-2">{isArabic ? 'تم الدفع بنجاح!' : 'Payment Successful!'}</h2>
+      <p className="text-muted-foreground mb-6">
+        {isArabic 
+          ? 'شكراً لاشتراكك في دروازة. يمكنك الآن الوصول لجميع الميزات.'
+          : 'Thank you for subscribing to Darwaza. You can now access all features.'}
+      </p>
+      <Button onClick={onClose} className="w-full">{isArabic ? 'متابعة' : 'Continue'}</Button>
+    </div>
+  </motion.div>
+);
+
 const SubscriptionsPage = () => {
   const { isHeritage, darkMode, themeColors } = useTheme();
   const { t, isRTL, language } = useLanguage();
+  const { isAuthenticated, user, token } = useAuth();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isArabic = language === 'ar';
   
   const [isYearly, setIsYearly] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('stripe');
+  const [plans, setPlans] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [checkingPayment, setCheckingPayment] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
-  const plans = [
-    {
-      plan_id: 'free',
-      name: 'Free',
-      name_ar: 'مجاني',
-      description: 'Basic access to Darwaza',
-      description_ar: 'الوصول الأساسي إلى دروازة',
-      price_monthly: 0,
-      price_yearly: 0,
-      currency: 'KWD',
-      features: ['Browse marketplace', 'View live councils', 'Basic AI chat (limited)'],
-      features_ar: ['تصفح السوق', 'مشاهدة المجالس الحية', 'محادثة الذكاء الاصطناعي (محدودة)']
-    },
-    {
-      plan_id: 'family',
-      name: 'Family',
-      name_ar: 'العائلة',
-      description: 'Perfect for families exploring heritage together',
-      description_ar: 'مثالي للعائلات لاستكشاف التراث معًا',
-      price_monthly: 9.99,
-      price_yearly: 99.99,
-      currency: 'KWD',
-      features: ['Everything in Free', 'Unlimited AI chat', 'Kids Heritage Box', 'Live workshops access', 'Priority support'],
-      features_ar: ['كل ما في المجاني', 'محادثة AI غير محدودة', 'صندوق التراث للأطفال', 'الوصول لورش العمل الحية', 'دعم أولوية']
-    },
-    {
-      plan_id: 'heritage',
-      name: 'Heritage Plus',
-      name_ar: 'التراث المميز',
-      description: 'Full access to all Darwaza features',
-      description_ar: 'الوصول الكامل لجميع ميزات دروازة',
-      price_monthly: 19.99,
-      price_yearly: 199.99,
-      currency: 'KWD',
-      features: ['Everything in Family', 'AR experiences', 'Certified courses', 'Host live councils', 'Exclusive discounts', 'VIP events access'],
-      features_ar: ['كل ما في العائلة', 'تجارب الواقع المعزز', 'دورات معتمدة', 'استضافة المجالس الحية', 'خصومات حصرية', 'الوصول لفعاليات VIP']
+  useEffect(() => {
+    fetchPlans();
+  }, []);
+
+  // Check for payment return
+  useEffect(() => {
+    const sessionId = searchParams.get('session_id');
+    if (sessionId && isAuthenticated) {
+      pollPaymentStatus(sessionId);
     }
-  ];
+  }, [searchParams, isAuthenticated]);
+
+  const fetchPlans = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/subscriptions/plans`);
+      setPlans(response.data.plans || []);
+    } catch (error) {
+      console.error('Error fetching plans:', error);
+    }
+  };
+
+  const pollPaymentStatus = async (sessionId, attempts = 0) => {
+    const maxAttempts = 5;
+    
+    if (attempts >= maxAttempts) {
+      toast.error(isArabic ? 'انتهت مهلة التحقق من الدفع' : 'Payment status check timed out');
+      return;
+    }
+
+    setCheckingPayment(true);
+    
+    try {
+      const response = await axios.get(`${API_URL}/api/payments/status/${sessionId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (response.data.payment_status === 'paid') {
+        setShowSuccess(true);
+        setCheckingPayment(false);
+        // Clear URL params
+        window.history.replaceState({}, '', window.location.pathname);
+      } else if (response.data.payment_status === 'expired') {
+        toast.error(isArabic ? 'انتهت صلاحية جلسة الدفع' : 'Payment session expired');
+        setCheckingPayment(false);
+      } else {
+        // Continue polling
+        setTimeout(() => pollPaymentStatus(sessionId, attempts + 1), 2000);
+      }
+    } catch (error) {
+      console.error('Error checking payment:', error);
+      setCheckingPayment(false);
+    }
+  };
+
+  const handleSubscribe = async (planId) => {
+    if (!isAuthenticated) {
+      toast.error(isArabic ? 'يرجى تسجيل الدخول أولاً' : 'Please login first');
+      navigate('/login');
+      return;
+    }
+
+    setLoading(true);
+    
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/payments/checkout`,
+        {
+          plan_id: planId,
+          billing_cycle: isYearly ? 'yearly' : 'monthly',
+          payment_method: paymentMethod,
+          origin_url: window.location.origin
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response.data.checkout_url) {
+        // Redirect to Stripe
+        window.location.href = response.data.checkout_url;
+      } else if (response.data.payment_method === 'knet') {
+        // K-NET not fully integrated yet
+        toast.info(response.data.message || 'K-NET integration coming soon');
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast.error(error.response?.data?.detail || (isArabic ? 'حدث خطأ' : 'An error occurred'));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className={`min-h-screen ${darkMode ? (isHeritage ? 'bg-[#1A1A1A]' : 'bg-[#0F172A]') : (isHeritage ? 'bg-[#FDF6E3]' : 'bg-[#F8FAFC]')}`}>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {checkingPayment && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl text-center">
+            <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-primary" />
+            <p>{isArabic ? 'جاري التحقق من الدفع...' : 'Checking payment status...'}</p>
+          </div>
+        </div>
+      )}
+      
+      {showSuccess && <PaymentSuccess isArabic={isArabic} onClose={() => setShowSuccess(false)} />}
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -168,7 +279,7 @@ const SubscriptionsPage = () => {
         </motion.div>
 
         {/* Billing Toggle */}
-        <div className="flex items-center justify-center gap-4 mb-12">
+        <div className="flex items-center justify-center gap-4 mb-8">
           <span className={`text-sm font-medium ${!isYearly ? '' : 'text-muted-foreground'}`}>
             {t('monthly')}
           </span>
@@ -180,20 +291,45 @@ const SubscriptionsPage = () => {
           <span className={`text-sm font-medium ${isYearly ? '' : 'text-muted-foreground'}`}>
             {t('yearly')}
             <span className={`ms-2 px-2 py-0.5 rounded-full text-xs ${isHeritage ? 'bg-[#D97706]/20 text-[#D97706]' : 'bg-[#F59E0B]/20 text-[#F59E0B]'}`}>
-              {isArabic ? 'وفر 17%' : 'Save 17%'}
+              {isArabic ? 'وفر 20%' : 'Save 20%'}
             </span>
           </span>
         </div>
 
+        {/* Payment Method Selection */}
+        <div className="flex justify-center mb-12">
+          <div className={`p-4 rounded-xl ${darkMode ? 'bg-white/5' : 'bg-gray-100'}`}>
+            <p className="text-sm font-medium mb-3 text-center">{isArabic ? 'طريقة الدفع' : 'Payment Method'}</p>
+            <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="flex gap-4">
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="stripe" id="stripe" />
+                <Label htmlFor="stripe" className="flex items-center gap-2 cursor-pointer">
+                  <CreditCard className="w-4 h-4" />
+                  <span>Visa/MasterCard</span>
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="knet" id="knet" />
+                <Label htmlFor="knet" className="flex items-center gap-2 cursor-pointer">
+                  <span className="font-bold text-blue-600">K-NET</span>
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+        </div>
+
         {/* Plans Grid */}
-        <div className="grid md:grid-cols-3 gap-6 items-start">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
           {plans.map((plan, index) => (
             <PlanCard
               key={plan.plan_id}
               plan={plan}
               isYearly={isYearly}
               isArabic={isArabic}
-              isPopular={plan.plan_id === 'family'}
+              isPopular={plan.plan_id === 'heritage'}
+              onSubscribe={handleSubscribe}
+              loading={loading}
+              currentPlan={user?.subscription_plan}
             />
           ))}
         </div>
@@ -209,16 +345,16 @@ const SubscriptionsPage = () => {
           <div className="space-y-4">
             {[
               {
+                q: isArabic ? 'ما هي طرق الدفع المتاحة؟' : 'What payment methods are available?',
+                a: isArabic ? 'نقبل بطاقات Visa وMasterCard عبر Stripe، وقريباً K-NET للمستخدمين في الكويت.' : 'We accept Visa and MasterCard via Stripe, and K-NET for Kuwait users coming soon.'
+              },
+              {
                 q: isArabic ? 'هل يمكنني تغيير خطتي لاحقاً؟' : 'Can I change my plan later?',
                 a: isArabic ? 'نعم، يمكنك الترقية أو التخفيض في أي وقت. سيتم احتساب الفرق بشكل تناسبي.' : 'Yes, you can upgrade or downgrade anytime. The difference will be prorated.'
               },
               {
                 q: isArabic ? 'هل هناك فترة تجريبية مجانية؟' : 'Is there a free trial?',
                 a: isArabic ? 'نعم، جميع الخطط المدفوعة تتضمن فترة تجريبية مجانية لمدة 7 أيام.' : 'Yes, all paid plans include a 7-day free trial.'
-              },
-              {
-                q: isArabic ? 'كيف يمكنني إلغاء اشتراكي؟' : 'How can I cancel my subscription?',
-                a: isArabic ? 'يمكنك إلغاء اشتراكك في أي وقت من إعدادات حسابك. لن يتم تحصيل أي رسوم إضافية.' : 'You can cancel your subscription anytime from your account settings. No additional charges will be made.'
               }
             ].map((faq, index) => (
               <SaduCard key={index}>

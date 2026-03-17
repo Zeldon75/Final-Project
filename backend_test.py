@@ -45,7 +45,7 @@ class DarwazaAPITester:
             return False
     
     def test_subscription_plans(self):
-        """Test subscription plans endpoint"""
+        """Test subscription plans endpoint with updated pricing"""
         print("\n🔍 Testing Subscription Plans...")
         
         try:
@@ -54,13 +54,35 @@ class DarwazaAPITester:
                 data = response.json()
                 plans = data.get("plans", [])
                 
-                # Check if we have all 3 plans
+                # Check if we have all 4 plans (including premium)
                 plan_ids = [plan.get("plan_id") for plan in plans]
-                expected_plans = ["free", "family", "heritage"]
+                expected_plans = ["free", "family", "heritage", "premium"]
                 has_all_plans = all(plan_id in plan_ids for plan_id in expected_plans)
                 
-                self.log_result("Subscription Plans Count", len(plans) == 3, f"Found {len(plans)} plans")
+                self.log_result("Subscription Plans Count", len(plans) == 4, f"Found {len(plans)} plans")
                 self.log_result("Required Plans Present", has_all_plans, f"Plans: {plan_ids}")
+                
+                # Check specific pricing (Free=0, Family=10KWD, Heritage=25KWD, Premium=55KWD)
+                expected_prices = {
+                    "free": 0.0,
+                    "family": 10.0,
+                    "heritage": 25.0,
+                    "premium": 55.0
+                }
+                
+                pricing_correct = True
+                for plan in plans:
+                    plan_id = plan.get("plan_id")
+                    if plan_id in expected_prices:
+                        expected_price = expected_prices[plan_id]
+                        actual_price = plan.get("price_monthly", -1)
+                        if actual_price != expected_price:
+                            pricing_correct = False
+                            self.log_result(f"Plan {plan_id} Pricing", False, f"Expected {expected_price}, got {actual_price}")
+                        else:
+                            self.log_result(f"Plan {plan_id} Pricing", True, f"{actual_price} KWD")
+                
+                self.log_result("All Plan Pricing Correct", pricing_correct, "Updated pricing structure verified")
                 
                 # Check plan structure
                 if plans:
@@ -238,6 +260,53 @@ class DarwazaAPITester:
             self.log_result("Live Councils", False, f"Exception: {str(e)}")
             return False
     
+    def test_payment_checkout(self):
+        """Test payment checkout functionality (Stripe + K-NET)"""
+        print("\n🔍 Testing Payment Checkout...")
+        
+        if not self.token:
+            self.log_result("Payment Checkout", False, "No auth token available")
+            return False
+        
+        try:
+            # Test Stripe checkout
+            stripe_payload = {
+                "plan_id": "family",
+                "billing_cycle": "monthly",
+                "payment_method": "stripe",
+                "origin_url": "https://sadu-cultural.preview.emergentagent.com"
+            }
+            
+            response = self.session.post(f"{self.base_url}/payments/checkout", json=stripe_payload)
+            if response.status_code == 200:
+                data = response.json()
+                has_checkout_url = data.get("checkout_url") is not None
+                has_session_id = data.get("session_id") is not None
+                self.log_result("Stripe Checkout", has_checkout_url, f"Session ID: {data.get('session_id', 'None')}")
+            else:
+                self.log_result("Stripe Checkout", False, f"Status: {response.status_code}, Response: {response.text}")
+            
+            # Test K-NET checkout (should return placeholder message)
+            knet_payload = {
+                "plan_id": "heritage",
+                "billing_cycle": "monthly",
+                "payment_method": "knet",
+                "origin_url": "https://sadu-cultural.preview.emergentagent.com"
+            }
+            
+            response = self.session.post(f"{self.base_url}/payments/checkout", json=knet_payload)
+            if response.status_code == 200:
+                data = response.json()
+                is_knet_placeholder = data.get("payment_method") == "knet" and data.get("message") is not None
+                self.log_result("K-NET Placeholder", is_knet_placeholder, f"Message: {data.get('message', 'None')}")
+            else:
+                self.log_result("K-NET Checkout", False, f"Status: {response.status_code}")
+                
+            return True
+        except Exception as e:
+            self.log_result("Payment Checkout", False, f"Exception: {str(e)}")
+            return False
+    
     def run_all_tests(self):
         """Run all backend tests"""
         print("🚀 Starting Darwaza Backend API Tests...")
@@ -254,6 +323,7 @@ class DarwazaAPITester:
         if self.test_user_registration():
             self.test_user_profile()
             self.test_ai_chat()
+            self.test_payment_checkout()
         
         # Final summary
         print("\n" + "=" * 50)

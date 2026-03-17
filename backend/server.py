@@ -14,6 +14,7 @@ import bcrypt
 import jwt
 import httpx
 from emergentintegrations.llm.chat import LlmChat, UserMessage
+from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionResponse, CheckoutStatusResponse, CheckoutSessionRequest
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -30,6 +31,17 @@ JWT_EXPIRATION_DAYS = 7
 
 # Emergent LLM Key
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY', '')
+
+# Stripe Key
+STRIPE_API_KEY = os.environ.get('STRIPE_API_KEY', '')
+
+# Subscription Plans - Fixed prices defined on backend only
+SUBSCRIPTION_PLANS = {
+    "free": {"price_monthly": 0.0, "price_yearly": 0.0},
+    "family": {"price_monthly": 10.0, "price_yearly": 99.0},
+    "heritage": {"price_monthly": 25.0, "price_yearly": 250.0},
+    "premium": {"price_monthly": 55.0, "price_yearly": 550.0}
+}
 
 app = FastAPI(title="Darwaza API", version="1.0.0")
 api_router = APIRouter(prefix="/api")
@@ -522,8 +534,8 @@ async def get_subscription_plans():
             "name_ar": "مجاني",
             "description": "Basic access to Darwaza",
             "description_ar": "الوصول الأساسي إلى دروازة",
-            "price_monthly": 0,
-            "price_yearly": 0,
+            "price_monthly": 0.0,
+            "price_yearly": 0.0,
             "currency": "KWD",
             "features": ["Browse marketplace", "View live councils", "Basic AI chat (limited)"],
             "features_ar": ["تصفح السوق", "مشاهدة المجالس الحية", "محادثة الذكاء الاصطناعي (محدودة)"]
@@ -534,8 +546,8 @@ async def get_subscription_plans():
             "name_ar": "العائلة",
             "description": "Perfect for families exploring heritage together",
             "description_ar": "مثالي للعائلات لاستكشاف التراث معًا",
-            "price_monthly": 9.99,
-            "price_yearly": 99.99,
+            "price_monthly": 10.0,
+            "price_yearly": 99.0,
             "currency": "KWD",
             "features": ["Everything in Free", "Unlimited AI chat", "Kids Heritage Box", "Live workshops access"],
             "features_ar": ["كل ما في المجاني", "محادثة AI غير محدودة", "صندوق التراث للأطفال", "الوصول لورش العمل الحية"]
@@ -544,16 +556,243 @@ async def get_subscription_plans():
             "plan_id": "heritage",
             "name": "Heritage Plus",
             "name_ar": "التراث المميز",
+            "description": "Full heritage experience with AR and courses",
+            "description_ar": "تجربة التراث الكاملة مع الواقع المعزز والدورات",
+            "price_monthly": 25.0,
+            "price_yearly": 250.0,
+            "currency": "KWD",
+            "features": ["Everything in Family", "AR experiences", "Certified courses", "Priority support"],
+            "features_ar": ["كل ما في العائلة", "تجارب الواقع المعزز", "دورات معتمدة", "دعم أولوية"]
+        },
+        {
+            "plan_id": "premium",
+            "name": "Premium",
+            "name_ar": "بريميوم",
             "description": "Full access to all Darwaza features",
             "description_ar": "الوصول الكامل لجميع ميزات دروازة",
-            "price_monthly": 19.99,
-            "price_yearly": 199.99,
+            "price_monthly": 55.0,
+            "price_yearly": 550.0,
             "currency": "KWD",
-            "features": ["Everything in Family", "AR experiences", "Certified courses", "Priority support", "Host live councils"],
-            "features_ar": ["كل ما في العائلة", "تجارب الواقع المعزز", "دورات معتمدة", "دعم أولوية", "استضافة المجالس الحية"]
+            "features": ["Everything in Heritage", "Host live councils", "VIP events access", "Exclusive discounts", "Personal heritage consultant"],
+            "features_ar": ["كل ما في التراث", "استضافة المجالس الحية", "الوصول لفعاليات VIP", "خصومات حصرية", "مستشار تراثي شخصي"]
         }
     ]
     return {"plans": plans}
+
+# ==================== PAYMENT ENDPOINTS (STRIPE + K-NET) ====================
+
+class PaymentRequest(BaseModel):
+    plan_id: str
+    billing_cycle: str = "monthly"  # monthly or yearly
+    payment_method: str = "stripe"  # stripe or knet
+    origin_url: str
+
+class PaymentStatusRequest(BaseModel):
+    session_id: str
+
+@api_router.post("/payments/checkout")
+async def create_checkout(payment: PaymentRequest, request: Request, user: dict = Depends(require_auth)):
+    """Create a checkout session for subscription payment"""
+    
+    # Validate plan exists
+    if payment.plan_id not in SUBSCRIPTION_PLANS:
+        raise HTTPException(status_code=400, detail="Invalid plan")
+    
+    if payment.plan_id == "free":
+        raise HTTPException(status_code=400, detail="Free plan doesn't require payment")
+    
+    # Get amount from server-side definition only (SECURITY)
+    plan_prices = SUBSCRIPTION_PLANS[payment.plan_id]
+    if payment.billing_cycle == "yearly":
+        amount = plan_prices["price_yearly"]
+    else:
+        amount = plan_prices["price_monthly"]
+    
+    # Build URLs from provided origin
+    success_url = f"{payment.origin_url}/subscriptions/success?session_id={{CHECKOUT_SESSION_ID}}"
+    cancel_url = f"{payment.origin_url}/subscriptions"
+    
+    if payment.payment_method == "stripe":
+        # Initialize Stripe checkout
+        host_url = str(request.base_url).rstrip('/')
+        webhook_url = f"{host_url}/api/webhook/stripe"
+        stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url)
+        
+        # Create checkout session
+        checkout_request = CheckoutSessionRequest(
+            amount=float(amount),
+            currency="usd",  # Stripe uses USD, convert KWD display
+            success_url=success_url,
+            cancel_url=cancel_url,
+            metadata={
+                "user_id": user["user_id"],
+                "plan_id": payment.plan_id,
+                "billing_cycle": payment.billing_cycle,
+                "original_currency": "KWD",
+                "original_amount": str(amount)
+            }
+        )
+        
+        session = await stripe_checkout.create_checkout_session(checkout_request)
+        
+        # Create payment transaction record
+        await db.payment_transactions.insert_one({
+            "transaction_id": f"txn_{uuid.uuid4().hex[:12]}",
+            "session_id": session.session_id,
+            "user_id": user["user_id"],
+            "plan_id": payment.plan_id,
+            "billing_cycle": payment.billing_cycle,
+            "amount": amount,
+            "currency": "KWD",
+            "payment_method": "stripe",
+            "payment_status": "pending",
+            "created_at": datetime.now(timezone.utc).isoformat()
+        })
+        
+        return {"checkout_url": session.url, "session_id": session.session_id, "payment_method": "stripe"}
+    
+    elif payment.payment_method == "knet":
+        # K-NET requires merchant account setup
+        # For now, return info about K-NET integration
+        transaction_id = f"knet_{uuid.uuid4().hex[:12]}"
+        
+        # Create pending transaction
+        await db.payment_transactions.insert_one({
+            "transaction_id": transaction_id,
+            "session_id": transaction_id,
+            "user_id": user["user_id"],
+            "plan_id": payment.plan_id,
+            "billing_cycle": payment.billing_cycle,
+            "amount": amount,
+            "currency": "KWD",
+            "payment_method": "knet",
+            "payment_status": "pending",
+            "created_at": datetime.now(timezone.utc).isoformat()
+        })
+        
+        return {
+            "checkout_url": None,
+            "session_id": transaction_id,
+            "payment_method": "knet",
+            "message": "K-NET integration requires merchant account setup with a Kuwaiti bank. Please contact support.",
+            "message_ar": "تكامل كي-نت يتطلب إعداد حساب تاجر مع بنك كويتي. يرجى التواصل مع الدعم."
+        }
+    else:
+        raise HTTPException(status_code=400, detail="Invalid payment method")
+
+@api_router.get("/payments/status/{session_id}")
+async def get_payment_status(session_id: str, request: Request, user: dict = Depends(require_auth)):
+    """Get payment status and update subscription if paid"""
+    
+    # Find transaction
+    transaction = await db.payment_transactions.find_one(
+        {"session_id": session_id, "user_id": user["user_id"]},
+        {"_id": 0}
+    )
+    
+    if not transaction:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    
+    if transaction["payment_method"] == "stripe" and transaction["payment_status"] == "pending":
+        # Check with Stripe
+        host_url = str(request.base_url).rstrip('/')
+        webhook_url = f"{host_url}/api/webhook/stripe"
+        stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url)
+        
+        try:
+            status = await stripe_checkout.get_checkout_status(session_id)
+            
+            # Update transaction status
+            new_status = "paid" if status.payment_status == "paid" else status.payment_status
+            await db.payment_transactions.update_one(
+                {"session_id": session_id},
+                {"$set": {"payment_status": new_status, "updated_at": datetime.now(timezone.utc).isoformat()}}
+            )
+            
+            # If paid, update user subscription
+            if new_status == "paid":
+                await db.users.update_one(
+                    {"user_id": user["user_id"]},
+                    {"$set": {
+                        "subscription_plan": transaction["plan_id"],
+                        "subscription_billing_cycle": transaction["billing_cycle"],
+                        "subscription_started_at": datetime.now(timezone.utc).isoformat()
+                    }}
+                )
+            
+            return {
+                "session_id": session_id,
+                "payment_status": new_status,
+                "plan_id": transaction["plan_id"],
+                "amount": transaction["amount"],
+                "currency": transaction["currency"]
+            }
+        except Exception as e:
+            logger.error(f"Stripe status check error: {e}")
+            return {
+                "session_id": session_id,
+                "payment_status": transaction["payment_status"],
+                "plan_id": transaction["plan_id"]
+            }
+    
+    return {
+        "session_id": session_id,
+        "payment_status": transaction["payment_status"],
+        "plan_id": transaction["plan_id"],
+        "amount": transaction["amount"],
+        "currency": transaction["currency"]
+    }
+
+@api_router.post("/webhook/stripe")
+async def stripe_webhook(request: Request):
+    """Handle Stripe webhook events"""
+    body = await request.body()
+    signature = request.headers.get("Stripe-Signature")
+    
+    host_url = str(request.base_url).rstrip('/')
+    webhook_url = f"{host_url}/api/webhook/stripe"
+    stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url)
+    
+    try:
+        webhook_response = await stripe_checkout.handle_webhook(body, signature)
+        
+        if webhook_response.payment_status == "paid":
+            # Update transaction and user subscription
+            await db.payment_transactions.update_one(
+                {"session_id": webhook_response.session_id},
+                {"$set": {"payment_status": "paid", "updated_at": datetime.now(timezone.utc).isoformat()}}
+            )
+            
+            # Get transaction to find user
+            transaction = await db.payment_transactions.find_one(
+                {"session_id": webhook_response.session_id},
+                {"_id": 0}
+            )
+            
+            if transaction:
+                await db.users.update_one(
+                    {"user_id": transaction["user_id"]},
+                    {"$set": {
+                        "subscription_plan": transaction["plan_id"],
+                        "subscription_billing_cycle": transaction["billing_cycle"],
+                        "subscription_started_at": datetime.now(timezone.utc).isoformat()
+                    }}
+                )
+        
+        return {"status": "received"}
+    except Exception as e:
+        logger.error(f"Webhook error: {e}")
+        return {"status": "error", "message": str(e)}
+
+@api_router.get("/payments/history")
+async def get_payment_history(user: dict = Depends(require_auth)):
+    """Get user's payment history"""
+    transactions = await db.payment_transactions.find(
+        {"user_id": user["user_id"]},
+        {"_id": 0}
+    ).sort("created_at", -1).limit(20).to_list(20)
+    
+    return {"transactions": transactions}
 
 # ==================== CONTENT ENDPOINTS ====================
 

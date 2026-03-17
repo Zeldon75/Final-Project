@@ -71,6 +71,7 @@ const AppRouter = () => {
           <Route path="/tourists" element={<TouristsPage />} />
           <Route path="/arab-world" element={<ArabWorldPage />} />
           <Route path="/subscriptions" element={<SubscriptionsPage />} />
+          <Route path="/subscriptions/success" element={<SubscriptionsPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
