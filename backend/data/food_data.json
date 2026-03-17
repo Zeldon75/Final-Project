@@ -1,0 +1,124 @@
+{
+  "categories": [
+    {
+      "id": "kuwaiti",
+      "name": "Kuwaiti Cuisine",
+      "name_ar": "المطبخ الكويتي",
+      "icon": "utensils"
+    },
+    {
+      "id": "gulf",
+      "name": "Gulf Dishes",
+      "name_ar": "أطباق خليجية",
+      "icon": "bowl-food"
+    },
+    {
+      "id": "levantine",
+      "name": "Levantine",
+      "name_ar": "المطبخ الشامي",
+      "icon": "leaf"
+    },
+    {
+      "id": "maghreb",
+      "name": "Maghrebi",
+      "name_ar": "المطبخ المغاربي",
+      "icon": "pepper-hot"
+    },
+    {
+      "id": "desserts",
+      "name": "Arab Desserts",
+      "name_ar": "الحلويات العربية",
+      "icon": "cake-candles"
+    }
+  ],
+  "videos": [
+    {
+      "id": "video_1",
+      "title": "Traditional Kuwaiti Machboos",
+      "title_ar": "المجبوس الكويتي التقليدي",
+      "description": "Learn to cook authentic Kuwaiti Machboos with lamb - the national dish of Kuwait.",
+      "description_ar": "تعلم طبخ المجبوس الكويتي الأصيل مع لحم الضأن - الطبق الوطني للكويت.",
+      "category": "kuwaiti",
+      "youtube_id": "8JnfIa84TnU",
+      "duration": "15:30",
+      "thumbnail": "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&h=225&fit=crop"
+    },
+    {
+      "id": "video_2",
+      "title": "Perfect Saudi Kabsa",
+      "title_ar": "الكبسة السعودية المثالية",
+      "description": "Master the art of Saudi Kabsa with its signature blend of spices.",
+      "description_ar": "أتقن فن الكبسة السعودية مع مزيج التوابل المميز.",
+      "category": "gulf",
+      "youtube_id": "JgJUbmGDc6k",
+      "duration": "18:45",
+      "thumbnail": "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=400&h=225&fit=crop"
+    },
+    {
+      "id": "video_3",
+      "title": "Egyptian Koshary - Street Food Style",
+      "title_ar": "الكشري المصري - أسلوب طعام الشارع",
+      "description": "The complete guide to making authentic Egyptian Koshary at home.",
+      "description_ar": "الدليل الكامل لعمل الكشري المصري الأصيل في المنزل.",
+      "category": "levantine",
+      "youtube_id": "TH0Z5pLHuzQ",
+      "duration": "12:20",
+      "thumbnail": "https://images.unsplash.com/photo-1541518763669-27fef04b14ea?w=400&h=225&fit=crop"
+    },
+    {
+      "id": "video_4",
+      "title": "Authentic Moroccan Couscous",
+      "title_ar": "الكسكس المغربي الأصيل",
+      "description": "Traditional Friday Couscous with seven vegetables and tender lamb.",
+      "description_ar": "كسكس الجمعة التقليدي مع سبع خضروات ولحم الضأن الطري.",
+      "category": "maghreb",
+      "youtube_id": "MPpJCHs3i1Y",
+      "duration": "22:15",
+      "thumbnail": "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400&h=225&fit=crop"
+    },
+    {
+      "id": "video_5",
+      "title": "Lebanese Tabbouleh & Fattoush",
+      "title_ar": "التبولة والفتوش اللبناني",
+      "description": "Fresh and vibrant Lebanese salads - perfect for any mezze spread.",
+      "description_ar": "سلطات لبنانية طازجة ونابضة بالحياة - مثالية لأي مائدة مزة.",
+      "category": "levantine",
+      "youtube_id": "WXm-lXkJJjI",
+      "duration": "10:00",
+      "thumbnail": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=225&fit=crop"
+    },
+    {
+      "id": "video_6",
+      "title": "Emirati Harees - Ramadan Special",
+      "title_ar": "الهريس الإماراتي - طبق رمضاني",
+      "description": "How to make traditional Emirati Harees - a beloved Ramadan comfort food.",
+      "description_ar": "كيفية عمل الهريس الإماراتي التقليدي - طعام الراحة المحبوب في رمضان.",
+      "category": "gulf",
+      "youtube_id": "5-r7PfJ8xpk",
+      "duration": "16:40",
+      "thumbnail": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=225&fit=crop"
+    },
+    {
+      "id": "video_7",
+      "title": "Kuwaiti Gabout - Fish Stew",
+      "title_ar": "القبوط الكويتي",
+      "description": "Traditional Kuwaiti fish stew with dried lime and spices.",
+      "description_ar": "يخنة السمك الكويتية التقليدية مع الليمون المجفف والتوابل.",
+      "category": "kuwaiti",
+      "youtube_id": "5-r7PfJ8xpk",
+      "duration": "14:15",
+      "thumbnail": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=225&fit=crop"
+    },
+    {
+      "id": "video_8",
+      "title": "Kunafa - The King of Arab Desserts",
+      "title_ar": "الكنافة - ملك الحلويات العربية",
+      "description": "Crispy, cheesy, syrup-soaked perfection - learn to make authentic Kunafa.",
+      "description_ar": "الكمال المقرمش بالجبن والشراب - تعلم عمل الكنافة الأصيلة.",
+      "category": "desserts",
+      "youtube_id": "WXm-lXkJJjI",
+      "duration": "13:30",
+      "thumbnail": "https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=400&h=225&fit=crop"
+    }
+  ]
+}

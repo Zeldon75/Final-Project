@@ -22,6 +22,7 @@ import CookingPage from './pages/CookingPage';
 import TouristsPage from './pages/TouristsPage';
 import ArabWorldPage from './pages/ArabWorldPage';
 import SubscriptionsPage from './pages/SubscriptionsPage';
+import MockPaymentPage from './pages/MockPaymentPage';
 import { LoginPage, RegisterPage } from './pages/AuthPage';
 import AuthCallback from './pages/AuthCallback';
 
@@ -72,6 +73,7 @@ const AppRouter = () => {
           <Route path="/arab-world" element={<ArabWorldPage />} />
           <Route path="/subscriptions" element={<SubscriptionsPage />} />
           <Route path="/subscriptions/success" element={<SubscriptionsPage />} />
+          <Route path="/payment" element={<MockPaymentPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/auth/callback" element={<AuthCallback />} />

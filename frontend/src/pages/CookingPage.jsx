@@ -1,5 +1,5 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Button } from '../components/ui/button';
@@ -13,37 +13,136 @@ import {
   FlaskConical,
   Smartphone,
   Lock,
-  Star
+  Star,
+  Filter,
+  Clock,
+  X
 } from 'lucide-react';
+import axios from 'axios';
+
+const API_URL = process.env.REACT_APP_BACKEND_URL;
+
+const YouTubePlayer = ({ videoId, title, onClose }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="relative w-full max-w-4xl bg-black rounded-2xl overflow-hidden"
+        onClick={e => e.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/30 transition-colors"
+          data-testid="close-video-btn"
+        >
+          <X className="w-5 h-5 text-white" />
+        </button>
+        <div className="aspect-video">
+          <iframe
+            width="100%"
+            height="100%"
+            src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`}
+            title={title}
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="w-full h-full"
+          />
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+const VideoCard = ({ video, isArabic, isHeritage, themeColors, onPlay }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -5 }}
+      className="h-full"
+    >
+      <SaduCard className="overflow-hidden p-0 h-full flex flex-col">
+        <div className="aspect-video relative group cursor-pointer" onClick={onPlay}>
+          <img
+            src={video.thumbnail}
+            alt={isArabic ? video.title_ar : video.title}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <div 
+              className="w-16 h-16 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: themeColors.primary }}
+            >
+              <Play className="w-8 h-8 text-white ml-1" fill="white" />
+            </div>
+          </div>
+          <div className="absolute bottom-3 right-3 px-2 py-1 rounded bg-black/70 text-white text-xs flex items-center gap-1">
+            <Clock className="w-3 h-3" />
+            {video.duration}
+          </div>
+        </div>
+        <div className="p-4 flex-1 flex flex-col">
+          <h3 className={`font-bold mb-2 line-clamp-2 ${isHeritage ? 'font-serif' : ''}`}>
+            {isArabic ? video.title_ar : video.title}
+          </h3>
+          <p className="text-sm text-muted-foreground line-clamp-2 flex-1">
+            {isArabic ? video.description_ar : video.description}
+          </p>
+          <Button 
+            className="mt-4 w-full gap-2" 
+            style={{ backgroundColor: themeColors.primary }}
+            onClick={onPlay}
+            data-testid={`play-video-${video.id}`}
+          >
+            <Play className="w-4 h-4" />
+            {isArabic ? 'شاهد الآن' : 'Watch Now'}
+          </Button>
+        </div>
+      </SaduCard>
+    </motion.div>
+  );
+};
 
 const CookingPage = () => {
   const { isHeritage, darkMode, themeColors } = useTheme();
-  const { isRTL, language } = useLanguage();
+  const { language } = useLanguage();
   const isArabic = language === 'ar';
+  
+  const [videos, setVideos] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [playingVideo, setPlayingVideo] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const recipes = [
-    {
-      name: isArabic ? 'المجبوس' : 'Machboos',
-      description: isArabic ? 'طبق الأرز الكويتي الشهير مع اللحم أو الدجاج' : 'Famous Kuwaiti rice dish with meat or chicken',
-      difficulty: 'medium',
-      time: '90 min',
-      image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&h=300&fit=crop'
-    },
-    {
-      name: isArabic ? 'الغريبة' : 'Ghraiba',
-      description: isArabic ? 'حلوى تقليدية هشة ولذيذة' : 'Traditional crumbly and delicious cookies',
-      difficulty: 'easy',
-      time: '45 min',
-      image: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=400&h=300&fit=crop'
-    },
-    {
-      name: isArabic ? 'الهريس' : 'Harees',
-      description: isArabic ? 'طبق رمضاني تقليدي من القمح واللحم' : 'Traditional Ramadan dish of wheat and meat',
-      difficulty: 'hard',
-      time: '180 min',
-      image: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&h=300&fit=crop'
+  useEffect(() => {
+    fetchFoodData();
+  }, []);
+
+  const fetchFoodData = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/content/food-videos`);
+      setVideos(response.data.videos || []);
+      setCategories(response.data.categories || []);
+    } catch (error) {
+      console.error('Error fetching food data:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const filteredVideos = selectedCategory === 'all' 
+    ? videos 
+    : videos.filter(v => v.category === selectedCategory);
 
   const features = [
     {
@@ -64,29 +163,29 @@ const CookingPage = () => {
     }
   ];
 
-  const getDifficultyColor = (diff) => {
-    switch (diff) {
-      case 'easy': return 'bg-green-100 text-green-700';
-      case 'medium': return 'bg-yellow-100 text-yellow-700';
-      case 'hard': return 'bg-red-100 text-red-700';
-      default: return 'bg-gray-100 text-gray-700';
-    }
-  };
-
-  const getDifficultyText = (diff) => {
-    if (isArabic) {
-      switch (diff) {
-        case 'easy': return 'سهل';
-        case 'medium': return 'متوسط';
-        case 'hard': return 'صعب';
-        default: return diff;
-      }
-    }
-    return diff.charAt(0).toUpperCase() + diff.slice(1);
+  const getCategoryIcon = (id) => {
+    const icons = {
+      kuwaiti: '🇰🇼',
+      gulf: '🌊',
+      levantine: '🌿',
+      maghreb: '🌶️',
+      desserts: '🍰'
+    };
+    return icons[id] || '🍽️';
   };
 
   return (
     <div className={`min-h-screen ${darkMode ? (isHeritage ? 'bg-[#1A1A1A]' : 'bg-[#0F172A]') : (isHeritage ? 'bg-[#FDF6E3]' : 'bg-[#F8FAFC]')}`}>
+      <AnimatePresence>
+        {playingVideo && (
+          <YouTubePlayer 
+            videoId={playingVideo.youtube_id} 
+            title={isArabic ? playingVideo.title_ar : playingVideo.title}
+            onClose={() => setPlayingVideo(null)} 
+          />
+        )}
+      </AnimatePresence>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <motion.div
@@ -102,8 +201,8 @@ const CookingPage = () => {
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             {isArabic
-              ? 'تعلم الطبخ الكويتي التقليدي بطريقة ممتعة وتفاعلية مع تقنيات حديثة.'
-              : 'Learn traditional Kuwaiti cooking in a fun, interactive way with modern technology.'}
+              ? 'تعلم الطبخ الكويتي والعربي التقليدي من أفضل الطهاة مع دروس فيديو تفاعلية.'
+              : 'Learn traditional Kuwaiti and Arab cooking from top chefs with interactive video tutorials.'}
           </p>
         </motion.div>
 
@@ -146,58 +245,90 @@ const CookingPage = () => {
 
         <SaduDivider className="mb-16" />
 
-        {/* Recipes */}
+        {/* Video Tutorials Section */}
         <div className="mb-16">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className={`text-2xl font-bold ${isHeritage ? 'font-serif' : ''}`}>
-              {isArabic ? 'الوصفات الكويتية' : 'Kuwaiti Recipes'}
-            </h2>
-            <Button variant="outline" data-testid="view-all-recipes">
-              {isArabic ? 'عرض الكل' : 'View All'}
-            </Button>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+            <div>
+              <h2 className={`text-2xl font-bold ${isHeritage ? 'font-serif' : ''}`}>
+                {isArabic ? 'دروس الطبخ بالفيديو' : 'Video Cooking Tutorials'}
+              </h2>
+              <p className="text-muted-foreground mt-1">
+                {isArabic ? `${videos.length} فيديو متاح` : `${videos.length} videos available`}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">{isArabic ? 'تصفية:' : 'Filter:'}</span>
+            </div>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {recipes.map((recipe, index) => (
-              <motion.div
-                key={recipe.name}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -5 }}
+          {/* Category Filter */}
+          <div className="flex flex-wrap gap-2 mb-8">
+            <Button
+              variant={selectedCategory === 'all' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setSelectedCategory('all')}
+              style={selectedCategory === 'all' ? { backgroundColor: themeColors.primary } : {}}
+              data-testid="filter-all"
+            >
+              {isArabic ? 'الكل' : 'All'}
+            </Button>
+            {categories.map(cat => (
+              <Button
+                key={cat.id}
+                variant={selectedCategory === cat.id ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedCategory(cat.id)}
+                className="gap-2"
+                style={selectedCategory === cat.id ? { backgroundColor: themeColors.primary } : {}}
+                data-testid={`filter-${cat.id}`}
               >
-                <SaduCard className="overflow-hidden p-0">
-                  <div className="aspect-video relative">
-                    <img
-                      src={recipe.image}
-                      alt={recipe.name}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <h3 className="text-xl font-bold text-white mb-1">{recipe.name}</h3>
-                      <p className="text-white/80 text-sm">{recipe.description}</p>
-                    </div>
-                    <Button
-                      size="icon"
-                      className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30"
-                    >
-                      <Play className="w-5 h-5 text-white" />
-                    </Button>
-                  </div>
-                  <div className="p-4 flex items-center justify-between">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getDifficultyColor(recipe.difficulty)}`}>
-                      {getDifficultyText(recipe.difficulty)}
-                    </span>
-                    <span className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <Utensils className="w-4 h-4" />
-                      {recipe.time}
-                    </span>
-                  </div>
-                </SaduCard>
-              </motion.div>
+                <span>{getCategoryIcon(cat.id)}</span>
+                {isArabic ? cat.name_ar : cat.name}
+              </Button>
             ))}
           </div>
+
+          {/* Videos Grid */}
+          {loading ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="animate-pulse">
+                  <div className={`aspect-video rounded-t-xl ${darkMode ? 'bg-white/10' : 'bg-gray-200'}`} />
+                  <div className={`p-4 rounded-b-xl ${darkMode ? 'bg-white/5' : 'bg-gray-100'}`}>
+                    <div className={`h-4 rounded mb-2 ${darkMode ? 'bg-white/10' : 'bg-gray-200'}`} />
+                    <div className={`h-3 rounded w-2/3 ${darkMode ? 'bg-white/10' : 'bg-gray-200'}`} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredVideos.length === 0 ? (
+            <div className="text-center py-12">
+              <Utensils className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">
+                {isArabic ? 'لا توجد فيديوهات في هذه الفئة' : 'No videos in this category'}
+              </p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredVideos.map((video, index) => (
+                <motion.div
+                  key={video.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <VideoCard
+                    video={video}
+                    isArabic={isArabic}
+                    isHeritage={isHeritage}
+                    themeColors={themeColors}
+                    onPlay={() => setPlayingVideo(video)}
+                  />
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* AR Coming Soon */}

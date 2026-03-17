@@ -219,33 +219,8 @@ const SubscriptionsPage = () => {
       return;
     }
 
-    setLoading(true);
-    
-    try {
-      const response = await axios.post(
-        `${API_URL}/api/payments/checkout`,
-        {
-          plan_id: planId,
-          billing_cycle: isYearly ? 'yearly' : 'monthly',
-          payment_method: paymentMethod,
-          origin_url: window.location.origin
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      if (response.data.checkout_url) {
-        // Redirect to Stripe
-        window.location.href = response.data.checkout_url;
-      } else if (response.data.payment_method === 'knet') {
-        // K-NET not fully integrated yet
-        toast.info(response.data.message || 'K-NET integration coming soon');
-      }
-    } catch (error) {
-      console.error('Checkout error:', error);
-      toast.error(error.response?.data?.detail || (isArabic ? 'حدث خطأ' : 'An error occurred'));
-    } finally {
-      setLoading(false);
-    }
+    // Navigate to mock payment page
+    navigate(`/payment?plan=${planId}&billing=${isYearly ? 'yearly' : 'monthly'}&method=${paymentMethod}`);
   };
 
   return (

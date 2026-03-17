@@ -1,0 +1,112 @@
+{
+  "countries": [
+    {
+      "code": "KW",
+      "name": "Kuwait",
+      "name_ar": "الكويت",
+      "flag": "🇰🇼",
+      "description": "The gateway to the Gulf, known for its rich maritime heritage and pearl diving history.",
+      "description_ar": "بوابة الخليج، تشتهر بتراثها البحري الغني وتاريخ صيد اللؤلؤ.",
+      "video_id": "dQw4w9WgXcQ",
+      "video_title": "Discover Kuwait's Heritage",
+      "video_title_ar": "اكتشف تراث الكويت",
+      "dish": {
+        "name": "Machboos",
+        "name_ar": "مجبوس",
+        "description": "A traditional spiced rice dish with meat, considered Kuwait's national dish.",
+        "description_ar": "طبق أرز متبل تقليدي مع اللحم، يعتبر الطبق الوطني للكويت.",
+        "image": "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=600&h=400&fit=crop"
+      }
+    },
+    {
+      "code": "SA",
+      "name": "Saudi Arabia",
+      "name_ar": "السعودية",
+      "flag": "🇸🇦",
+      "description": "The heart of Arabia, home to ancient civilizations, vast deserts, and the two holiest cities in Islam.",
+      "description_ar": "قلب الجزيرة العربية، موطن الحضارات القديمة والصحاري الشاسعة وأقدس مدينتين في الإسلام.",
+      "video_id": "dQw4w9WgXcQ",
+      "video_title": "Saudi Arabia: Land of Heritage",
+      "video_title_ar": "السعودية: أرض التراث",
+      "dish": {
+        "name": "Kabsa",
+        "name_ar": "كبسة",
+        "description": "A fragrant rice dish with meat and a blend of aromatic spices, the pride of Saudi cuisine.",
+        "description_ar": "طبق أرز عطري مع اللحم ومزيج من التوابل العطرية، فخر المطبخ السعودي.",
+        "image": "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=600&h=400&fit=crop"
+      }
+    },
+    {
+      "code": "EG",
+      "name": "Egypt",
+      "name_ar": "مصر",
+      "flag": "🇪🇬",
+      "description": "The land of Pharaohs, pyramids, and the Nile - one of the world's oldest civilizations.",
+      "description_ar": "أرض الفراعنة والأهرامات والنيل - واحدة من أقدم الحضارات في العالم.",
+      "video_id": "dQw4w9WgXcQ",
+      "video_title": "Egypt: Mother of the World",
+      "video_title_ar": "مصر: أم الدنيا",
+      "dish": {
+        "name": "Koshary",
+        "name_ar": "كشري",
+        "description": "Egypt's beloved street food - a hearty mix of rice, pasta, lentils, and crispy onions with tangy tomato sauce.",
+        "description_ar": "طعام الشارع المحبوب في مصر - مزيج شهي من الأرز والمكرونة والعدس والبصل المقرمش مع صلصة الطماطم.",
+        "image": "https://images.unsplash.com/photo-1541518763669-27fef04b14ea?w=600&h=400&fit=crop"
+      }
+    },
+    {
+      "code": "LB",
+      "name": "Lebanon",
+      "name_ar": "لبنان",
+      "flag": "🇱🇧",
+      "description": "The jewel of the Mediterranean, famous for its cuisine, mountains, and vibrant culture.",
+      "description_ar": "جوهرة البحر الأبيض المتوسط، تشتهر بمطبخها وجبالها وثقافتها النابضة بالحياة.",
+      "video_id": "dQw4w9WgXcQ",
+      "video_title": "Lebanon: Pearl of the Middle East",
+      "video_title_ar": "لبنان: لؤلؤة الشرق الأوسط",
+      "dish": {
+        "name": "Tabbouleh",
+        "name_ar": "تبولة",
+        "description": "A refreshing salad of finely chopped parsley, mint, tomatoes, and bulgur with lemon and olive oil.",
+        "description_ar": "سلطة منعشة من البقدونس المفروم ناعماً والنعناع والطماطم والبرغل مع الليمون وزيت الزيتون.",
+        "image": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&h=400&fit=crop"
+      }
+    },
+    {
+      "code": "MA",
+      "name": "Morocco",
+      "name_ar": "المغرب",
+      "flag": "🇲🇦",
+      "description": "Where Africa meets Arabia and Europe - a land of kasbahs, souks, and stunning landscapes.",
+      "description_ar": "حيث تلتقي أفريقيا بالعرب وأوروبا - أرض القصبات والأسواق والمناظر الطبيعية الخلابة.",
+      "video_id": "dQw4w9WgXcQ",
+      "video_title": "Morocco: Gateway to Africa",
+      "video_title_ar": "المغرب: بوابة أفريقيا",
+      "dish": {
+        "name": "Couscous",
+        "name_ar": "كسكس",
+        "description": "The iconic Maghreb dish - steamed semolina granules served with vegetables and tender meat.",
+        "description_ar": "الطبق المغاربي الأيقوني - حبيبات السميد المطهوة على البخار مع الخضار واللحم الطري.",
+        "image": "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=600&h=400&fit=crop"
+      }
+    },
+    {
+      "code": "AE",
+      "name": "UAE",
+      "name_ar": "الإمارات",
+      "flag": "🇦🇪",
+      "description": "A stunning fusion of ancient Bedouin traditions and futuristic innovation.",
+      "description_ar": "اندماج مذهل بين تقاليد البدو القديمة والابتكار المستقبلي.",
+      "video_id": "dQw4w9WgXcQ",
+      "video_title": "UAE: Where Tradition Meets Tomorrow",
+      "video_title_ar": "الإمارات: حيث يلتقي التراث بالمستقبل",
+      "dish": {
+        "name": "Harees",
+        "name_ar": "هريس",
+        "description": "A comforting porridge of wheat and slow-cooked meat, traditionally served during Ramadan.",
+        "description_ar": "عصيدة مريحة من القمح واللحم المطبوخ ببطء، تقدم تقليدياً خلال رمضان.",
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&h=400&fit=crop"
+      }
+    }
+  ]
+}
