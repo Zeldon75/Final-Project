@@ -1,53 +1,97 @@
-import { useEffect } from "react";
-import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
+import React from 'react';
+import { useLocation, BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'sonner';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+// Contexts
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
+import { AuthProvider } from './contexts/AuthContext';
+import { LanguageProvider } from './contexts/LanguageContext';
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
+// Layout
+import Navbar from './components/layout/Navbar';
+import Footer from './components/layout/Footer';
 
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
+// Pages
+import WelcomePage from './pages/WelcomePage';
+import HomePage from './pages/HomePage';
+import AIHubPage from './pages/AIHubPage';
+import SeniorsPage from './pages/SeniorsPage';
+import YouthPage from './pages/YouthPage';
+import KidsPage from './pages/KidsPage';
+import CookingPage from './pages/CookingPage';
+import TouristsPage from './pages/TouristsPage';
+import ArabWorldPage from './pages/ArabWorldPage';
+import SubscriptionsPage from './pages/SubscriptionsPage';
+import { LoginPage, RegisterPage } from './pages/AuthPage';
+import AuthCallback from './pages/AuthCallback';
+
+import './App.css';
+
+// Route wrapper that checks for auth callback
+const AppRouter = () => {
+  const location = useLocation();
+  const { hasSelectedTheme, darkMode, isHeritage } = useTheme();
+  
+  // Check URL fragment for session_id (OAuth callback)
+  if (location.hash?.includes('session_id=')) {
+    return <AuthCallback />;
+  }
+
+  // If user hasn't selected a theme yet, show welcome page
+  if (!hasSelectedTheme) {
+    return <WelcomePage />;
+  }
 
   return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
+    <div className={`min-h-screen flex flex-col ${
+      darkMode 
+        ? isHeritage ? 'bg-[#1A1A1A] text-[#FDF6E3]' : 'bg-[#0F172A] text-[#F9FAFB]'
+        : isHeritage ? 'bg-[#FDF6E3] text-[#1A1A1A]' : 'bg-[#F8FAFC] text-[#0F172A]'
+    }`}>
+      <Navbar />
+      <main className="flex-1">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/ai-hub" element={<AIHubPage />} />
+          <Route path="/seniors" element={<SeniorsPage />} />
+          <Route path="/youth" element={<YouthPage />} />
+          <Route path="/kids" element={<KidsPage />} />
+          <Route path="/cooking" element={<CookingPage />} />
+          <Route path="/tourists" element={<TouristsPage />} />
+          <Route path="/arab-world" element={<ArabWorldPage />} />
+          <Route path="/subscriptions" element={<SubscriptionsPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
+      <Footer />
     </div>
   );
 };
 
 function App() {
   return (
-    <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </div>
+    <BrowserRouter>
+      <ThemeProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <AppRouter />
+            <Toaster 
+              position="top-center"
+              toastOptions={{
+                style: {
+                  background: 'var(--card)',
+                  color: 'var(--foreground)',
+                  border: '1px solid var(--border)',
+                }
+              }}
+            />
+          </AuthProvider>
+        </LanguageProvider>
+      </ThemeProvider>
+    </BrowserRouter>
   );
 }
 
