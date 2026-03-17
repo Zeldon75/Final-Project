@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useTheme, THEMES } from '../contexts/ThemeContext';
@@ -11,6 +11,12 @@ const WelcomePage = () => {
   const { selectTheme } = useTheme();
   const { t, language, setLanguage, languages, isRTL } = useLanguage();
   const navigate = useNavigate();
+  const [key, setKey] = useState(0);
+
+  // Force re-render when language changes
+  useEffect(() => {
+    setKey(prev => prev + 1);
+  }, [language]);
 
   const handleSelectTheme = (theme) => {
     selectTheme(theme);
@@ -18,7 +24,7 @@ const WelcomePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FDF6E3] via-[#E8DCCA] to-[#FDF6E3] relative overflow-hidden">
+    <div key={key} className="min-h-screen bg-gradient-to-br from-[#FDF6E3] via-[#E8DCCA] to-[#FDF6E3] relative overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 sadu-pattern opacity-30" />
       

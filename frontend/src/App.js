@@ -30,25 +30,36 @@ import './App.css';
 // Route wrapper that checks for auth callback
 const AppRouter = () => {
   const location = useLocation();
-  const { hasSelectedTheme, darkMode, isHeritage } = useTheme();
+  const { hasSelectedTheme, darkMode, isHeritage, selectTheme, THEMES } = useTheme();
   
   // Check URL fragment for session_id (OAuth callback)
   if (location.hash?.includes('session_id=')) {
     return <AuthCallback />;
   }
 
-  // If user hasn't selected a theme yet, show welcome page
-  if (!hasSelectedTheme) {
+  // Allow auth pages to work even without theme selection
+  const isAuthRoute = ['/login', '/register', '/auth/callback'].includes(location.pathname);
+  
+  // If user hasn't selected a theme yet and not on auth page, show welcome page
+  if (!hasSelectedTheme && !isAuthRoute) {
     return <WelcomePage />;
   }
+  
+  // If on auth page without theme, temporarily use heritage theme
+  if (!hasSelectedTheme && isAuthRoute) {
+    // Don't save to localStorage, just use heritage for display
+  }
+
+  const effectiveIsHeritage = hasSelectedTheme ? isHeritage : true;
+  const effectiveDarkMode = hasSelectedTheme ? darkMode : false;
 
   return (
     <div className={`min-h-screen flex flex-col ${
-      darkMode 
-        ? isHeritage ? 'bg-[#1A1A1A] text-[#FDF6E3]' : 'bg-[#0F172A] text-[#F9FAFB]'
-        : isHeritage ? 'bg-[#FDF6E3] text-[#1A1A1A]' : 'bg-[#F8FAFC] text-[#0F172A]'
+      effectiveDarkMode 
+        ? effectiveIsHeritage ? 'bg-[#1A1A1A] text-[#FDF6E3]' : 'bg-[#0F172A] text-[#F9FAFB]'
+        : effectiveIsHeritage ? 'bg-[#FDF6E3] text-[#1A1A1A]' : 'bg-[#F8FAFC] text-[#0F172A]'
     }`}>
-      <Navbar />
+      {hasSelectedTheme && <Navbar />}
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -66,7 +77,7 @@ const AppRouter = () => {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
-      <Footer />
+      {hasSelectedTheme && <Footer />}
     </div>
   );
 };

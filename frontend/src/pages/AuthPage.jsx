@@ -12,11 +12,15 @@ import { Mail, Lock, User, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const AuthPage = ({ isLogin = true }) => {
-  const { isHeritage, darkMode, themeColors } = useTheme();
+  const { isHeritage, darkMode, themeColors, hasSelectedTheme } = useTheme();
   const { t, isRTL, language } = useLanguage();
   const { login, register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const isArabic = language === 'ar';
+  
+  // Use heritage theme defaults if no theme selected
+  const effectiveIsHeritage = hasSelectedTheme ? isHeritage : true;
+  const effectiveDarkMode = hasSelectedTheme ? darkMode : false;
 
   const [formData, setFormData] = useState({
     email: '',
@@ -62,30 +66,30 @@ const AuthPage = ({ isLogin = true }) => {
   };
 
   return (
-    <div className={`min-h-screen flex items-center justify-center px-4 py-12 ${darkMode ? (isHeritage ? 'bg-[#1A1A1A]' : 'bg-[#0F172A]') : (isHeritage ? 'bg-[#FDF6E3]' : 'bg-[#F8FAFC]')}`}>
-      {isHeritage && <div className="fixed inset-0 sadu-pattern opacity-10 pointer-events-none" />}
+    <div className={`min-h-screen flex items-center justify-center px-4 py-12 ${effectiveDarkMode ? (effectiveIsHeritage ? 'bg-[#1A1A1A]' : 'bg-[#0F172A]') : (effectiveIsHeritage ? 'bg-[#FDF6E3]' : 'bg-[#F8FAFC]')}`}>
+      {effectiveIsHeritage && <div className="fixed inset-0 sadu-pattern opacity-10 pointer-events-none" />}
       
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className={`w-full max-w-md p-8 rounded-2xl ${
-          isHeritage
-            ? darkMode ? 'bg-[#2A2A2A] border-2 border-[#8D1C1C]' : 'bg-white border-2 border-[#8D1C1C]'
-            : darkMode ? 'glass-modern' : 'bg-white shadow-xl'
+          effectiveIsHeritage
+            ? effectiveDarkMode ? 'bg-[#2A2A2A] border-2 border-[#8D1C1C]' : 'bg-white border-2 border-[#8D1C1C]'
+            : effectiveDarkMode ? 'glass-modern' : 'bg-white shadow-xl'
         }`}
       >
         {/* Logo */}
         <Link to="/" className="flex items-center justify-center gap-3 mb-8">
-          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#0D9488]'}`}>
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${effectiveIsHeritage ? 'bg-[#8D1C1C]' : 'bg-[#0D9488]'}`}>
             <span className="text-white font-bold text-2xl">د</span>
           </div>
-          <span className={`text-2xl font-bold ${isHeritage ? 'font-serif text-[#8D1C1C]' : 'text-[#0D9488]'}`}>
+          <span className={`text-2xl font-bold ${effectiveIsHeritage ? 'font-serif text-[#8D1C1C]' : 'text-[#0D9488]'}`}>
             دروازة
           </span>
         </Link>
 
         {/* Title */}
-        <h1 className={`text-2xl font-bold text-center mb-2 ${isHeritage ? 'font-serif' : ''}`}>
+        <h1 className={`text-2xl font-bold text-center mb-2 ${effectiveIsHeritage ? 'font-serif' : ''}`}>
           {isLogin ? t('login') : t('register')}
         </h1>
         <p className="text-center text-muted-foreground mb-8">
@@ -204,7 +208,7 @@ const AuthPage = ({ isLogin = true }) => {
           <Button
             type="submit"
             disabled={loading}
-            className={`w-full h-12 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#0D9488] hover:bg-[#0B7A70]'}`}
+            className={`w-full h-12 ${effectiveIsHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#0D9488] hover:bg-[#0B7A70]'}`}
             data-testid="submit-btn"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (isLogin ? t('login') : t('register'))}
@@ -216,7 +220,7 @@ const AuthPage = ({ isLogin = true }) => {
           {isLogin ? t('dont_have_account') : t('already_have_account')}{' '}
           <Link
             to={isLogin ? '/register' : '/login'}
-            className={`font-semibold ${isHeritage ? 'text-[#8D1C1C]' : 'text-[#0D9488]'} hover:underline`}
+            className={`font-semibold ${effectiveIsHeritage ? 'text-[#8D1C1C]' : 'text-[#0D9488]'} hover:underline`}
             data-testid="switch-auth-link"
           >
             {isLogin ? t('register') : t('login')}
