@@ -1,0 +1,374 @@
+{
+  "etiquette": {
+    "title": "Etiquette & Customs",
+    "title_ar": "الصنعة والآداب",
+    "sections": [
+      {
+        "id": "greetings",
+        "title": "Greetings & Hospitality",
+        "title_ar": "التحية والضيافة",
+        "icon": "heart",
+        "content": "Greetings are very important in Kuwaiti culture. Men typically shake hands, and close friends may kiss on the cheek. When greeting elders, it's respectful to stand. The phrase 'As-salamu alaykum' (Peace be upon you) is the most common greeting.",
+        "content_ar": "التحية مهمة جداً في الثقافة الكويتية. يتصافح الرجال عادة بالأيدي، وقد يقبل الأصدقاء المقربون بعضهم على الخد. عند تحية كبار السن، من المحترم الوقوف. عبارة 'السلام عليكم' هي التحية الأكثر شيوعاً.",
+        "tips": [
+          "Always use your right hand for greetings and eating",
+          "Remove shoes when entering a Kuwaiti home",
+          "Accept tea or coffee when offered - refusing may be seen as impolite"
+        ],
+        "tips_ar": [
+          "استخدم دائماً يدك اليمنى للتحية والأكل",
+          "اخلع حذاءك عند دخول منزل كويتي",
+          "اقبل الشاي أو القهوة عند تقديمها - الرفض قد يُعتبر غير مهذب"
+        ],
+        "image": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&h=400&fit=crop"
+      },
+      {
+        "id": "diwaniya",
+        "title": "Diwaniya Culture",
+        "title_ar": "ثقافة الديوانية",
+        "icon": "users",
+        "content": "The Diwaniya is a uniquely Kuwaiti social institution - a gathering room where men meet to discuss politics, business, and social matters. It's a cornerstone of Kuwaiti social life and hospitality.",
+        "content_ar": "الديوانية هي مؤسسة اجتماعية كويتية فريدة - غرفة تجمع حيث يلتقي الرجال لمناقشة السياسة والأعمال والشؤون الاجتماعية. إنها حجر الزاوية في الحياة الاجتماعية والضيافة الكويتية.",
+        "tips": [
+          "Diwaniyas usually open after Maghrib prayer",
+          "Dress modestly and conservatively",
+          "Greet everyone starting from the right side of the room",
+          "Don't point the soles of your feet at others while seated"
+        ],
+        "tips_ar": [
+          "تفتح الديوانيات عادة بعد صلاة المغرب",
+          "ارتدِ ملابس محتشمة ومحافظة",
+          "حيّ الجميع بدءاً من الجانب الأيمن من الغرفة",
+          "لا توجه باطن قدميك نحو الآخرين أثناء الجلوس"
+        ],
+        "image": "https://images.unsplash.com/photo-1590076215667-875d4ef2d7de?w=600&h=400&fit=crop"
+      },
+      {
+        "id": "dress",
+        "title": "Dress Code",
+        "title_ar": "قواعد اللباس",
+        "icon": "shirt",
+        "content": "Kuwait is relatively liberal compared to other Gulf countries, but modest dress is appreciated. Men often wear the traditional 'Dishdasha' (white robe) and 'Ghutra' (head covering). Women may wear the 'Abaya' (black cloak) in public.",
+        "content_ar": "الكويت متحررة نسبياً مقارنة بدول الخليج الأخرى، لكن اللباس المحتشم مقدر. يرتدي الرجال غالباً الدشداشة التقليدية (الثوب الأبيض) والغترة (غطاء الرأس). قد ترتدي النساء العباءة (العباءة السوداء) في الأماكن العامة.",
+        "tips": [
+          "Avoid revealing clothing in public places",
+          "Cover shoulders and knees when visiting mosques",
+          "Business attire is acceptable in most settings",
+          "Traditional dress is not required for visitors"
+        ],
+        "tips_ar": [
+          "تجنب الملابس الكاشفة في الأماكن العامة",
+          "غطِّ الكتفين والركبتين عند زيارة المساجد",
+          "ملابس العمل مقبولة في معظم الأماكن",
+          "اللباس التقليدي غير مطلوب للزوار"
+        ],
+        "image": "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600&h=400&fit=crop"
+      },
+      {
+        "id": "ramadan",
+        "title": "Ramadan Customs",
+        "title_ar": "عادات رمضان",
+        "icon": "moon",
+        "content": "During Ramadan, Muslims fast from dawn to sunset. Non-Muslims are expected to refrain from eating, drinking, or smoking in public during daylight hours. Iftar (breaking fast) and Suhoor (pre-dawn meal) are special times for family gatherings.",
+        "content_ar": "خلال رمضان، يصوم المسلمون من الفجر حتى غروب الشمس. يُتوقع من غير المسلمين الامتناع عن الأكل والشرب والتدخين في الأماكن العامة خلال ساعات النهار. الإفطار والسحور هي أوقات خاصة لتجمعات العائلة.",
+        "tips": [
+          "Restaurants may be closed during daytime in Ramadan",
+          "Work hours are typically shorter during Ramadan",
+          "Greet people with 'Ramadan Kareem' (Generous Ramadan)",
+          "Accept invitations to Iftar - it's a great cultural experience"
+        ],
+        "tips_ar": [
+          "قد تكون المطاعم مغلقة خلال النهار في رمضان",
+          "ساعات العمل عادة أقصر خلال رمضان",
+          "حيّ الناس بـ 'رمضان كريم'",
+          "اقبل دعوات الإفطار - إنها تجربة ثقافية رائعة"
+        ],
+        "image": "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=600&h=400&fit=crop"
+      }
+    ]
+  },
+  "cuisine": {
+    "title": "Traditional Cuisine",
+    "title_ar": "المأكولات التقليدية",
+    "dishes": [
+      {
+        "id": "machboos",
+        "name": "Machboos",
+        "name_ar": "مجبوس",
+        "description": "Kuwait's national dish - fragrant rice cooked with meat (lamb, chicken, or fish), dried lime (loomi), and a blend of spices including cardamom, cinnamon, and turmeric.",
+        "description_ar": "الطبق الوطني الكويتي - أرز عطري مطبوخ مع اللحم (ضأن أو دجاج أو سمك) والليمون المجفف (لومي) ومزيج من التوابل بما في ذلك الهيل والقرفة والكركم.",
+        "ingredients": ["Basmati rice", "Lamb/Chicken/Fish", "Onions", "Tomatoes", "Dried lime (Loomi)", "Bezar spice mix"],
+        "ingredients_ar": ["أرز بسمتي", "لحم/دجاج/سمك", "بصل", "طماطم", "لومي", "بزار"],
+        "where_to_try": "Freej Swaileh, Mais Alghanim, Al Boom",
+        "where_to_try_ar": "فريج صويلح، ميس الغانم، البوم",
+        "image": "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=600&h=400&fit=crop"
+      },
+      {
+        "id": "jireesh",
+        "name": "Jireesh",
+        "name_ar": "جريش",
+        "description": "A hearty porridge made from crushed wheat cooked slowly with meat and chicken stock. Often served during Ramadan and special occasions.",
+        "description_ar": "عصيدة شهية مصنوعة من القمح المجروش المطبوخ ببطء مع اللحم ومرق الدجاج. يُقدم غالباً خلال رمضان والمناسبات الخاصة.",
+        "ingredients": ["Crushed wheat", "Lamb or chicken", "Onions", "Butter", "Cumin", "Cinnamon"],
+        "ingredients_ar": ["قمح مجروش", "لحم أو دجاج", "بصل", "زبدة", "كمون", "قرفة"],
+        "where_to_try": "Traditional Kuwaiti homes, Beit 7",
+        "where_to_try_ar": "البيوت الكويتية التقليدية، بيت 7",
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&h=400&fit=crop"
+      },
+      {
+        "id": "margoog",
+        "name": "Margoog",
+        "name_ar": "مرقوق",
+        "description": "A traditional stew featuring thin pieces of dough cooked in a rich tomato and vegetable broth with meat. Similar to a Middle Eastern lasagna.",
+        "description_ar": "يخنة تقليدية تتميز بقطع رقيقة من العجين مطبوخة في مرق طماطم غني بالخضروات مع اللحم. مشابه للازانيا الشرق أوسطية.",
+        "ingredients": ["Flour dough", "Lamb", "Zucchini", "Eggplant", "Tomatoes", "Onions"],
+        "ingredients_ar": ["عجينة دقيق", "لحم ضأن", "كوسا", "باذنجان", "طماطم", "بصل"],
+        "where_to_try": "Dar Hamad, Local restaurants",
+        "where_to_try_ar": "دار حمد، المطاعم المحلية",
+        "image": "https://images.unsplash.com/photo-1547592180-85f173990554?w=600&h=400&fit=crop"
+      },
+      {
+        "id": "gabout",
+        "name": "Gabout",
+        "name_ar": "قبوط",
+        "description": "A flavorful fish stew made with local Gulf fish, dried lime, and a blend of traditional spices. A testament to Kuwait's maritime heritage.",
+        "description_ar": "يخنة سمك لذيذة مصنوعة من سمك الخليج المحلي والليمون المجفف ومزيج من التوابل التقليدية. شهادة على التراث البحري الكويتي.",
+        "ingredients": ["Gulf fish", "Onions", "Dried lime", "Turmeric", "Fenugreek", "Rice"],
+        "ingredients_ar": ["سمك خليجي", "بصل", "لومي", "كركم", "حلبة", "أرز"],
+        "where_to_try": "Al Boom, Freej Swaileh",
+        "where_to_try_ar": "البوم، فريج صويلح",
+        "image": "https://images.unsplash.com/photo-1534080564583-6be75777b70a?w=600&h=400&fit=crop"
+      },
+      {
+        "id": "harees",
+        "name": "Harees",
+        "name_ar": "هريس",
+        "description": "A comforting dish of wheat and meat slow-cooked to a smooth, porridge-like consistency. Traditionally served during Ramadan.",
+        "description_ar": "طبق مريح من القمح واللحم المطبوخ ببطء حتى يصل لقوام ناعم يشبه العصيدة. يُقدم تقليدياً خلال رمضان.",
+        "ingredients": ["Wheat", "Lamb or chicken", "Butter", "Salt", "Cinnamon"],
+        "ingredients_ar": ["قمح", "لحم أو دجاج", "زبدة", "ملح", "قرفة"],
+        "where_to_try": "During Ramadan at most restaurants",
+        "where_to_try_ar": "خلال رمضان في معظم المطاعم",
+        "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600&h=400&fit=crop"
+      },
+      {
+        "id": "luqaimat",
+        "name": "Luqaimat",
+        "name_ar": "لقيمات",
+        "description": "Sweet, crispy dumplings drizzled with date syrup (dibs) or honey. A beloved dessert often served with Arabic coffee.",
+        "description_ar": "زلابية حلوة ومقرمشة مغطاة بشراب التمر (دبس) أو العسل. حلوى محبوبة تُقدم غالباً مع القهوة العربية.",
+        "ingredients": ["Flour", "Yeast", "Saffron", "Cardamom", "Date syrup"],
+        "ingredients_ar": ["دقيق", "خميرة", "زعفران", "هيل", "دبس التمر"],
+        "where_to_try": "Street vendors, Mubarakiya Souq",
+        "where_to_try_ar": "الباعة المتجولون، سوق المباركية",
+        "image": "https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=600&h=400&fit=crop"
+      }
+    ]
+  },
+  "landmarks": {
+    "title": "Tourist Attractions",
+    "title_ar": "المعالم السياحية",
+    "places": [
+      {
+        "id": "kuwait-towers",
+        "name": "Kuwait Towers",
+        "name_ar": "أبراج الكويت",
+        "description": "The iconic symbol of Kuwait, these three towers on a promontory into the Persian Gulf were inaugurated in 1979. The main tower features a rotating observation sphere and restaurant with panoramic views of the city.",
+        "description_ar": "الرمز الأيقوني للكويت، هذه الأبراج الثلاثة على نتوء في الخليج العربي افتُتحت في 1979. يتميز البرج الرئيسي بكرة مراقبة دوارة ومطعم بإطلالات بانورامية على المدينة.",
+        "address": "Arabian Gulf Street, Kuwait City",
+        "address_ar": "شارع الخليج العربي، مدينة الكويت",
+        "hours": "8:00 AM - 11:00 PM",
+        "entry_fee": "3 KWD",
+        "rating": 4.8,
+        "duration": "2-3 hours",
+        "duration_ar": "2-3 ساعات",
+        "highlights": ["360° city views", "Restaurant", "Gift shop", "Light show at night"],
+        "highlights_ar": ["إطلالات 360° على المدينة", "مطعم", "متجر هدايا", "عرض أضواء ليلي"],
+        "image": "https://images.unsplash.com/photo-1571986204936-76077adb51f9?w=600&h=400&fit=crop"
+      },
+      {
+        "id": "grand-mosque",
+        "name": "Grand Mosque",
+        "name_ar": "المسجد الكبير",
+        "description": "Kuwait's largest mosque, covering 45,000 square meters. The stunning architecture combines traditional Islamic design with modern elements. Free guided tours available for non-Muslims.",
+        "description_ar": "أكبر مسجد في الكويت، يغطي 45,000 متر مربع. تجمع الهندسة المعمارية المذهلة بين التصميم الإسلامي التقليدي والعناصر الحديثة. جولات إرشادية مجانية متاحة لغير المسلمين.",
+        "address": "Al Safat Square, Kuwait City",
+        "address_ar": "ساحة الصفاة، مدينة الكويت",
+        "hours": "Tours: Sun-Thu 9:00 AM - 11:00 AM",
+        "entry_fee": "Free",
+        "rating": 4.9,
+        "duration": "1-2 hours",
+        "duration_ar": "1-2 ساعة",
+        "highlights": ["Largest mosque in Kuwait", "Beautiful calligraphy", "Guided tours", "Islamic architecture"],
+        "highlights_ar": ["أكبر مسجد في الكويت", "خط عربي جميل", "جولات إرشادية", "عمارة إسلامية"],
+        "image": "https://images.unsplash.com/photo-1585361079276-30e5b7a32a0d?w=600&h=400&fit=crop"
+      },
+      {
+        "id": "mubarakiya-souq",
+        "name": "Souq Al-Mubarakiya",
+        "name_ar": "سوق المباركية",
+        "description": "Kuwait's oldest and most famous traditional market, dating back over 200 years. Browse spices, gold, perfumes, traditional clothing, and handicrafts in this bustling marketplace.",
+        "description_ar": "أقدم وأشهر سوق تقليدي في الكويت، يعود تاريخه لأكثر من 200 عام. تصفح التوابل والذهب والعطور والملابس التقليدية والحرف اليدوية في هذا السوق النابض بالحياة.",
+        "address": "Al Mubarakiya, Kuwait City",
+        "address_ar": "المباركية، مدينة الكويت",
+        "hours": "9:00 AM - 12:00 PM, 4:00 PM - 9:00 PM",
+        "entry_fee": "Free",
+        "rating": 4.7,
+        "duration": "3-4 hours",
+        "duration_ar": "3-4 ساعات",
+        "highlights": ["Traditional shops", "Spice market", "Gold souq", "Local food stalls", "Antiques"],
+        "highlights_ar": ["محلات تقليدية", "سوق التوابل", "سوق الذهب", "أكشاك الطعام المحلي", "التحف"],
+        "image": "https://images.unsplash.com/photo-1569288052389-dac9b01c9c05?w=600&h=400&fit=crop"
+      },
+      {
+        "id": "failaka-island",
+        "name": "Failaka Island",
+        "name_ar": "جزيرة فيلكا",
+        "description": "An island rich in archaeological history, featuring Greek temples from Alexander the Great's era and Bronze Age settlements. The island was evacuated during the Gulf War and offers a unique glimpse into ancient history.",
+        "description_ar": "جزيرة غنية بالتاريخ الأثري، تضم معابد يونانية من عهد الإسكندر الأكبر ومستوطنات من العصر البرونزي. أُخليت الجزيرة خلال حرب الخليج وتقدم لمحة فريدة عن التاريخ القديم.",
+        "address": "20 km off Kuwait coast",
+        "address_ar": "20 كم قبالة ساحل الكويت",
+        "hours": "Ferry departures: 8:00 AM, 10:00 AM",
+        "entry_fee": "5 KWD (ferry)",
+        "rating": 4.5,
+        "duration": "Full day",
+        "duration_ar": "يوم كامل",
+        "highlights": ["Greek temple ruins", "Bronze Age artifacts", "Beach", "Historical museum"],
+        "highlights_ar": ["أطلال المعبد اليوناني", "قطع أثرية من العصر البرونزي", "شاطئ", "متحف تاريخي"],
+        "image": "https://images.unsplash.com/photo-1590362891991-f776e747a588?w=600&h=400&fit=crop"
+      },
+      {
+        "id": "sadu-house",
+        "name": "Sadu House",
+        "name_ar": "بيت السدو",
+        "description": "A cultural center dedicated to preserving Bedouin weaving traditions. Watch artisans create traditional Sadu textiles and learn about this UNESCO-recognized craft.",
+        "description_ar": "مركز ثقافي مكرس للحفاظ على تقاليد النسيج البدوي. شاهد الحرفيين يصنعون منسوجات السدو التقليدية وتعرف على هذه الحرفة المعترف بها من اليونسكو.",
+        "address": "Arabian Gulf Street, Kuwait City",
+        "address_ar": "شارع الخليج العربي، مدينة الكويت",
+        "hours": "Sun-Thu: 8:00 AM - 1:00 PM, 4:00 PM - 8:00 PM",
+        "entry_fee": "1 KWD",
+        "rating": 4.6,
+        "duration": "1-2 hours",
+        "duration_ar": "1-2 ساعة",
+        "highlights": ["Live weaving demonstrations", "Sadu products for sale", "Cultural workshops", "Traditional courtyard"],
+        "highlights_ar": ["عروض نسيج حية", "منتجات سدو للبيع", "ورش ثقافية", "فناء تقليدي"],
+        "image": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop"
+      },
+      {
+        "id": "liberation-tower",
+        "name": "Liberation Tower",
+        "name_ar": "برج التحرير",
+        "description": "At 372 meters, this is Kuwait's tallest structure and the world's 11th tallest tower. Built to commemorate Kuwait's liberation in 1991, it offers stunning views and houses telecommunications equipment.",
+        "description_ar": "بارتفاع 372 متر، هذا هو أطول مبنى في الكويت و11 أطول برج في العالم. بُني لإحياء ذكرى تحرير الكويت في 1991، ويوفر إطلالات مذهلة ويضم معدات اتصالات.",
+        "address": "Al Safat, Kuwait City",
+        "address_ar": "الصفاة، مدينة الكويت",
+        "hours": "External viewing only",
+        "entry_fee": "Free (external)",
+        "rating": 4.4,
+        "duration": "30 minutes",
+        "duration_ar": "30 دقيقة",
+        "highlights": ["Iconic architecture", "City skyline photos", "Liberation memorial"],
+        "highlights_ar": ["عمارة أيقونية", "صور أفق المدينة", "نصب التحرير"],
+        "image": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&h=400&fit=crop"
+      }
+    ]
+  },
+  "social_life": {
+    "title": "Social Life",
+    "title_ar": "الحياة الاجتماعية",
+    "topics": [
+      {
+        "id": "diwaniya-life",
+        "title": "Diwaniya Culture",
+        "title_ar": "ثقافة الديوانية",
+        "description": "The Diwaniya is the heart of Kuwaiti social life. These gathering rooms, typically found in homes or separate buildings, are where men meet regularly to discuss everything from politics to business, while enjoying Arabic coffee and dates.",
+        "description_ar": "الديوانية هي قلب الحياة الاجتماعية الكويتية. غرف التجمع هذه، الموجودة عادة في المنازل أو مبانٍ منفصلة، هي حيث يلتقي الرجال بانتظام لمناقشة كل شيء من السياسة إلى الأعمال، أثناء الاستمتاع بالقهوة العربية والتمر.",
+        "facts": [
+          "Most Kuwaiti families have their own Diwaniya",
+          "Sessions typically start after Maghrib prayer",
+          "Arabic coffee (gahwa) is served continuously",
+          "Important business deals are often made in Diwaniyas"
+        ],
+        "facts_ar": [
+          "معظم العائلات الكويتية لديها ديوانية خاصة",
+          "تبدأ الجلسات عادة بعد صلاة المغرب",
+          "تُقدم القهوة العربية (القهوة) باستمرار",
+          "غالباً ما تُعقد صفقات تجارية مهمة في الديوانيات"
+        ],
+        "image": "https://images.unsplash.com/photo-1590076215667-875d4ef2d7de?w=600&h=400&fit=crop"
+      },
+      {
+        "id": "family-gatherings",
+        "title": "Family Gatherings",
+        "title_ar": "التجمعات العائلية",
+        "description": "Family is the cornerstone of Kuwaiti society. Extended families often live close together and gather regularly for meals, especially on Fridays after Jumu'ah prayer. These gatherings strengthen family bonds across generations.",
+        "description_ar": "العائلة هي حجر الزاوية في المجتمع الكويتي. غالباً ما تعيش العائلات الممتدة بالقرب من بعضها وتجتمع بانتظام لتناول الطعام، خاصة في أيام الجمعة بعد صلاة الجمعة. هذه التجمعات تقوي الروابط العائلية عبر الأجيال.",
+        "facts": [
+          "Friday lunch is the main family gathering",
+          "Elders are always served first",
+          "Children play important roles in gatherings",
+          "Three generations often live in close proximity"
+        ],
+        "facts_ar": [
+          "غداء الجمعة هو التجمع العائلي الرئيسي",
+          "يُقدم الطعام دائماً للكبار أولاً",
+          "يلعب الأطفال أدواراً مهمة في التجمعات",
+          "غالباً ما تعيش ثلاثة أجيال بالقرب من بعضها"
+        ],
+        "image": "https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=600&h=400&fit=crop"
+      },
+      {
+        "id": "celebrations",
+        "title": "Celebrations & Holidays",
+        "title_ar": "الاحتفالات والأعياد",
+        "description": "Kuwait celebrates both religious and national holidays with great enthusiasm. Eid Al-Fitr and Eid Al-Adha are major religious celebrations, while National Day (February 25) and Liberation Day (February 26) commemorate the country's independence and freedom.",
+        "description_ar": "تحتفل الكويت بالأعياد الدينية والوطنية بحماس كبير. عيد الفطر وعيد الأضحى هما احتفالان دينيان رئيسيان، بينما يحتفل اليوم الوطني (25 فبراير) ويوم التحرير (26 فبراير) باستقلال البلاد وحريتها.",
+        "facts": [
+          "National Day features fireworks and parades",
+          "Eid celebrations last 3-4 days",
+          "Children receive 'Eidiya' (money gifts) during Eid",
+          "Homes are decorated and guests are welcomed"
+        ],
+        "facts_ar": [
+          "يتميز اليوم الوطني بالألعاب النارية والمسيرات",
+          "تستمر احتفالات العيد 3-4 أيام",
+          "يتلقى الأطفال 'العيدية' خلال العيد",
+          "تُزين المنازل ويُرحب بالضيوف"
+        ],
+        "image": "https://images.unsplash.com/photo-1530968033775-2c92736b131e?w=600&h=400&fit=crop"
+      },
+      {
+        "id": "coffee-culture",
+        "title": "Coffee & Hospitality",
+        "title_ar": "القهوة والضيافة",
+        "description": "Arabic coffee (gahwa) is central to Kuwaiti hospitality. The traditional coffee pot (dallah) is an iconic symbol. Coffee is served in small cups (finjan) without handles, always with the right hand, and often accompanied by dates.",
+        "description_ar": "القهوة العربية (القهوة) هي محور الضيافة الكويتية. إبريق القهوة التقليدي (الدلة) هو رمز أيقوني. تُقدم القهوة في فناجين صغيرة بدون مقابض، دائماً باليد اليمنى، وغالباً مع التمر.",
+        "facts": [
+          "Shake your cup to indicate you've had enough",
+          "Coffee is cardamom-flavored and unsweetened",
+          "The dallah design varies by region",
+          "Refusing coffee can be considered impolite"
+        ],
+        "facts_ar": [
+          "هز فنجانك للإشارة إلى أنك اكتفيت",
+          "القهوة بنكهة الهيل وغير محلاة",
+          "يختلف تصميم الدلة حسب المنطقة",
+          "رفض القهوة قد يُعتبر غير مهذب"
+        ],
+        "image": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&h=400&fit=crop"
+      }
+    ]
+  },
+  "phrases": [
+    { "ar": "السلام عليكم", "en": "Peace be upon you", "pronunciation": "As-salamu alaykum", "context": "Universal greeting" },
+    { "ar": "وعليكم السلام", "en": "And upon you peace", "pronunciation": "Wa alaykum as-salam", "context": "Response to greeting" },
+    { "ar": "شلونك؟", "en": "How are you? (Kuwaiti)", "pronunciation": "Shlonak? (m) / Shlonich? (f)", "context": "Casual greeting" },
+    { "ar": "الحمد لله", "en": "Praise be to God", "pronunciation": "Alhamdulillah", "context": "Response to 'How are you?'" },
+    { "ar": "إن شاء الله", "en": "God willing", "pronunciation": "Inshallah", "context": "When talking about future plans" },
+    { "ar": "ما شاء الله", "en": "What God has willed", "pronunciation": "Mashallah", "context": "Expressing admiration" },
+    { "ar": "يعطيك العافية", "en": "May God give you strength", "pronunciation": "Ya'teek al-afya", "context": "Thanking someone working" },
+    { "ar": "تسلم/تسلمين", "en": "Thank you (Kuwaiti)", "pronunciation": "Tislam (m) / Tislameen (f)", "context": "Casual thanks" },
+    { "ar": "هلا والله", "en": "Hello! (Kuwaiti)", "pronunciation": "Hala wallah", "context": "Warm welcome" },
+    { "ar": "الله يسلمك", "en": "May God keep you safe", "pronunciation": "Allah yisalmak", "context": "Response to thanks" }
+  ]
+}

@@ -58,3 +58,13 @@ async def get_food_videos():
         return data
     # Fallback to empty structure
     return {"videos": [], "categories": []}
+
+
+@router.get("/tourists-guide")
+async def get_tourists_guide():
+    """Get comprehensive tourist guide data from JSON file"""
+    data = load_json_data("tourists_data.json")
+    if data:
+        return data
+    # Fallback to basic structure
+    return {"etiquette": {}, "cuisine": {}, "landmarks": {}, "social_life": {}, "phrases": []}
