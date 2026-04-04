@@ -67,7 +67,7 @@ const CountryCard = ({ country, isArabic, isHeritage, themeColors, isSelected, o
       onClick={onClick}
       className={`relative overflow-hidden rounded-2xl cursor-pointer transition-all duration-300 ${
         isSelected 
-          ? `ring-4 ${isHeritage ? 'ring-[#8D1C1C]' : 'ring-[#0D9488]'}`
+          ? `ring-4 ${isHeritage ? 'ring-[#8D1C1C]' : 'ring-[#1D4ED8]'}`
           : ''
       }`}
     >
@@ -252,7 +252,7 @@ const ArabWorldPage = () => {
     {
       name: isArabic ? 'دول الخليج' : 'Gulf Countries',
       countries: ['KW', 'SA', 'AE'],
-      color: '#0D9488',
+      color: '#1D4ED8',
       description: isArabic ? 'تراث بحري وحضارة عريقة' : 'Maritime heritage and ancient civilization'
     },
     {
@@ -295,7 +295,7 @@ const ArabWorldPage = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-16"
         >
-          <div className={`w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-6 ${isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#0D9488]'}`}>
+          <div className={`w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-6 ${isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#1D4ED8]'}`}>
             <Globe className="w-10 h-10 text-white" />
           </div>
           <h1 className={`text-4xl md:text-5xl font-bold mb-4 ${isHeritage ? 'font-serif' : ''}`} style={{ color: themeColors.primary }}>
@@ -412,7 +412,7 @@ const ArabWorldPage = () => {
               : 'Are you an expert in your country\'s culture? Help us document Arab heritage!'}
           </p>
           <Button
-            className={`h-12 px-8 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#0D9488] hover:bg-[#0B7A70]'}`}
+            className={`h-12 px-8 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'}`}
             data-testid="contribute-btn"
           >
             {isArabic ? 'ساهم الآن' : 'Contribute Now'}

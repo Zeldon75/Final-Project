@@ -76,7 +76,7 @@ export const ThemeProvider = ({ children }) => {
     card: darkMode ? '#2A2A2A' : '#FDF6E3',
     border: '#8D1C1C'
   } : {
-    primary: '#0D9488',
+    primary: '#1D4ED8',
     primaryForeground: '#F9FAFB',
     background: darkMode ? '#0F172A' : '#F8FAFC',
     foreground: darkMode ? '#F9FAFB' : '#0F172A',

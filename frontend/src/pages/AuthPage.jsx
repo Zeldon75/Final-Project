@@ -80,10 +80,10 @@ const AuthPage = ({ isLogin = true }) => {
       >
         {/* Logo */}
         <Link to="/" className="flex items-center justify-center gap-3 mb-8">
-          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${effectiveIsHeritage ? 'bg-[#8D1C1C]' : 'bg-[#0D9488]'}`}>
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${effectiveIsHeritage ? 'bg-[#8D1C1C]' : 'bg-[#1D4ED8]'}`}>
             <span className="text-white font-bold text-2xl">د</span>
           </div>
-          <span className={`text-2xl font-bold ${effectiveIsHeritage ? 'font-serif text-[#8D1C1C]' : 'text-[#0D9488]'}`}>
+          <span className={`text-2xl font-bold ${effectiveIsHeritage ? 'font-serif text-[#8D1C1C]' : 'text-[#1D4ED8]'}`}>
             دروازة
           </span>
         </Link>
@@ -208,7 +208,7 @@ const AuthPage = ({ isLogin = true }) => {
           <Button
             type="submit"
             disabled={loading}
-            className={`w-full h-12 ${effectiveIsHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#0D9488] hover:bg-[#0B7A70]'}`}
+            className={`w-full h-12 ${effectiveIsHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'}`}
             data-testid="submit-btn"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (isLogin ? t('login') : t('register'))}
@@ -220,7 +220,7 @@ const AuthPage = ({ isLogin = true }) => {
           {isLogin ? t('dont_have_account') : t('already_have_account')}{' '}
           <Link
             to={isLogin ? '/register' : '/login'}
-            className={`font-semibold ${effectiveIsHeritage ? 'text-[#8D1C1C]' : 'text-[#0D9488]'} hover:underline`}
+            className={`font-semibold ${effectiveIsHeritage ? 'text-[#8D1C1C]' : 'text-[#1D4ED8]'} hover:underline`}
             data-testid="switch-auth-link"
           >
             {isLogin ? t('register') : t('login')}

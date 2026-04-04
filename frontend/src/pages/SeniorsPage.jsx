@@ -68,7 +68,7 @@ const MarketplaceItem = ({ item, isArabic, onClick }) => {
           {isArabic ? item.description_ar : item.description}
         </p>
         <div className="flex items-center justify-between">
-          <span className={`text-lg font-bold ${isHeritage ? 'text-[#8D1C1C]' : 'text-[#0D9488]'}`}>
+          <span className={`text-lg font-bold ${isHeritage ? 'text-[#8D1C1C]' : 'text-[#1D4ED8]'}`}>
             {item.price} {item.currency}
           </span>
           {item.is_authenticated && (
@@ -141,7 +141,7 @@ const CouncilCard = ({ council, isArabic, onJoin, onStart, isHost }) => {
         ) : council.status === 'live' ? (
           <Button
             onClick={() => onJoin(council.council_id)}
-            className={`w-full ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#0D9488] hover:bg-[#0B7A70]'}`}
+            className={`w-full ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'}`}
             data-testid={`join-council-${council.council_id}`}
           >
             <Video className="w-4 h-4 me-2" />
@@ -358,7 +358,7 @@ const SellItemModal = ({ open, onOpenChange, onSuccess, categories, isArabic }) 
             <Button
               type="submit"
               disabled={loading}
-              className={`flex-1 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#0D9488] hover:bg-[#0B7A70]'}`}
+              className={`flex-1 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'}`}
               data-testid="submit-item-btn"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : t('submit')}
@@ -528,7 +528,7 @@ const HostCouncilModal = ({ open, onOpenChange, onSuccess, isArabic }) => {
             <Button
               type="submit"
               disabled={loading}
-              className={`flex-1 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#0D9488] hover:bg-[#0B7A70]'}`}
+              className={`flex-1 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'}`}
               data-testid="submit-council-btn"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : t('submit')}
@@ -547,41 +547,28 @@ const SeniorsPage = () => {
   const isArabic = language === 'ar';
   
   const [activeTab, setActiveTab] = useState('marketplace');
-  const [items, setItems] = useState([]);
-  const [councils, setCouncils] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [sellModalOpen, setSellModalOpen] = useState(false);
-  const [councilModalOpen, setCouncilModalOpen] = useState(false);
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      const [itemsRes, councilsRes, categoriesRes] = await Promise.all([
-        axios.get(`${API_URL}/api/marketplace/items`),
-        axios.get(`${API_URL}/api/councils`),
-        axios.get(`${API_URL}/api/content/categories`)
-      ]);
-      setItems(itemsRes.data.items || []);
-      setCouncils(councilsRes.data.councils || []);
-      setCategories(categoriesRes.data.categories || []);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
-      setLoading(false);
+ const [items, setItems] = useState([
+    {
+      id: "fake-1",
+      title: "ثوب الثريا - نسائي",
+      title_ar: "ثوب الثريا - نسائي",
+      price: 50,
+      description: "ثوب نسائي وهو دراعة وتُصنع عليه قطع ذهبية تُسمى نيرات على شكل نجوم الثريا المتلألئة البراقة. سنة الصنع: 1970",
+      description_ar: 'ثوب نسائي وهو "دراعة" وتُصنع عليه قطع ذهبية تُسمى "نيرات" على شكل نجوم الثريا المتلألئة البراقة. سنة الصنع: 1970',
+      images: ["/thoubathuraya.png"],
+      seller_name: "بوابة المتقاعدين"
     }
-  };
+  ]);
 
-  const handleJoinCouncil = async (councilId) => {
+  // إيقاف دائرة التحميل لعرض الفستان فوراً
+  useEffect(() => {
+    setLoading(false);
+  }, []);
+    const handleJoinCouncil = async (councilId) => {
     if (!isAuthenticated) {
       toast.error(isArabic ? 'يرجى تسجيل الدخول أولاً' : 'Please login first');
       return;
     }
-    
     try {
       await axios.post(
         `${API_URL}/api/councils/${councilId}/join`,
@@ -589,7 +576,6 @@ const SeniorsPage = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success(isArabic ? 'تم الانضمام للمجلس' : 'Joined council successfully');
-      fetchData();
     } catch (error) {
       toast.error(error.response?.data?.detail || (isArabic ? 'حدث خطأ' : 'An error occurred'));
     }
@@ -674,7 +660,7 @@ const SeniorsPage = () => {
               {isAuthenticated && (
                 <Button
                   onClick={() => setSellModalOpen(true)}
-                  className={`gap-2 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#0D9488] hover:bg-[#0B7A70]'}`}
+                  className={`gap-2 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'}`}
                   data-testid="sell-item-btn"
                 >
                   <Plus className="w-4 h-4" />
@@ -736,7 +722,7 @@ const SeniorsPage = () => {
               {isAuthenticated && (
                 <Button
                   onClick={() => setCouncilModalOpen(true)}
-                  className={`gap-2 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#0D9488] hover:bg-[#0B7A70]'}`}
+                  className={`gap-2 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'}`}
                   data-testid="host-council-btn"
                 >
                   <Plus className="w-4 h-4" />
@@ -789,7 +775,7 @@ const SeniorsPage = () => {
                   : 'Coming soon: Professional courses in traditional crafts like dhow building, weaving, and blacksmithing.'}
               </p>
               <Button
-                className={`${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#0D9488] hover:bg-[#0B7A70]'}`}
+                className={`${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'}`}
                 data-testid="academy-notify-btn"
               >
                 {t('notify_me')}

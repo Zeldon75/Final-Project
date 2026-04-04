@@ -143,14 +143,14 @@ const WelcomePage = () => {
             whileHover={{ scale: 1.02 }}
             className="relative group"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-[#0D9488] to-[#0F172A] rounded-2xl transform -rotate-2 group-hover:-rotate-3 transition-transform" />
-            <div className="relative bg-[#0F172A] border border-[#0D9488]/50 rounded-2xl p-8 backdrop-blur-xl">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#1D4ED8] to-[#0F172A] rounded-2xl transform -rotate-2 group-hover:-rotate-3 transition-transform" />
+            <div className="relative bg-[#0F172A] border border-[#1D4ED8]/50 rounded-2xl p-8 backdrop-blur-xl">
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 bg-[#0D9488] rounded-xl flex items-center justify-center">
+                <div className="w-16 h-16 bg-[#1D4ED8] rounded-xl flex items-center justify-center">
                   <Rocket className="w-8 h-8 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-[#0D9488]" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+                  <h3 className="text-2xl font-bold text-[#1D4ED8]" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
                     {t('modern_interface')}
                   </h3>
                   <p className="text-[#94A3B8]">{t('modern_desc')}</p>
@@ -174,7 +174,7 @@ const WelcomePage = () => {
 
               <Button
                 onClick={() => handleSelectTheme(THEMES.MODERN)}
-                className="w-full h-14 text-lg bg-[#0D9488] hover:bg-[#0B7A70] text-white rounded-xl border border-white/20 backdrop-blur-sm transition-all"
+                className="w-full h-14 text-lg bg-[#1D4ED8] hover:bg-[#0B7A70] text-white rounded-xl border border-white/20 backdrop-blur-sm transition-all"
                 data-testid="select-modern-btn"
               >
                 {t('get_started')}

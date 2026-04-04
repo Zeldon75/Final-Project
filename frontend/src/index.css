@@ -86,7 +86,7 @@ body {
 .theme-modern {
   --font-heading: 'Space Grotesk', sans-serif;
   --font-body: 'IBM Plex Sans Arabic', sans-serif;
-  --primary: #0D9488;
+  --primary: #1D4ED8;
   --primary-foreground: #F9FAFB;
   --background: #0F172A;
   --foreground: #F9FAFB;
@@ -231,7 +231,7 @@ body {
 }
 
 .theme-modern *:focus-visible {
-  outline: 3px solid #0D9488;
+  outline: 3px solid #1D4ED8;
   outline-offset: 2px;
 }
 

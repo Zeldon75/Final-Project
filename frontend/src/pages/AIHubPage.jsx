@@ -81,7 +81,7 @@ const ChatMessage = ({ message, isUser, isArabic }) => {
     >
       <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
         isUser
-          ? isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#0D9488]'
+          ? isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#1D4ED8]'
           : 'bg-purple-600'
       }`}>
         {isUser ? <User className="w-5 h-5 text-white" /> : <Bot className="w-5 h-5 text-white" />}
@@ -90,7 +90,7 @@ const ChatMessage = ({ message, isUser, isArabic }) => {
         isUser
           ? isHeritage
             ? 'bg-[#8D1C1C] text-white'
-            : 'bg-[#0D9488] text-white'
+            : 'bg-[#1D4ED8] text-white'
           : darkMode
             ? 'bg-white/10'
             : 'bg-gray-100'
@@ -226,7 +226,7 @@ const AIHubPage = () => {
               <ScrollArea className="flex-1 p-4">
                 {messages.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-center p-8">
-                    <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-4 ${isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#0D9488]'}`}>
+                    <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-4 ${isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#1D4ED8]'}`}>
                       <Brain className="w-10 h-10 text-white" />
                     </div>
                     <h3 className={`text-xl font-bold mb-2 ${isHeritage ? 'font-serif' : ''}`}>
@@ -278,7 +278,7 @@ const AIHubPage = () => {
                   <Button
                     onClick={handleSend}
                     disabled={loading || !input.trim()}
-                    className={`h-12 px-6 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#0D9488] hover:bg-[#0B7A70]'}`}
+                    className={`h-12 px-6 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'}`}
                     data-testid="ai-send-btn"
                   >
                     {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}

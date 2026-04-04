@@ -266,7 +266,7 @@ const YouthPage = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <div className={`w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-6 ${isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#0D9488]'}`}>
+          <div className={`w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-6 ${isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#1D4ED8]'}`}>
             <Sparkles className="w-10 h-10 text-white" />
           </div>
           <h1 className={`text-4xl md:text-5xl font-bold mb-4 ${isHeritage ? 'font-serif' : ''}`} style={{ color: themeColors.primary }}>
@@ -378,7 +378,7 @@ const YouthPage = () => {
                         <span className="font-bold" style={{ color: themeColors.primary }}>{course.price}</span>
                         <Button
                           size="sm"
-                          className={isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#0D9488] hover:bg-[#0B7A70]'}
+                          className={isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'}
                           data-testid={`course-${course.id}-btn`}
                         >
                           {course.progress > 0 ? (isArabic ? 'متابعة' : 'Continue') : (isArabic ? 'ابدأ' : 'Start')}
@@ -394,7 +394,7 @@ const YouthPage = () => {
           {/* Design Lab Tab */}
           <TabsContent value="design">
             <div className="mb-8">
-              <div className={`p-6 rounded-2xl mb-8 ${isHeritage ? 'bg-[#8D1C1C]/10' : 'bg-[#0D9488]/10'}`}>
+              <div className={`p-6 rounded-2xl mb-8 ${isHeritage ? 'bg-[#8D1C1C]/10' : 'bg-[#1D4ED8]/10'}`}>
                 <div className="flex flex-col md:flex-row items-center gap-6">
                   <div className="w-20 h-20 rounded-2xl flex items-center justify-center" style={{ backgroundColor: themeColors.primary }}>
                     <Zap className="w-10 h-10 text-white" />
@@ -408,7 +408,7 @@ const YouthPage = () => {
                         ? 'استخدم الذكاء الاصطناعي لدمج أنماط السدو التقليدية في تصاميمك العصرية.'
                         : 'Use AI to merge traditional Sadu patterns into your modern designs.'}
                     </p>
-                    <Button className={isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#0D9488] hover:bg-[#0B7A70]'} data-testid="ai-generator-btn">
+                    <Button className={isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'} data-testid="ai-generator-btn">
                       {isArabic ? 'جرب الآن' : 'Try Now'}
                       <Sparkles className="w-4 h-4 ms-2" />
                     </Button>
@@ -495,7 +495,7 @@ const YouthPage = () => {
                       </div>
                       <div className="flex flex-col items-end gap-2">
                         <span className="text-xs text-muted-foreground">{isArabic ? job.posted_ar : job.posted}</span>
-                        <Button className={isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#0D9488] hover:bg-[#0B7A70]'} data-testid={`apply-${job.id}`}>
+                        <Button className={isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'} data-testid={`apply-${job.id}`}>
                           {isArabic ? 'تقدم الآن' : 'Apply Now'}
                           <ChevronRight className={`w-4 h-4 ms-1 ${isRTL ? 'rotate-180' : ''}`} />
                         </Button>
@@ -512,7 +512,7 @@ const YouthPage = () => {
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`mt-16 p-8 rounded-2xl ${isHeritage ? 'bg-[#8D1C1C]/10' : 'bg-[#0D9488]/10'}`}
+          className={`mt-16 p-8 rounded-2xl ${isHeritage ? 'bg-[#8D1C1C]/10' : 'bg-[#1D4ED8]/10'}`}
         >
           <div className="flex flex-col md:flex-row items-center gap-8">
             <div className="flex-1 text-center md:text-start">
@@ -527,7 +527,7 @@ const YouthPage = () => {
               </p>
               <Button
                 size="lg"
-                className={`h-12 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#0D9488] hover:bg-[#0B7A70]'}`}
+                className={`h-12 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'}`}
                 data-testid="join-community-btn"
               >
                 {isArabic ? 'انضم الآن' : 'Join Now'}
@@ -585,7 +585,7 @@ const YouthPage = () => {
                   </div>
                 )}
                 
-                <Button className={`w-full h-12 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#0D9488] hover:bg-[#0B7A70]'}`}>
+                <Button className={`w-full h-12 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'}`}>
                   {selectedCourse.progress > 0 ? (isArabic ? 'متابعة الدورة' : 'Continue Course') : (isArabic ? 'ابدأ الدورة' : 'Start Course')}
                 </Button>
               </div>

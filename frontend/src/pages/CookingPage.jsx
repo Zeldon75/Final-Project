@@ -193,7 +193,7 @@ const CookingPage = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-16"
         >
-          <div className={`w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-6 ${isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#0D9488]'}`}>
+          <div className={`w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-6 ${isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#1D4ED8]'}`}>
             <ChefHat className="w-10 h-10 text-white" />
           </div>
           <h1 className={`text-4xl md:text-5xl font-bold mb-4 ${isHeritage ? 'font-serif' : ''}`} style={{ color: themeColors.primary }}>
@@ -335,9 +335,9 @@ const CookingPage = () => {
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`p-8 rounded-2xl text-center ${isHeritage ? 'bg-[#8D1C1C]/10' : 'bg-[#0D9488]/10'}`}
+          className={`p-8 rounded-2xl text-center ${isHeritage ? 'bg-[#8D1C1C]/10' : 'bg-[#1D4ED8]/10'}`}
         >
-          <div className={`w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-6 ${isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#0D9488]'}`}>
+          <div className={`w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-6 ${isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#1D4ED8]'}`}>
             <Lock className="w-10 h-10 text-white" />
           </div>
           <h3 className={`text-2xl font-bold mb-4 ${isHeritage ? 'font-serif' : ''}`}>

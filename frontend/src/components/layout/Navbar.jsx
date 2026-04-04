@@ -54,10 +54,10 @@ const NavLink = ({ to, icon: Icon, children, onClick, isActive }) => {
         isActive 
           ? isHeritage 
             ? 'bg-[#8D1C1C] text-white' 
-            : 'bg-[#0D9488] text-white'
+            : 'bg-[#1D4ED8] text-white'
           : isHeritage
             ? `hover:bg-[#8D1C1C]/10 ${darkMode ? 'text-[#FDF6E3]' : 'text-[#1A1A1A]'}`
-            : `hover:bg-[#0D9488]/10 ${darkMode ? 'text-[#F9FAFB]' : 'text-[#0F172A]'}`
+            : `hover:bg-[#1D4ED8]/10 ${darkMode ? 'text-[#F9FAFB]' : 'text-[#0F172A]'}`
       }`}
       data-testid={`nav-${to.replace('/', '') || 'home'}`}
     >
@@ -75,7 +75,7 @@ const NavDropdown = ({ trigger, items, isRTL, themeColors }) => {
       <DropdownMenuTrigger asChild>
         <Button 
           variant="ghost" 
-          className={`gap-1.5 px-3 h-9 ${isHeritage ? 'hover:bg-[#8D1C1C]/10' : 'hover:bg-[#0D9488]/10'}`}
+          className={`gap-1.5 px-3 h-9 ${isHeritage ? 'hover:bg-[#8D1C1C]/10' : 'hover:bg-[#1D4ED8]/10'}`}
           data-testid={`nav-dropdown-${trigger.label}`}
         >
           <trigger.icon className="w-4 h-4" />
@@ -156,7 +156,7 @@ export const Navbar = () => {
         icon: Sparkles, 
         label: isArabic ? 'تمكين الشباب' : 'Youth Empowerment',
         description: isArabic ? 'الدورات والتصميم والوظائف' : 'Courses, Design & Careers',
-        color: '#0D9488'
+        color: '#1D4ED8'
       },
       { separator: true },
       { label: isArabic ? 'للأطفال' : 'For Kids' },
@@ -212,7 +212,7 @@ export const Navbar = () => {
     { to: '/ai-hub', icon: Brain, label: t('ai_hub'), color: '#8B5CF6' },
     { separator: true, label: isArabic ? 'الأقسام الرئيسية' : 'Main Sections' },
     { to: '/seniors', icon: Users, label: t('seniors'), color: '#8D1C1C' },
-    { to: '/youth', icon: Sparkles, label: t('youth'), color: '#0D9488' },
+    { to: '/youth', icon: Sparkles, label: t('youth'), color: '#1D4ED8' },
     { to: '/kids', icon: Gamepad2, label: t('kids'), color: '#F59E0B' },
     { separator: true, label: isArabic ? 'استكشف' : 'Explore' },
     { to: '/cooking', icon: ChefHat, label: t('cooking'), color: '#EC4899' },
@@ -248,9 +248,9 @@ export const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3" data-testid="logo-link">
-            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-              isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#0D9488]'
-            }`}>
+          <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${
+  isHeritage ? 'bg-[#8D1C1C]' : 'bg-blue-700 shadow-[0_0_15px_rgba(29,78,216,0.8)] animate-[pulse_3s_ease-in-out_infinite]'
+}`}>
               <span className="text-white font-bold text-xl">د</span>
             </div>
             <span className={`text-xl font-bold ${
@@ -360,7 +360,7 @@ export const Navbar = () => {
                       <img src={user.picture} alt={user.name} className="w-7 h-7 rounded-full" />
                     ) : (
                       <div className={`w-7 h-7 rounded-full flex items-center justify-center ${
-                        isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#0D9488]'
+                        isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#1D4ED8]'
                       }`}>
                         <User className="w-4 h-4 text-white" />
                       </div>
@@ -386,13 +386,13 @@ export const Navbar = () => {
               </DropdownMenu>
             ) : (
               <Button
-                onClick={() => navigate('/login')}
-                size="sm"
-                className={`h-9 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#0D9488] hover:bg-[#0B7A70]'}`}
-                data-testid="login-button"
-              >
-                {t('login')}
-              </Button>
+  onClick={() => navigate('/login')}
+  size="sm"
+  className={`h-9 px-4 transition-all duration-300 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-blue-700 text-white shadow-[0_0_15px_rgba(29,78,216,0.8)] hover:shadow-[0_0_25px_rgba(29,78,216,1)] animate-[pulse_3s_ease-in-out_infinite]'}`}
+  data-testid="login-button"
+>
+  {t('login')}
+</Button>
             )}
 
             {/* Mobile Menu */}
@@ -402,10 +402,12 @@ export const Navbar = () => {
                   <Menu className="w-5 h-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side={isRTL ? 'right' : 'left'} className="w-80 p-0">
-                <div className="flex flex-col h-full">
-                  {/* Mobile Header */}
-                  <div className={`p-4 border-b ${isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#0D9488]'}`}>
+         <SheetContent 
+  side={isRTL ? 'right' : 'left'} 
+  className={`w-80 border-none p-0 shadow-2xl transition-colors duration-300 ${darkMode ? 'bg-[#0A0A0A] text-white' : 'bg-white text-gray-900'}`}
+>
+  <div className="flex flex-col h-full py-6 px-2">                  {/* Mobile Header */}
+                  <div className={`p-4 border-b ${isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#1D4ED8]'}`}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
@@ -441,7 +443,7 @@ export const Navbar = () => {
                             onClick={() => setMobileOpen(false)}
                             className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-colors ${
                               location.pathname === item.to
-                                ? isHeritage ? 'bg-[#8D1C1C] text-white' : 'bg-[#0D9488] text-white'
+                                ? isHeritage ? 'bg-[#8D1C1C] text-white' : 'bg-[#1D4ED8] text-white'
                                 : 'hover:bg-accent'
                             }`}
                             data-testid={`mobile-nav-${item.to.replace('/', '') || 'home'}`}
@@ -473,7 +475,7 @@ export const Navbar = () => {
                     <div className="p-4 border-t">
                       <Button
                         onClick={() => { navigate('/login'); setMobileOpen(false); }}
-                        className={`w-full h-12 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#0D9488] hover:bg-[#0B7A70]'}`}
+                        className={`w-full h-12 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'}`}
                       >
                         {t('login')}
                       </Button>

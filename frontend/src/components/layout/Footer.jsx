@@ -29,7 +29,7 @@ export const Footer = () => {
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-3 mb-4">
               <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#0D9488]'
+                isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#1D4ED8]'
               }`}>
                 <span className="text-white font-bold text-2xl">د</span>
               </div>

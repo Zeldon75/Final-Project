@@ -19,40 +19,31 @@ import {
   GraduationCap
 } from 'lucide-react';
 
-const ModuleCard = ({ icon: Icon, title, titleAr, description, descriptionAr, to, color, delay }) => {
-  const { isHeritage, darkMode, isRTL } = useTheme();
-  const { language } = useLanguage();
-  const isArabic = language === 'ar';
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay }}
-      whileHover={{ y: -5 }}
-    >
-      <Link to={to} data-testid={`module-card-${to.replace('/', '')}`}>
-        <SaduCard className="h-full cursor-pointer group">
-          <div className={`w-14 h-14 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110`} style={{ backgroundColor: color }}>
-            <Icon className="w-7 h-7 text-white" strokeWidth={isHeritage ? 2.5 : 1.5} />
-          </div>
-          <h3 className={`text-xl font-bold mb-2 ${isHeritage ? 'font-serif' : ''} ${darkMode ? 'text-white' : 'text-foreground'}`}>
-            {isArabic ? titleAr : title}
-          </h3>
-          <p className="text-muted-foreground text-sm leading-relaxed">
-            {isArabic ? descriptionAr : description}
-          </p>
-        </SaduCard>
-      </Link>
-    </motion.div>
-  );
-};
-
 const HomePage = () => {
   const { isHeritage, darkMode, themeColors } = useTheme();
   const { t, isRTL, language } = useLanguage();
   const isArabic = language === 'ar';
 
+  const ModuleCard = ({ icon: Icon, title, titleAr, description, descriptionAr, to, color }) => (
+    <motion.div
+      whileHover={{ y: -5, scale: 1.02 }}
+      className="relative group h-full"
+    >
+    <Link 
+  to={to} 
+  className={`block p-8 rounded-3xl h-full transition-all duration-500 ${isHeritage ? 'border-[4px] border-[#8A1538]' : 'border-2 border-white/50 hover:border-cyan-400 hover:shadow-[0_0_25px_rgba(34,211,238,0.6)]'}`} >
+        <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-white shadow-lg transition-transform duration-500 group-hover:rotate-12" style={{ backgroundColor: color }}>
+          <Icon className="w-8 h-8" />
+        </div>
+        <h3 className={`text-2xl font-bold mb-3 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+          {isArabic ? titleAr : title}
+        </h3>
+        <p className="text-gray-400 leading-relaxed">
+          {isArabic ? descriptionAr : description}
+        </p>
+      </Link>
+    </motion.div>
+  );
   const modules = [
     {
       icon: Brain,
@@ -79,7 +70,7 @@ const HomePage = () => {
       description: 'Certified heritage courses, modern design lab, live workshops.',
       descriptionAr: 'دورات تراثية معتمدة، مختبر التصميم الحديث، ورش عمل حية.',
       to: '/youth',
-      color: '#0D9488'
+      color: '#1D4ED8'
     },
     {
       icon: Gamepad2,
@@ -133,39 +124,36 @@ const HomePage = () => {
               transition={{ duration: 0.6 }}
               className={isRTL ? 'text-right' : 'text-left'}
             >
-              <h1 className={`text-5xl md:text-7xl font-bold mb-6 ${isHeritage ? 'font-serif' : ''}`} style={{ color: themeColors.primary }}>
-                {isArabic ? 'دروازة' : 'Darwaza'}
-              </h1>
-              <p className={`text-xl md:text-2xl mb-8 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+<h1 className={`text-5xl md:text-7xl font-bold mb-6 ${isHeritage ? 'font-serif' : 'text-blue-700 drop-shadow-[0_0_15px_rgba(29,78,216,0.8)]'}`} style={isHeritage ? { color: themeColors.primary } : {}}>
+  {isArabic ? 'دروازة' : 'Darwaza'}
+</h1>              <p className={`text-xl md:text-2xl mb-8 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                 {isArabic
                   ? 'بوابتك إلى التراث الكويتي الأصيل. نربط الأجيال عبر التكنولوجيا والذكاء الاصطناعي.'
                   : 'Your gateway to authentic Kuwaiti heritage. Bridging generations through technology and AI.'}
               </p>
               
               <div className="flex flex-wrap gap-4">
-                <Button
-                  asChild
-                  size="lg"
-                  className={`h-14 px-8 text-lg ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515] shadow-[4px_4px_0px_0px_#D97706]' : 'bg-[#0D9488] hover:bg-[#0B7A70]'}`}
-                  data-testid="hero-explore-btn"
-                >
-                  <Link to="/seniors">
-                    {t('explore')}
-                    <ArrowRight className={`ms-2 w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
-                  </Link>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="h-14 px-8 text-lg"
-                  data-testid="hero-watch-btn"
-                >
-                  <Play className="me-2 w-5 h-5" />
-                  {isArabic ? 'شاهد الفيديو' : 'Watch Video'}
-                </Button>
-              </div>
-            </motion.div>
-
+<Button
+  size="lg"
+  className={`h-14 px-8 text-lg relative z-50 transition-all duration-300 ${
+    isHeritage 
+      ? 'bg-[#8D1C1C] text-white hover:bg-[#6D1515] shadow-lg border-b-4 border-[#4A0E0E]' 
+      : `border-2 border-blue-700 hover:bg-blue-700 hover:text-white shadow-[0_0_15px_rgba(29,78,216,0.4)] bg-transparent ${darkMode ? 'text-white' : 'text-blue-700 font-bold'}`
+  }`}
+  data-testid="hero-explore-btn"
+  onClick={(e) => {
+    e.preventDefault();
+    const target = document.getElementById('explore');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }}
+>
+  {t('explore')}
+  <ArrowRight className={`ms-2 w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
+</Button>
+</div>
+</motion.div>
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -192,7 +180,7 @@ const HomePage = () => {
       <SaduDivider className="max-w-7xl mx-auto" />
 
       {/* Modules Grid */}
-      <section className="py-16 md:py-24">
+      <section id="explore" className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -265,7 +253,7 @@ const HomePage = () => {
             <Button
               asChild
               size="lg"
-              className={`h-16 px-12 text-xl ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515] shadow-[4px_4px_0px_0px_#D97706]' : 'bg-[#0D9488] hover:bg-[#0B7A70]'}`}
+              className={`h-16 px-12 text-xl ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515] shadow-[4px_4px_0px_0px_#D97706]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'}`}
               data-testid="cta-subscribe-btn"
             >
               <Link to="/subscriptions">

@@ -155,7 +155,7 @@ const MockPaymentPage = () => {
                     </p>
                   </div>
                   <div className="text-right">
-                    <span className={`text-2xl font-bold ${isHeritage ? 'text-[#8D1C1C]' : 'text-[#0D9488]'}`}>
+                    <span className={`text-2xl font-bold ${isHeritage ? 'text-[#8D1C1C]' : 'text-[#1D4ED8]'}`}>
                       {amount} KWD
                     </span>
                     <p className="text-xs text-muted-foreground">
@@ -175,7 +175,7 @@ const MockPaymentPage = () => {
                   </div>
                   <div className="flex justify-between pt-2 border-t font-bold">
                     <span>{isArabic ? 'المجموع' : 'Total'}</span>
-                    <span className={isHeritage ? 'text-[#8D1C1C]' : 'text-[#0D9488]'}>{amount} KWD</span>
+                    <span className={isHeritage ? 'text-[#8D1C1C]' : 'text-[#1D4ED8]'}>{amount} KWD</span>
                   </div>
                 </div>
               </div>
@@ -206,7 +206,7 @@ const MockPaymentPage = () => {
               <div className="mb-6">
                 <Label className="mb-3 block">{isArabic ? 'طريقة الدفع' : 'Payment Method'}</Label>
                 <RadioGroup value={method} className="flex gap-4">
-                  <div className={`flex-1 p-4 rounded-lg border-2 cursor-pointer ${method === 'stripe' ? (isHeritage ? 'border-[#8D1C1C] bg-[#8D1C1C]/5' : 'border-[#0D9488] bg-[#0D9488]/5') : 'border-gray-200'}`}>
+                  <div className={`flex-1 p-4 rounded-lg border-2 cursor-pointer ${method === 'stripe' ? (isHeritage ? 'border-[#8D1C1C] bg-[#8D1C1C]/5' : 'border-[#1D4ED8] bg-[#1D4ED8]/5') : 'border-gray-200'}`}>
                     <div className="flex items-center gap-2">
                       <RadioGroupItem value="stripe" id="stripe" />
                       <Label htmlFor="stripe" className="cursor-pointer flex items-center gap-2">
@@ -215,7 +215,7 @@ const MockPaymentPage = () => {
                       </Label>
                     </div>
                   </div>
-                  <div className={`flex-1 p-4 rounded-lg border-2 cursor-pointer ${method === 'knet' ? (isHeritage ? 'border-[#8D1C1C] bg-[#8D1C1C]/5' : 'border-[#0D9488] bg-[#0D9488]/5') : 'border-gray-200'}`}>
+                  <div className={`flex-1 p-4 rounded-lg border-2 cursor-pointer ${method === 'knet' ? (isHeritage ? 'border-[#8D1C1C] bg-[#8D1C1C]/5' : 'border-[#1D4ED8] bg-[#1D4ED8]/5') : 'border-gray-200'}`}>
                     <div className="flex items-center gap-2">
                       <RadioGroupItem value="knet" id="knet" />
                       <Label htmlFor="knet" className="cursor-pointer font-bold text-blue-600">K-NET</Label>
@@ -293,7 +293,7 @@ const MockPaymentPage = () => {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className={`w-full h-14 text-lg mt-6 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#0D9488] hover:bg-[#0B7A70]'}`}
+                  className={`w-full h-14 text-lg mt-6 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'}`}
                   data-testid="pay-now-btn"
                 >
                   {loading ? (

@@ -57,7 +57,7 @@ const PlanCard = ({ plan, isYearly, isArabic, isPopular, onSubscribe, loading, c
           <div className={`w-16 h-16 mx-auto rounded-2xl flex items-center justify-center mb-4 ${
             plan.plan_id === 'free' 
               ? 'bg-gray-200' 
-              : isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#0D9488]'
+              : isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#1D4ED8]'
           }`}>
             <Icon className={`w-8 h-8 ${plan.plan_id === 'free' ? 'text-gray-600' : 'text-white'}`} />
           </div>
@@ -71,7 +71,7 @@ const PlanCard = ({ plan, isYearly, isArabic, isPopular, onSubscribe, loading, c
 
         <div className="text-center mb-6">
           <div className="flex items-baseline justify-center">
-            <span className={`text-4xl font-bold ${isHeritage ? 'text-[#8D1C1C]' : 'text-[#0D9488]'}`}>
+            <span className={`text-4xl font-bold ${isHeritage ? 'text-[#8D1C1C]' : 'text-[#1D4ED8]'}`}>
               {price === 0 ? (isArabic ? 'مجاني' : 'Free') : `${price}`}
             </span>
             {price > 0 && (
@@ -91,7 +91,7 @@ const PlanCard = ({ plan, isYearly, isArabic, isPopular, onSubscribe, loading, c
         <ul className="space-y-3 mb-6">
           {(isArabic ? plan.features_ar : plan.features).map((feature, index) => (
             <li key={index} className="flex items-start gap-2">
-              <Check className={`w-5 h-5 mt-0.5 flex-shrink-0 ${isHeritage ? 'text-[#8D1C1C]' : 'text-[#0D9488]'}`} />
+              <Check className={`w-5 h-5 mt-0.5 flex-shrink-0 ${isHeritage ? 'text-[#8D1C1C]' : 'text-[#1D4ED8]'}`} />
               <span className="text-sm">{feature}</span>
             </li>
           ))}
@@ -105,7 +105,7 @@ const PlanCard = ({ plan, isYearly, isArabic, isPopular, onSubscribe, loading, c
               ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               : isHeritage 
                 ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' 
-                : 'bg-[#0D9488] hover:bg-[#0B7A70]'
+                : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'
           }`}
           data-testid={`subscribe-${plan.plan_id}`}
         >
@@ -341,7 +341,7 @@ const SubscriptionsPage = () => {
         </div>
 
         {/* Enterprise CTA */}
-        <div className={`mt-16 text-center p-8 rounded-2xl ${isHeritage ? 'bg-[#8D1C1C]/10' : 'bg-[#0D9488]/10'}`}>
+        <div className={`mt-16 text-center p-8 rounded-2xl ${isHeritage ? 'bg-[#8D1C1C]/10' : 'bg-[#1D4ED8]/10'}`}>
           <Shield className="w-12 h-12 mx-auto mb-4" style={{ color: themeColors.primary }} />
           <h3 className={`text-xl font-bold mb-2 ${isHeritage ? 'font-serif' : ''}`}>
             {isArabic ? 'للمؤسسات والشركات' : 'For Enterprises & Organizations'}
@@ -353,7 +353,7 @@ const SubscriptionsPage = () => {
           </p>
           <Button
             variant="outline"
-            className={`${isHeritage ? 'border-[#8D1C1C] text-[#8D1C1C]' : 'border-[#0D9488] text-[#0D9488]'}`}
+            className={`${isHeritage ? 'border-[#8D1C1C] text-[#8D1C1C]' : 'border-[#1D4ED8] text-[#1D4ED8]'}`}
             data-testid="enterprise-contact-btn"
           >
             {isArabic ? 'تواصل معنا' : 'Contact Sales'}

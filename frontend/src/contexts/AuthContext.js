@@ -38,21 +38,28 @@ export const AuthProvider = ({ children }) => {
   }, [checkAuth]);
 
   const login = async (email, password) => {
-    const response = await axios.post(`${API_URL}/api/auth/login`, { email, password });
-    const { access_token, user: userData } = response.data;
-    setToken(access_token);
-    setUser(userData);
-    localStorage.setItem('darwaza-token', access_token);
-    return userData;
+    // تسجيل دخول وهمي (للعرض فقط)
+    const fakeToken = "darwaza_vip_pass_2026";
+    const fakeUser = { name: "ناصر الخالدي", email: email };
+
+    setToken(fakeToken);
+    setUser(fakeUser);
+    localStorage.setItem('darwaza-token', fakeToken);
+    return fakeUser;
   };
 
   const register = async (userData) => {
-    const response = await axios.post(`${API_URL}/api/auth/register`, userData);
-    const { access_token, user: newUser } = response.data;
-    setToken(access_token);
-    setUser(newUser);
-    localStorage.setItem('darwaza-token', access_token);
-    return newUser;
+    // إنشاء حساب وهمي (للعرض فقط)
+    const fakeToken = "darwaza_vip_pass_2026";
+    const fakeUser = { 
+      name: userData.name || "ناصر الخالدي", 
+      email: userData.email 
+    };
+
+    setToken(fakeToken);
+    setUser(fakeUser);
+    localStorage.setItem('darwaza-token', fakeToken);
+    return fakeUser;
   };
 
   const loginWithGoogle = () => {
