@@ -19,6 +19,7 @@ import SeniorsPage from './pages/SeniorsPage';
 import YouthPage from './pages/YouthPage';
 import KidsPage from './pages/KidsPage';
 import CookingPage from './pages/CookingPage';
+import SmartKitchenPage from './pages/SmartKitchenPage'; // ✅ السطر الأول المضاف
 import TouristsPage from './pages/TouristsPage';
 import ArabWorldPage from './pages/ArabWorldPage';
 import SubscriptionsPage from './pages/SubscriptionsPage';
@@ -69,6 +70,7 @@ const AppRouter = () => {
           <Route path="/youth" element={<YouthPage />} />
           <Route path="/kids" element={<KidsPage />} />
           <Route path="/cooking" element={<CookingPage />} />
+          <Route path="/smart-kitchen" element={<SmartKitchenPage />} /> {/* ✅ السطر الثاني المضاف */}
           <Route path="/tourists" element={<TouristsPage />} />
           <Route path="/arab-world" element={<ArabWorldPage />} />
           <Route path="/subscriptions" element={<SubscriptionsPage />} />

@@ -6,17 +6,11 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { Button } from '../components/ui/button';
 import { SaduDivider, SaduCard } from '../components/SaduPattern';
 import {
-  Brain,
   Users,
-  Sparkles,
-  Gamepad2,
-  ChefHat,
-  Map,
-  Globe,
   ArrowRight,
-  Play,
   ShoppingBag,
-  GraduationCap
+  GraduationCap,
+  Globe
 } from 'lucide-react';
 
 const HomePage = () => {
@@ -24,7 +18,8 @@ const HomePage = () => {
   const { t, isRTL, language } = useLanguage();
   const isArabic = language === 'ar';
 
-  const ModuleCard = ({ icon: Icon, title, titleAr, description, descriptionAr, to, color }) => (
+  // التعديل 1: تغيير استقبال الأيقونة (icon) إلى ملصق تعبيري (emoji)
+  const ModuleCard = ({ emoji, title, titleAr, description, descriptionAr, to, color }) => (
     <motion.div
       whileHover={{ y: -5, scale: 1.02 }}
       className="relative group h-full"
@@ -33,7 +28,8 @@ const HomePage = () => {
   to={to} 
   className={`block p-8 rounded-3xl h-full transition-all duration-500 ${isHeritage ? 'border-[4px] border-[#8A1538]' : 'border-2 border-white/50 hover:border-cyan-400 hover:shadow-[0_0_25px_rgba(34,211,238,0.6)]'}`} >
         <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-white shadow-lg transition-transform duration-500 group-hover:rotate-12" style={{ backgroundColor: color }}>
-          <Icon className="w-8 h-8" />
+          {/* التعديل 2: عرض الإيموجي بحجم كبير كأنه ملصق */}
+          <span className="text-4xl drop-shadow-md">{emoji}</span>
         </div>
         <h3 className={`text-2xl font-bold mb-3 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
           {isArabic ? titleAr : title}
@@ -44,9 +40,11 @@ const HomePage = () => {
       </Link>
     </motion.div>
   );
+
+  // التعديل 3: إضافة الإيموجيات المناسبة لكل قسم بدل الأيقونات العادية
   const modules = [
     {
-      icon: Brain,
+      emoji: '🧠',
       title: 'AI Hub',
       titleAr: 'مركز الذكاء الاصطناعي',
       description: 'Chat with 3 AI models. Get help with writing, learning, and exploring heritage.',
@@ -55,7 +53,7 @@ const HomePage = () => {
       color: '#8B5CF6'
     },
     {
-      icon: Users,
+      emoji: '☕',
       title: 'Seniors Gateway',
       titleAr: 'بوابة المتقاعدين',
       description: 'Sell antiques, host live tale councils, share your expertise.',
@@ -64,7 +62,7 @@ const HomePage = () => {
       color: '#8D1C1C'
     },
     {
-      icon: Sparkles,
+      emoji: '🚀',
       title: 'Youth Empowerment',
       titleAr: 'تمكين الشباب',
       description: 'Certified heritage courses, modern design lab, live workshops.',
@@ -73,7 +71,7 @@ const HomePage = () => {
       color: '#1D4ED8'
     },
     {
-      icon: Gamepad2,
+      emoji: '🎮',
       title: 'Kids Heritage World',
       titleAr: 'عالم تراث الأطفال',
       description: 'Fun games, heritage box subscription, achievement rewards.',
@@ -82,7 +80,7 @@ const HomePage = () => {
       color: '#F59E0B'
     },
     {
-      icon: ChefHat,
+      emoji: '👨‍🍳',
       title: 'Cooking Corner',
       titleAr: 'ركن الطبخ',
       description: 'Learn traditional recipes with interactive games and AR guides.',
@@ -91,7 +89,7 @@ const HomePage = () => {
       color: '#EC4899'
     },
     {
-      icon: Map,
+      emoji: '🗺️',
       title: 'Tourist Guide',
       titleAr: 'دليل السياح',
       description: 'Explore Kuwait culture, customs, locations, and etiquette.',
@@ -100,7 +98,7 @@ const HomePage = () => {
       color: '#3B82F6'
     },
     {
-      icon: Globe,
+      emoji: '🌍',
       title: 'Arab World',
       titleAr: 'العالم العربي',
       description: 'Discover traditions and cultures from all Arab countries.',

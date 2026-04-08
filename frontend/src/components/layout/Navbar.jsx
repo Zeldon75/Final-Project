@@ -17,11 +17,6 @@ import {
   Home,
   Brain,
   Users,
-  Sparkles,
-  Gamepad2,
-  ChefHat,
-  Globe,
-  Map,
   CreditCard,
   User,
   LogOut,
@@ -33,13 +28,6 @@ import {
   Palette,
   ChevronDown,
   Compass,
-  GraduationCap,
-  ShoppingBag,
-  Video,
-  BookOpen,
-  Utensils,
-  Heart,
-  Camera,
   X
 } from 'lucide-react';
 
@@ -100,10 +88,15 @@ const NavDropdown = ({ trigger, items, isRTL, themeColors }) => {
               <DropdownMenuItem asChild>
                 <Link to={item.to} className="flex items-center gap-3 py-2">
                   <div 
-                    className="w-8 h-8 rounded-lg flex items-center justify-center"
+                    className="w-8 h-8 rounded-lg flex items-center justify-center shadow-sm"
                     style={{ backgroundColor: item.color || themeColors.primary + '20' }}
                   >
-                    <item.icon className="w-4 h-4" style={{ color: item.color || themeColors.primary }} />
+                    {/* عرض الإيموجي هنا إذا كان موجوداً، وإلا عرض الأيقونة العادية */}
+                    {item.emoji ? (
+                      <span className="text-lg drop-shadow-md">{item.emoji}</span>
+                    ) : item.icon ? (
+                      <item.icon className="w-4 h-4" style={{ color: item.color || themeColors.primary }} />
+                    ) : null}
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-sm">{item.label}</p>
@@ -137,14 +130,14 @@ export const Navbar = () => {
     { to: '/ai-hub', icon: Brain, label: t('ai_hub') },
   ];
 
-  // Sections dropdown
+  // Sections dropdown (إضافة الإيموجيات هنا)
   const sectionsDropdown = {
     trigger: { icon: Users, label: isArabic ? 'الأقسام' : 'Sections' },
     items: [
       { label: isArabic ? 'لكبار السن' : 'For Seniors' },
       { 
         to: '/seniors', 
-        icon: Users, 
+        emoji: '☕', 
         label: isArabic ? 'بوابة المتقاعدين' : 'Seniors Gateway',
         description: isArabic ? 'السوق والمجالس والأكاديمية' : 'Marketplace, Councils & Academy',
         color: '#8D1C1C'
@@ -153,7 +146,7 @@ export const Navbar = () => {
       { label: isArabic ? 'للشباب' : 'For Youth' },
       { 
         to: '/youth', 
-        icon: Sparkles, 
+        emoji: '🚀', 
         label: isArabic ? 'تمكين الشباب' : 'Youth Empowerment',
         description: isArabic ? 'الدورات والتصميم والوظائف' : 'Courses, Design & Careers',
         color: '#1D4ED8'
@@ -162,7 +155,7 @@ export const Navbar = () => {
       { label: isArabic ? 'للأطفال' : 'For Kids' },
       { 
         to: '/kids', 
-        icon: Gamepad2, 
+        emoji: '🎮', 
         label: isArabic ? 'عالم الأطفال' : 'Kids World',
         description: isArabic ? 'الألعاب والإنجازات' : 'Games & Achievements',
         color: '#F59E0B'
@@ -170,27 +163,27 @@ export const Navbar = () => {
     ]
   };
 
-  // Explore dropdown
+  // Explore dropdown (إضافة الإيموجيات هنا)
   const exploreDropdown = {
     trigger: { icon: Compass, label: isArabic ? 'استكشف' : 'Explore' },
     items: [
       { 
         to: '/cooking', 
-        icon: ChefHat, 
+        emoji: '👨‍🍳', 
         label: isArabic ? 'ركن الطبخ' : 'Cooking Corner',
         description: isArabic ? 'الوصفات والفيديوهات' : 'Recipes & Videos',
         color: '#EC4899'
       },
       { 
         to: '/tourists', 
-        icon: Map, 
+        emoji: '🗺️', 
         label: isArabic ? 'دليل السياح' : 'Tourist Guide',
         description: isArabic ? 'المعالم والثقافة' : 'Landmarks & Culture',
         color: '#3B82F6'
       },
       { 
         to: '/arab-world', 
-        icon: Globe, 
+        emoji: '🌍', 
         label: isArabic ? 'العالم العربي' : 'Arab World',
         description: isArabic ? 'ثقافات الوطن العربي' : 'Pan-Arab Cultures',
         color: '#10B981'
@@ -198,7 +191,7 @@ export const Navbar = () => {
       { separator: true },
       { 
         to: '/subscriptions', 
-        icon: CreditCard, 
+        emoji: '💎', 
         label: isArabic ? 'الاشتراكات' : 'Subscriptions',
         description: isArabic ? 'الخطط والأسعار' : 'Plans & Pricing',
         color: '#8B5CF6'
@@ -206,20 +199,20 @@ export const Navbar = () => {
     ]
   };
 
-  // All nav items for mobile
+  // All nav items for mobile (إضافة الإيموجيات لقائمة الجوال)
   const allNavItems = [
     { to: '/', icon: Home, label: t('home'), color: themeColors.primary },
-    { to: '/ai-hub', icon: Brain, label: t('ai_hub'), color: '#8B5CF6' },
+    { to: '/ai-hub', emoji: '🧠', label: t('ai_hub'), color: '#8B5CF6' },
     { separator: true, label: isArabic ? 'الأقسام الرئيسية' : 'Main Sections' },
-    { to: '/seniors', icon: Users, label: t('seniors'), color: '#8D1C1C' },
-    { to: '/youth', icon: Sparkles, label: t('youth'), color: '#1D4ED8' },
-    { to: '/kids', icon: Gamepad2, label: t('kids'), color: '#F59E0B' },
+    { to: '/seniors', emoji: '☕', label: t('seniors'), color: '#8D1C1C' },
+    { to: '/youth', emoji: '🚀', label: t('youth'), color: '#1D4ED8' },
+    { to: '/kids', emoji: '🎮', label: t('kids'), color: '#F59E0B' },
     { separator: true, label: isArabic ? 'استكشف' : 'Explore' },
-    { to: '/cooking', icon: ChefHat, label: t('cooking'), color: '#EC4899' },
-    { to: '/tourists', icon: Map, label: t('tourists'), color: '#3B82F6' },
-    { to: '/arab-world', icon: Globe, label: t('arab_world'), color: '#10B981' },
+    { to: '/cooking', emoji: '👨‍🍳', label: t('cooking'), color: '#EC4899' },
+    { to: '/tourists', emoji: '🗺️', label: t('tourists'), color: '#3B82F6' },
+    { to: '/arab-world', emoji: '🌍', label: t('arab_world'), color: '#10B981' },
     { separator: true, label: isArabic ? 'الحساب' : 'Account' },
-    { to: '/subscriptions', icon: CreditCard, label: t('subscriptions'), color: '#8B5CF6' },
+    { to: '/subscriptions', emoji: '💎', label: t('subscriptions'), color: '#8B5CF6' },
   ];
 
   const handleLogout = async () => {
@@ -449,19 +442,24 @@ export const Navbar = () => {
                             data-testid={`mobile-nav-${item.to.replace('/', '') || 'home'}`}
                           >
                             <div 
-                              className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                              className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm ${
                                 location.pathname === item.to ? 'bg-white/20' : ''
                               }`}
                               style={{ 
                                 backgroundColor: location.pathname === item.to ? undefined : item.color + '20'
                               }}
                             >
-                              <item.icon 
-                                className="w-5 h-5" 
-                                style={{ 
-                                  color: location.pathname === item.to ? 'white' : item.color 
-                                }} 
-                              />
+                              {/* عرض الإيموجي في الجوال أيضاً */}
+                              {item.emoji ? (
+                                <span className="text-2xl drop-shadow-sm">{item.emoji}</span>
+                              ) : item.icon ? (
+                                <item.icon 
+                                  className="w-5 h-5" 
+                                  style={{ 
+                                    color: location.pathname === item.to ? 'white' : item.color 
+                                  }} 
+                                />
+                              ) : null}
                             </div>
                             <span className="font-medium">{item.label}</span>
                           </Link>

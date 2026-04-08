@@ -1,805 +1,612 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
-import { Textarea } from '../components/ui/textarea';
-import { Label } from '../components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { SaduCard, SaduDivider } from '../components/SaduPattern';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Calendar } from '../components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
+import { SaduCard } from '../components/SaduPattern';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../components/ui/dropdown-menu';
 import {
-  ShoppingBag,
-  Video,
-  GraduationCap,
-  Plus,
-  Search,
-  Filter,
-  Users,
-  Clock,
-  Crown,
-  Gem,
-  Palette,
-  BookOpen,
-  Upload,
-  X,
-  CalendarIcon,
-  Loader2,
-  Image as ImageIcon,
-  Play,
-  MessageSquare
+  ShoppingBag, Video, GraduationCap, Plus, Search,
+  Users, Clock, Gem, Play, MessageSquare,
+  Scissors, ChefHat, PenTool, Anchor, Hammer, Leaf, BookOpen, CheckCircle2
 } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
+// --- مكونات فرعية (Sub-components) ---
+
 const MarketplaceItem = ({ item, isArabic, onClick }) => {
-  const { isHeritage, darkMode } = useTheme();
-  
+  const { isHeritage, darkMode } = useTheme(); 
+  const isModern = !isHeritage;
+  const modernBorder = isModern ? 'border-2 border-[#1D4ED8] rounded-2xl overflow-hidden' : '';
+  const modernDarkGlow = (isModern && darkMode) ? 'hover:shadow-[0_0_20px_rgba(29,78,216,0.8)]' : '';
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -5 }}
-      className="group cursor-pointer"
+      className={`group cursor-pointer transition-all duration-300 ${modernBorder} ${modernDarkGlow}`}
       onClick={onClick}
     >
       <SaduCard>
-        <div className="aspect-square rounded-lg overflow-hidden mb-4 bg-gray-200">
-          {item.images?.[0] ? (
-            <img src={item.images[0]} alt={item.title} className="w-full h-full object-cover" />
+        <div className="aspect-square rounded-lg overflow-hidden mb-4 bg-gray-200 relative">
+          {item.image ? (
+            <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <Gem className="w-12 h-12 text-gray-400" />
             </div>
           )}
         </div>
-        <h3 className={`font-bold mb-1 ${isHeritage ? 'font-serif' : ''}`}>
-          {isArabic ? item.title_ar : item.title}
+        <h3 className={`font-bold bg-white text-[#8D1C1C] px-3 py-1.5 rounded-lg inline-block mb-2 shadow-sm border border-gray-100 ${isHeritage ? 'font-serif' : ''}`}>
+          {item.title}
         </h3>
         <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-          {isArabic ? item.description_ar : item.description}
+          {item.description}
         </p>
-        <div className="flex items-center justify-between">
+        <div className="bg-white px-3 py-2 rounded-xl flex items-center justify-between mt-3 shadow-sm border border-gray-100">
           <span className={`text-lg font-bold ${isHeritage ? 'text-[#8D1C1C]' : 'text-[#1D4ED8]'}`}>
-            {item.price} {item.currency}
+            {item.price} د.ك
           </span>
-          {item.is_authenticated && (
-            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-              {isArabic ? 'موثق' : 'Verified'}
-            </span>
-          )}
+          <span className="text-xs bg-gray-50 text-gray-700 px-2 py-1 rounded-full font-medium border border-gray-200">
+            {item.seller_name}
+          </span>
         </div>
       </SaduCard>
     </motion.div>
+  );
+};
+
+const ProductDetailsModal = ({ item, open, onOpenChange, isArabic }) => {
+  const { isHeritage, darkMode } = useTheme();
+  if (!item) return null;
+
+  const modalBg = darkMode ? 'bg-[#1A1A1A]' : (isHeritage ? 'bg-[#FDF6E3]' : 'bg-gray-50');
+  const boxBg = darkMode ? 'bg-[#2A2A2A] border-gray-700' : 'bg-white border-gray-200';
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className={`max-w-md text-right border-0 overflow-hidden ${modalBg}`} dir={isArabic ? 'rtl' : 'ltr'}>
+        <DialogHeader className="pt-6 px-6">
+          <DialogTitle className="text-center mb-2 mt-2">
+            <span className={`inline-block px-6 py-2.5 rounded-xl shadow-md ${boxBg} text-xl font-bold ${isHeritage ? 'font-serif' : ''} text-[#8D1C1C]`}>
+              {item.title}
+            </span>
+          </DialogTitle>
+        </DialogHeader>
+        
+        <div className="space-y-4 px-6 pb-6">
+          <div className="aspect-square rounded-2xl overflow-hidden border-4 border-white shadow-md bg-gray-100">
+            <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+          </div>
+          
+          <div className="flex justify-between items-center gap-3">
+            <div className={`flex-1 ${boxBg} px-4 py-3 rounded-xl shadow-sm border flex flex-col justify-center items-center`}>
+              <span className="text-xs text-muted-foreground mb-1 font-semibold">{isArabic ? 'السعر' : 'Price'}</span>
+              <span className={`text-2xl font-bold ${isHeritage ? 'text-[#8D1C1C]' : 'text-[#1D4ED8]'}`}>
+                {item.price} د.ك
+              </span>
+            </div>
+            
+            <div className={`flex-1 ${boxBg} px-4 py-3 rounded-xl shadow-sm border flex flex-col justify-center items-center`}>
+              <span className="text-xs text-muted-foreground mb-1 font-semibold">{isArabic ? 'سنة الصنع' : 'Year'}</span>
+              <span className={`text-xl font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+                {item.year}
+              </span>
+            </div>
+          </div>
+          
+          <div className={`p-5 rounded-xl shadow-md ${isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#1D4ED8]'}`}>
+            <h4 className="font-bold mb-2 text-sm text-white/90">{isArabic ? 'وصف التحفة:' : 'Description:'}</h4>
+            <p className="text-white leading-relaxed font-medium">
+              {item.description}
+            </p>
+          </div>
+          
+          <Button 
+            className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white gap-2 transition-all duration-300 font-bold text-xl py-6 mt-2 shadow-md rounded-xl"
+            onClick={() => toast.success(isArabic ? 'سيتم تحويلك للواتساب' : 'Redirecting to WhatsApp')}
+          >
+            <MessageSquare className="w-6 h-6" />
+            {isArabic ? 'تواصل مع البائع' : 'Contact Seller'}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
 const CouncilCard = ({ council, isArabic, onJoin, onStart, isHost }) => {
   const { isHeritage, darkMode } = useTheme();
   const { t } = useLanguage();
-  
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'live': return 'bg-red-500';
-      case 'scheduled': return 'bg-yellow-500';
-      case 'ended': return 'bg-gray-500';
-      default: return 'bg-gray-500';
-    }
-  };
+
+  const modernContainer = darkMode 
+    ? 'bg-[#0F172A] border-2 border-blue-900/50 hover:border-blue-400 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] text-white' 
+    : 'bg-white border-2 border-blue-100 hover:border-blue-500 hover:shadow-xl text-gray-900';
+    
+  const modernButton = darkMode
+    ? 'bg-[#3B82F6] hover:bg-[#60A5FA] text-white shadow-[0_0_10px_rgba(59,130,246,0.4)]'
+    : 'bg-[#1D4ED8] hover:bg-[#1E3A8A] text-white shadow-md';
+
+  const heritageButton = 'bg-[#8D1C1C] hover:bg-[#6D1515] text-white shadow-[4px_4px_0px_0px_#D97706]';
+  const heritageText = darkMode ? 'text-gray-100' : 'text-[#8D1C1C]';
+
+  const innerContent = (
+    <>
+      <div className="flex items-start justify-between mb-5">
+        <div className={`px-3 py-1.5 rounded-full text-xs font-bold text-white shadow-sm flex items-center gap-2 ${council.status === 'live' ? 'bg-red-600 animate-pulse' : (isHeritage ? 'bg-[#D97706]' : 'bg-blue-500')}`}>
+          {council.status === 'live' && <span className="w-2 h-2 bg-white rounded-full"></span>}
+          {council.status === 'live' ? (isArabic ? 'مباشر الآن' : 'Live Now') : (isArabic ? 'قادم' : 'Upcoming')}
+        </div>
+        <div className={`flex items-center gap-1 text-sm font-semibold ${!isHeritage && darkMode ? 'text-gray-400' : 'text-muted-foreground'}`}>
+          <Users className="w-4 h-4" />
+          <span>{council.viewers || 0}</span>
+        </div>
+      </div>
+      
+      <h3 className={`text-xl font-bold mb-3 line-clamp-1 ${isHeritage ? `font-serif ${heritageText}` : ''}`}>
+        {isArabic ? council.title_ar : council.title}
+      </h3>
+      
+      <div className={`flex items-center gap-2 text-sm mb-6 font-medium ${!isHeritage && darkMode ? 'text-gray-400' : 'text-muted-foreground'}`}>
+        <Clock className="w-4 h-4" />
+        <span>{council.time}</span>
+      </div>
+      
+      {isHost && council.status === 'scheduled' ? (
+        <Button onClick={() => onStart(council.id)} className="w-full bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl h-12">
+          <Play className="w-5 h-5 me-2 fill-current" /> {isArabic ? 'ابدأ البث' : 'Start Stream'}
+        </Button>
+      ) : (
+        <Button onClick={() => onJoin(council.id)} className={`w-full font-bold rounded-xl h-12 transition-all duration-300 ${isHeritage ? heritageButton : modernButton}`}>
+          <Video className="w-5 h-5 me-2" /> {t('join_now')}
+        </Button>
+      )}
+    </>
+  );
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -5 }}
-    >
-      <SaduCard>
-        <div className="flex items-start justify-between mb-4">
-          <div className={`px-3 py-1 rounded-full text-xs font-medium text-white ${getStatusColor(council.status)}`}>
-            {council.status === 'live' ? (isArabic ? 'مباشر' : 'Live') : 
-             council.status === 'ended' ? (isArabic ? 'انتهى' : 'Ended') :
-             (isArabic ? 'قادم' : 'Upcoming')}
-          </div>
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-            <Users className="w-4 h-4" />
-            <span>{council.viewers?.length || 0}/{council.max_viewers}</span>
-          </div>
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} whileHover={{ y: -5 }} className="h-full">
+      {isHeritage ? (
+        <SaduCard className="h-full flex flex-col justify-between">
+          {innerContent}
+        </SaduCard>
+      ) : (
+        <div className={`p-6 h-full rounded-3xl flex flex-col justify-between transition-all duration-500 ${modernContainer}`}>
+          {innerContent}
         </div>
-        <h3 className={`font-bold mb-2 ${isHeritage ? 'font-serif' : ''}`}>
-          {isArabic ? council.title_ar : council.title}
-        </h3>
-        <p className="text-sm text-muted-foreground mb-2">
-          {isArabic ? `المضيف: ${council.host_name || 'مجهول'}` : `Host: ${council.host_name || 'Anonymous'}`}
-        </p>
-        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-          {isArabic ? council.description_ar : council.description}
-        </p>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-          <Clock className="w-4 h-4" />
-          <span>{new Date(council.scheduled_time).toLocaleDateString(isArabic ? 'ar-KW' : 'en-US', {
-            weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-          })}</span>
-        </div>
-        
-        {isHost && council.status === 'scheduled' ? (
-          <Button
-            onClick={() => onStart(council.council_id)}
-            className="w-full bg-red-500 hover:bg-red-600"
-            data-testid={`start-council-${council.council_id}`}
-          >
-            <Play className="w-4 h-4 me-2" />
-            {isArabic ? 'ابدأ البث' : 'Start Stream'}
-          </Button>
-        ) : council.status === 'live' ? (
-          <Button
-            onClick={() => onJoin(council.council_id)}
-            className={`w-full ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'}`}
-            data-testid={`join-council-${council.council_id}`}
-          >
-            <Video className="w-4 h-4 me-2" />
-            {t('join_now')}
-          </Button>
-        ) : council.status === 'scheduled' ? (
-          <Button
-            onClick={() => onJoin(council.council_id)}
-            variant="outline"
-            className="w-full"
-            data-testid={`remind-council-${council.council_id}`}
-          >
-            {t('remind_me')}
-          </Button>
-        ) : null}
-      </SaduCard>
+      )}
     </motion.div>
   );
 };
 
-// Sell Item Modal
-const SellItemModal = ({ open, onOpenChange, onSuccess, categories, isArabic }) => {
-  const { isHeritage } = useTheme();
-  const { t } = useLanguage();
-  const { token } = useAuth();
-  const fileInputRef = useRef(null);
-  
-  const [loading, setLoading] = useState(false);
-  const [images, setImages] = useState([]);
-  const [formData, setFormData] = useState({
-    title: '',
-    title_ar: '',
-    description: '',
-    description_ar: '',
-    category: '',
-    price: ''
-  });
+const AcademyCard = ({ course, isArabic, onEnroll }) => {
+  const { isHeritage, darkMode } = useTheme();
 
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    files.forEach(file => {
-      if (images.length >= 5) return;
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImages(prev => [...prev.slice(0, 4), e.target.result]);
-      };
-      reader.readAsDataURL(file);
-    });
-  };
+  const modernContainer = darkMode 
+    ? 'bg-[#0F172A] border-2 border-blue-900/50 hover:border-blue-400 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] text-white' 
+    : 'bg-white border-2 border-blue-100 hover:border-blue-500 hover:shadow-xl text-gray-900';
+    
+  const modernButton = darkMode
+    ? 'bg-[#3B82F6] hover:bg-[#60A5FA] text-white shadow-[0_0_10px_rgba(59,130,246,0.4)]'
+    : 'bg-[#1D4ED8] hover:bg-[#1E3A8A] text-white shadow-md';
 
-  const removeImage = (index) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
-  };
+  const heritageButton = 'bg-[#8D1C1C] hover:bg-[#6D1515] text-white shadow-[4px_4px_0px_0px_#D97706]';
+  const heritageText = darkMode ? 'text-gray-100' : 'text-[#8D1C1C]';
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.title || !formData.price || !formData.category) {
-      toast.error(isArabic ? 'يرجى ملء جميع الحقول المطلوبة' : 'Please fill all required fields');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await axios.post(
-        `${API_URL}/api/marketplace/items`,
-        {
-          ...formData,
-          price: parseFloat(formData.price),
-          images
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+  const innerContent = (
+    <>
+      <div className="flex items-center justify-between mb-4">
+        <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm ${isHeritage ? 'bg-[#D97706] text-white' : 'bg-blue-100 text-blue-800'}`}>
+          {isArabic ? course.category_ar : course.category}
+        </span>
+        <course.icon className={`w-8 h-8 opacity-80 ${isHeritage ? 'text-[#8D1C1C]' : 'text-[#1D4ED8]'}`} />
+      </div>
       
-      toast.success(isArabic ? 'تم إضافة المنتج بنجاح' : 'Item added successfully');
-      onSuccess();
-      onOpenChange(false);
-      setFormData({ title: '', title_ar: '', description: '', description_ar: '', category: '', price: '' });
-      setImages([]);
-    } catch (error) {
-      console.error('Error creating item:', error);
-      toast.error(error.response?.data?.detail || (isArabic ? 'حدث خطأ' : 'An error occurred'));
-    } finally {
-      setLoading(false);
-    }
-  };
+      <h3 className={`text-xl font-bold mb-2 line-clamp-2 ${isHeritage ? `font-serif ${heritageText}` : ''}`}>
+        {isArabic ? course.title_ar : course.title}
+      </h3>
+      
+      <p className={`text-sm mb-4 font-semibold ${!isHeritage && darkMode ? 'text-gray-400' : 'text-muted-foreground'}`}>
+        {isArabic ? 'تقديم الخبرة:' : 'Expert:'} <span className={isHeritage ? 'text-[#D97706]' : 'text-[#1D4ED8]'}>{isArabic ? course.instructor_ar : course.instructor}</span>
+      </p>
+      
+      <div className="flex items-center gap-4 text-sm mb-6 border-t border-gray-200/20 pt-4">
+         <div className="flex items-center gap-1.5">
+           <Clock className="w-4 h-4 opacity-70" />
+           <span className={`font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{isArabic ? course.duration_ar : course.duration}</span>
+         </div>
+         <div className="flex items-center gap-1.5">
+           <GraduationCap className="w-4 h-4 opacity-70" />
+           <span className={`font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{isArabic ? course.level_ar : course.level}</span>
+         </div>
+      </div>
+      
+      {/* استدعاء دالة التسجيل عند الضغط */}
+      <Button onClick={() => onEnroll(course)} className={`w-full font-bold rounded-xl h-12 transition-all duration-300 ${isHeritage ? heritageButton : modernButton}`}>
+        <BookOpen className="w-5 h-5 me-2" /> {isArabic ? 'سجل في الدورة' : 'Enroll Now'}
+      </Button>
+    </>
+  );
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{t('sell_item')}</DialogTitle>
-        </DialogHeader>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Image Upload */}
-          <div>
-            <Label>{isArabic ? 'صور المنتج' : 'Product Images'}</Label>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {images.map((img, index) => (
-                <div key={index} className="relative w-20 h-20 rounded-lg overflow-hidden">
-                  <img src={img} alt="" className="w-full h-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => removeImage(index)}
-                    className="absolute top-1 right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center"
-                  >
-                    <X className="w-3 h-3 text-white" />
-                  </button>
-                </div>
-              ))}
-              {images.length < 5 && (
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-20 h-20 border-2 border-dashed rounded-lg flex flex-col items-center justify-center text-muted-foreground hover:border-primary"
-                >
-                  <Upload className="w-5 h-5" />
-                  <span className="text-xs">{t('upload')}</span>
-                </button>
-              )}
-            </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleImageUpload}
-              className="hidden"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="title">{isArabic ? 'العنوان (إنجليزي)' : 'Title (English)'} *</Label>
-              <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                required
-                data-testid="item-title-input"
-              />
-            </div>
-            <div>
-              <Label htmlFor="title_ar">{isArabic ? 'العنوان (عربي)' : 'Title (Arabic)'}</Label>
-              <Input
-                id="title_ar"
-                value={formData.title_ar}
-                onChange={(e) => setFormData(prev => ({ ...prev, title_ar: e.target.value }))}
-                dir="rtl"
-                data-testid="item-title-ar-input"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="description">{isArabic ? 'الوصف (إنجليزي)' : 'Description (English)'}</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                rows={3}
-                data-testid="item-description-input"
-              />
-            </div>
-            <div>
-              <Label htmlFor="description_ar">{isArabic ? 'الوصف (عربي)' : 'Description (Arabic)'}</Label>
-              <Textarea
-                id="description_ar"
-                value={formData.description_ar}
-                onChange={(e) => setFormData(prev => ({ ...prev, description_ar: e.target.value }))}
-                rows={3}
-                dir="rtl"
-                data-testid="item-description-ar-input"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>{t('category')} *</Label>
-              <Select value={formData.category} onValueChange={(val) => setFormData(prev => ({ ...prev, category: val }))}>
-                <SelectTrigger data-testid="item-category-select">
-                  <SelectValue placeholder={isArabic ? 'اختر الفئة' : 'Select category'} />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map(cat => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      {isArabic ? cat.name_ar : cat.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="price">{t('price')} (KWD) *</Label>
-              <Input
-                id="price"
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.price}
-                onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                required
-                data-testid="item-price-input"
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-4 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
-              {t('cancel')}
-            </Button>
-            <Button
-              type="submit"
-              disabled={loading}
-              className={`flex-1 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'}`}
-              data-testid="submit-item-btn"
-            >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : t('submit')}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} whileHover={{ y: -5 }} className="h-full">
+      {isHeritage ? (
+        <SaduCard className="h-full flex flex-col justify-between">
+          {innerContent}
+        </SaduCard>
+      ) : (
+        <div className={`p-6 h-full rounded-3xl flex flex-col justify-between transition-all duration-500 ${modernContainer}`}>
+          {innerContent}
+        </div>
+      )}
+    </motion.div>
   );
 };
 
-// Host Council Modal
-const HostCouncilModal = ({ open, onOpenChange, onSuccess, isArabic }) => {
-  const { isHeritage } = useTheme();
-  const { t } = useLanguage();
-  const { token } = useAuth();
-  
-  const [loading, setLoading] = useState(false);
-  const [date, setDate] = useState(null);
-  const [formData, setFormData] = useState({
-    title: '',
-    title_ar: '',
-    description: '',
-    description_ar: '',
-    duration_minutes: 60,
-    max_viewers: 100
-  });
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.title || !date) {
-      toast.error(isArabic ? 'يرجى ملء جميع الحقول المطلوبة' : 'Please fill all required fields');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await axios.post(
-        `${API_URL}/api/councils`,
-        {
-          ...formData,
-          scheduled_time: date.toISOString()
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      
-      toast.success(isArabic ? 'تم إنشاء المجلس بنجاح' : 'Council created successfully');
-      onSuccess();
-      onOpenChange(false);
-      setFormData({ title: '', title_ar: '', description: '', description_ar: '', duration_minutes: 60, max_viewers: 100 });
-      setDate(null);
-    } catch (error) {
-      console.error('Error creating council:', error);
-      toast.error(error.response?.data?.detail || (isArabic ? 'حدث خطأ' : 'An error occurred'));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{t('host_council')}</DialogTitle>
-        </DialogHeader>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="council-title">{isArabic ? 'عنوان المجلس (إنجليزي)' : 'Council Title (English)'} *</Label>
-            <Input
-              id="council-title"
-              value={formData.title}
-              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-              required
-              data-testid="council-title-input"
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="council-title-ar">{isArabic ? 'عنوان المجلس (عربي)' : 'Council Title (Arabic)'}</Label>
-            <Input
-              id="council-title-ar"
-              value={formData.title_ar}
-              onChange={(e) => setFormData(prev => ({ ...prev, title_ar: e.target.value }))}
-              dir="rtl"
-              data-testid="council-title-ar-input"
-            />
-          </div>
-
-          <div>
-            <Label>{isArabic ? 'الوصف' : 'Description'}</Label>
-            <Textarea
-              value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              rows={3}
-              data-testid="council-description-input"
-            />
-          </div>
-
-          <div>
-            <Label>{isArabic ? 'موعد البث' : 'Schedule Date & Time'} *</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-start" data-testid="council-date-picker">
-                  <CalendarIcon className="w-4 h-4 me-2" />
-                  {date ? format(date, 'PPP p') : (isArabic ? 'اختر التاريخ والوقت' : 'Pick date and time')}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  disabled={(d) => d < new Date()}
-                />
-                <div className="p-3 border-t">
-                  <Input
-                    type="time"
-                    onChange={(e) => {
-                      if (date && e.target.value) {
-                        const [hours, minutes] = e.target.value.split(':');
-                        const newDate = new Date(date);
-                        newDate.setHours(parseInt(hours), parseInt(minutes));
-                        setDate(newDate);
-                      }
-                    }}
-                  />
-                </div>
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>{isArabic ? 'المدة (دقيقة)' : 'Duration (minutes)'}</Label>
-              <Select
-                value={String(formData.duration_minutes)}
-                onValueChange={(val) => setFormData(prev => ({ ...prev, duration_minutes: parseInt(val) }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="30">30 min</SelectItem>
-                  <SelectItem value="60">60 min</SelectItem>
-                  <SelectItem value="90">90 min</SelectItem>
-                  <SelectItem value="120">120 min</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>{isArabic ? 'الحد الأقصى للمشاهدين' : 'Max Viewers'}</Label>
-              <Input
-                type="number"
-                min="10"
-                max="1000"
-                value={formData.max_viewers}
-                onChange={(e) => setFormData(prev => ({ ...prev, max_viewers: parseInt(e.target.value) }))}
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-4 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
-              {t('cancel')}
-            </Button>
-            <Button
-              type="submit"
-              disabled={loading}
-              className={`flex-1 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'}`}
-              data-testid="submit-council-btn"
-            >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : t('submit')}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-};
+// --- المكون الرئيسي (Main Component) ---
 
 const SeniorsPage = () => {
   const { isHeritage, darkMode, themeColors } = useTheme();
-  const { t, isRTL, language } = useLanguage();
+  const { t, isRTL, language, languages, setLanguage } = useLanguage();
   const { isAuthenticated, user, token } = useAuth();
   const isArabic = language === 'ar';
-  
+
   const [activeTab, setActiveTab] = useState('marketplace');
- const [items, setItems] = useState([
-    {
-      id: "fake-1",
-      title: "ثوب الثريا - نسائي",
-      title_ar: "ثوب الثريا - نسائي",
-      price: 50,
-      description: "ثوب نسائي وهو دراعة وتُصنع عليه قطع ذهبية تُسمى نيرات على شكل نجوم الثريا المتلألئة البراقة. سنة الصنع: 1970",
-      description_ar: 'ثوب نسائي وهو "دراعة" وتُصنع عليه قطع ذهبية تُسمى "نيرات" على شكل نجوم الثريا المتلألئة البراقة. سنة الصنع: 1970',
-      images: ["/thoubathuraya.png"],
-      seller_name: "بوابة المتقاعدين"
-    }
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sellModalOpen, setSellModalOpen] = useState(false);
+  const [councilModalOpen, setCouncilModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  
+  // حالات أكاديمية الخبرات
+  const [enrollModalOpen, setEnrollModalOpen] = useState(false);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [registrationNumber, setRegistrationNumber] = useState('');
+  
+  const [items] = useState([
+    { id: "fake-1", title: "ثوب الثريا - نسائي", description: 'ثوب نسائي وهو "دراعة" و تُصنع عليه قطع ذهبية تُسمى "نيرات" على شكل نجوم الثريا المتلألئة البراقة.', price: 50, year: "1970", image: "/thoubathuraya.png", category: "clothing", seller_name: "بوابة المتقاعدين" },
+    { id: "fake-2", title: "بشت حساوي فاخر", description: 'بشت حساوي مشغول يدوياً بخيوط الزري الذهبية الأصلية، يتميز بدقة التطريز وفخامة القماش، مناسب للمناسبات الرسمية والأعياد.', price: 150, year: "1985", image: "/hasawi.jpg", category: "clothing", seller_name: "محل بومحمد للبشوت" },
+    { id: "fake-3", title: "مبخر خشب صاج مطعم بالنحاس", description: 'مبخر كويتي قديم مصنوع من خشب الصاج المتين، مزين بمسامير ونقوش نحاسية دقيقة تعكس عبق الماضي.', price: 35, year: "1960", image: "/مبخر خشب.png", category: "home", seller_name: "سوق المباركية للتحف" },
+    { id: "fake-4", title: "راديو خشب كلاسيكي", description: 'راديو ترانزستور خشبي قديم بحالة ممتازة، يعمل بشكل جيد ويضيف لمسة كلاسيكية رائعة لأي مجلس أو ديوانية.', price: 80, year: "1975", image: "/راديو خشب كلاسيكي.png", category: "electronics", seller_name: "أنتيكات الزمن الجميل" },
+    { id: "fake-5", title: "دلة رسلان أصلية", description: 'دلة قهوة عربية من نوع "رسلان" مختومة، مصنوعة من النحاس الخالص، كانت تستخدم في دواوين الكويت القديمة وتعتبر رمزاً للكرم.', price: 120, year: "1950", image: "/دلة رسلان أصلية.jpg", category: "home", seller_name: "مجلس الأجداد" },
+    { id: "fake-6", title: "صندوق مبيت كويتي", description: 'صندوق خشبي كبير كان يُستخدم قديماً لحفظ ملابس ومقتنيات العروس، مزين بزخارف هندسية رائعة ومسامير نحاسية لامعة.', price: 300, year: "1940", image: "/صندوق مبيت كويتي.jpg", category: "furniture", seller_name: "متحف الفريج" }
+  ]);
+  
+  const [councils] = useState([
+    { id: "c-1", title: "Tales of the Sea", title_ar: "حكايات البحر القديمة", status: "scheduled", time: "10:00 PM", viewers: 12, host_id: "user-123" },
+    { id: "c-2", title: "Pearl Diving Days", title_ar: "أيام الغوص على اللؤلؤ", status: "live", time: "الآن", viewers: 156, host_id: "user-456" },
+    { id: "c-3", title: "Art of Sadu", title_ar: "فن السدو وتاريخه", status: "scheduled", time: "غداً 8:00 PM", viewers: 45, host_id: "user-789" },
+    { id: "c-4", title: "Old Kuwaiti Markets", title_ar: "ذكريات أسواق الكويت", status: "live", time: "الآن", viewers: 89, host_id: "user-101" },
+    { id: "c-5", title: "Building the Boom Ship", title_ar: "صناعة السفن الخشبية (البوم)", status: "scheduled", time: "الخميس 9:00 PM", viewers: 30, host_id: "user-202" }
   ]);
 
-  // إيقاف دائرة التحميل لعرض الفستان فوراً
+  // إضافة حقل enrollees لتخزين عدد المسجلين الافتراضي
+  const [academyCourses] = useState([
+    { id: "a-1", title: "Traditional Sadu Weaving", title_ar: "أساسيات حياكة السدو التقليدية", instructor: "Om Mohammad", instructor_ar: "أم محمد المري", category: "Crafts", category_ar: "حرف يدوية", duration: "4 Weeks", duration_ar: "4 أسابيع", level: "Beginner", level_ar: "مبتدئ", enrollees: 34, icon: Scissors },
+    { id: "a-2", title: "Authentic Kuwaiti Cooking", title_ar: "أسرار الطبخ الكويتي الأصيل (مجبوس ومطبق)", instructor: "Chef Abu Salem", instructor_ar: "الطباخ أبو سالم", category: "Culinary", category_ar: "فنون الطهي", duration: "2 Weeks", duration_ar: "أسبوعان", level: "All Levels", level_ar: "الجميع", enrollees: 128, icon: ChefHat },
+    { id: "a-3", title: "Arabic Calligraphy & Poetry", title_ar: "الخط العربي الأصيل وأوزان الشعر النبطي", instructor: "Ustadh Khalid", instructor_ar: "الأستاذ خالد", category: "Arts", category_ar: "فنون وأدب", duration: "6 Weeks", duration_ar: "6 أسابيع", level: "Intermediate", level_ar: "متوسط", enrollees: 56, icon: PenTool },
+    { id: "a-4", title: "Pearl Diving History & Tools", title_ar: "تاريخ الغوص على اللؤلؤ وأسرار النواخذة", instructor: "Nokhatha Abu Saad", instructor_ar: "النوخذة أبو سعد", category: "History", category_ar: "تاريخ وتراث", duration: "1 Week", duration_ar: "أسبوع واحد", level: "All Levels", level_ar: "الجميع", enrollees: 89, icon: Anchor },
+    { id: "a-5", title: "Building Traditional Dhows", title_ar: "صناعة مجسمات السفن الخشبية (البوم الشراعي)", instructor: "Am Saleh", instructor_ar: "العم صالح القلاف", category: "Crafts", category_ar: "حرف يدوية", duration: "8 Weeks", duration_ar: "8 أسابيع", level: "Advanced", level_ar: "متقدم", enrollees: 21, icon: Hammer },
+    { id: "a-6", title: "Agriculture & Desert Plants", title_ar: "الزراعة الموسمية والتعرف على نباتات الصحراء", instructor: "Abu Abdullah", instructor_ar: "المزارع أبو عبدالله", category: "Agriculture", category_ar: "زراعة وبيئة", duration: "3 Weeks", duration_ar: "3 أسابيع", level: "Beginner", level_ar: "مبتدئ", enrollees: 42, icon: Leaf }
+  ]);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      setTimeout(() => setLoading(false), 1000);
+    } catch (error) {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    setLoading(false);
+    fetchData();
   }, []);
-    const handleJoinCouncil = async (councilId) => {
+
+  // دوال أكاديمية الخبرات
+  const handleEnrollClick = (course) => {
+    setSelectedCourse(course);
+    setEnrollModalOpen(true);
+  };
+
+  const handleEnrollSubmit = (e) => {
+    e.preventDefault();
+    // إغلاق نافذة التسجيل
+    setEnrollModalOpen(false);
+    
+    // إنشاء رقم تسجيل عشوائي مكون من 4 أرقام
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
+    setRegistrationNumber(`REG-${randomNum}`);
+    
+    // فتح نافذة النجاح بعد فترة قصيرة لتأثير بصري جميل
+    setTimeout(() => {
+      setSuccessModalOpen(true);
+    }, 300);
+  };
+
+  const handleJoinCouncil = async (councilId) => {
     if (!isAuthenticated) {
       toast.error(isArabic ? 'يرجى تسجيل الدخول أولاً' : 'Please login first');
       return;
     }
     try {
-      await axios.post(
-        `${API_URL}/api/councils/${councilId}/join`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      toast.success(isArabic ? 'تم الانضمام للمجلس' : 'Joined council successfully');
+      await axios.post(`${API_URL}/api/councils/${councilId}/join`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success(isArabic ? 'تم الانضمام للمجلس' : 'Joined successfully');
     } catch (error) {
-      toast.error(error.response?.data?.detail || (isArabic ? 'حدث خطأ' : 'An error occurred'));
+      toast.error(isArabic ? 'حدث خطأ في الانضمام' : 'Error joining');
     }
   };
 
   const handleStartCouncil = async (councilId) => {
     try {
-      const res = await axios.post(
-        `${API_URL}/api/councils/${councilId}/start`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await axios.post(`${API_URL}/api/councils/${councilId}/start`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       toast.success(isArabic ? 'بدأ البث المباشر!' : 'Stream started!');
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.detail || (isArabic ? 'حدث خطأ' : 'An error occurred'));
+      toast.error(isArabic ? 'فشل بدء البث' : 'Failed to start stream');
     }
   };
 
-  const categoryIcons = {
-    antiques: Gem,
-    crafts: Palette,
-    clothing: Crown,
-    jewelry: Crown,
-    art: Palette,
-    books: BookOpen
+  const handleItemClick = (item) => {
+    setSelectedItem(item);
+    setDetailsModalOpen(true);
   };
 
+  const getTabClasses = () => {
+    const baseClass = "gap-2 transition-all duration-300";
+    if (isHeritage) {
+      return `${baseClass} data-[state=active]:bg-[#8D1C1C] data-[state=active]:text-white`;
+    } else {
+      if (darkMode) {
+        return `${baseClass} data-[state=active]:bg-[#1D4ED8] data-[state=active]:text-white data-[state=active]:shadow-[0_0_20px_rgba(29,78,216,0.8)]`;
+      } else {
+        return `${baseClass} data-[state=active]:bg-[#DC2626] data-[state=active]:text-white`;
+      }
+    }
+  };
+
+  const getLanguageSelectorColor = () => {
+    if (isHeritage) {
+      if (darkMode) return 'text-white hover:text-white/80';
+      return 'text-[#8D1C1C] hover:text-[#8D1C1C]/80';
+    } else {
+      if (darkMode) return 'text-white hover:text-white/80';
+      return 'text-[#1D4ED8] hover:text-[#1D4ED8]/80';
+    }
+  };
+
+  const dynamicTabClass = getTabClasses();
+  const languageColorClass = getLanguageSelectorColor();
+
+  // --- ستايلات النوافذ الديناميكية ---
+  const modalBg = darkMode ? (isHeritage ? 'bg-[#1A1A1A]' : 'bg-[#0F172A]') : (isHeritage ? 'bg-[#FDF6E3]' : 'bg-white');
+  const inputStyle = darkMode 
+    ? (isHeritage ? 'bg-[#2A2A2A] border-gray-600 text-white placeholder:text-gray-400 focus:border-[#D97706]' : 'bg-[#1E293B] border-blue-900/50 text-white placeholder:text-gray-400 focus:border-blue-500 shadow-inner rounded-xl')
+    : (isHeritage ? 'bg-white border-[#8D1C1C]/30 text-[#8D1C1C] focus:border-[#8D1C1C]' : 'bg-gray-50 border-blue-200 text-gray-900 focus:border-blue-500 rounded-xl');
+  const labelStyle = darkMode ? 'text-gray-300' : (isHeritage ? 'text-[#8D1C1C] font-bold' : 'text-gray-700 font-semibold');
+
   return (
-    <div className={`min-h-screen ${darkMode ? (isHeritage ? 'bg-[#1A1A1A]' : 'bg-[#0F172A]') : (isHeritage ? 'bg-[#FDF6E3]' : 'bg-[#F8FAFC]')}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`mb-8 ${isRTL ? 'text-right' : ''}`}
-        >
-          <h1 className={`text-4xl md:text-5xl font-bold mb-4 ${isHeritage ? 'font-serif' : ''}`} style={{ color: themeColors.primary }}>
-            {t('seniors')}
-          </h1>
+    <div className={`min-h-screen ${darkMode ? 'bg-[#1A1A1A]' : 'bg-[#FDF6E3]'}`}>
+      <div className="max-w-7xl mx-auto px-4 py-8 relative">
+        
+        <div className={`absolute top-4 right-4 z-50 ${isRTL ? 'right-auto left-4' : 'right-4'}`}>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className={`gap-2 font-bold text-base transition-colors duration-300 ${languageColorClass}`}
+              >
+                <span className="text-xl">
+                  {languages.find(l => l.code === language)?.flag === 'KW' ? '🇰🇼' : '🇬🇧'}
+                </span>
+                {languages.find(l => l.code === language)?.name}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-36 mt-1" align={isRTL ? 'start' : 'end'}>
+              {languages.map((lng) => (
+                <DropdownMenuItem 
+                  key={lng.code} 
+                  onClick={() => setLanguage(lng.code)}
+                  className={`gap-3 ${language === lng.code ? 'bg-gray-100 font-semibold' : ''}`}
+                >
+                  <span className="text-xl">{lng.flag === 'KW' ? '🇰🇼' : '🇬🇧'}</span>
+                  <span className="text-sm">{lng.name}</span>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className={`mb-8 ${isRTL ? 'text-right' : ''}`}>
+          <h1 className="text-4xl font-bold mb-4" style={{ color: themeColors.primary }}>{t('seniors')}</h1>
           <p className="text-lg text-muted-foreground">
-            {isArabic
-              ? 'شارك خبراتك، بيع تحفك الثمينة، واستضف مجالس الحكايات الحية.'
-              : 'Share your expertise, sell your precious antiques, and host live tale councils.'}
+            {isArabic ? 'شارك خبراتك، بيع تحفك الثمينة، واستضف مجالس الحكايات الحية.' : 'Share your expertise and host live councils.'}
           </p>
         </motion.div>
 
-        {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className={`w-full grid grid-cols-3 mb-8 ${isHeritage ? 'bg-[#E8DCCA]' : ''}`}>
-            <TabsTrigger value="marketplace" className="gap-2" data-testid="tab-marketplace">
-              <ShoppingBag className="w-4 h-4" />
-              {t('marketplace')}
+          <TabsList className="w-full grid grid-cols-3 mb-8">
+            <TabsTrigger value="marketplace" className={dynamicTabClass}>
+              <ShoppingBag className="w-4 h-4" />{t('marketplace')}
             </TabsTrigger>
-            <TabsTrigger value="councils" className="gap-2" data-testid="tab-councils">
-              <Video className="w-4 h-4" />
-              {t('tale_councils')}
+            <TabsTrigger value="councils" className={dynamicTabClass}>
+              <Video className="w-4 h-4" />{t('tale_councils')}
             </TabsTrigger>
-            <TabsTrigger value="academy" className="gap-2" data-testid="tab-academy">
-              <GraduationCap className="w-4 h-4" />
-              {t('expertise_academy')}
+            <TabsTrigger value="academy" className={dynamicTabClass}>
+              <GraduationCap className="w-4 h-4" />{t('expertise_academy')}
             </TabsTrigger>
           </TabsList>
 
-          {/* Marketplace Tab */}
           <TabsContent value="marketplace">
             <div className="flex flex-col md:flex-row gap-4 mb-8">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input
-                  placeholder={isArabic ? 'ابحث عن التحف...' : 'Search antiques...'}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="ps-10"
-                  data-testid="marketplace-search"
+                <Input 
+                    placeholder={isArabic ? 'ابحث عن التحف...' : 'Search...'} 
+                    value={searchQuery} 
+                    onChange={(e) => setSearchQuery(e.target.value)} 
+                    className="ps-10" 
                 />
               </div>
-              <Button variant="outline" className="gap-2">
-                <Filter className="w-4 h-4" />
-                {t('filter')}
+              <Button onClick={() => setSellModalOpen(true)} className={`gap-2 text-white ${isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#1D4ED8]'}`}>
+                <Plus className="w-4 h-4" /> {isArabic ? 'بيع تحفة' : 'Sell Item'}
               </Button>
-              {isAuthenticated && (
-                <Button
-                  onClick={() => setSellModalOpen(true)}
-                  className={`gap-2 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'}`}
-                  data-testid="sell-item-btn"
-                >
-                  <Plus className="w-4 h-4" />
-                  {t('sell_item')}
-                </Button>
-              )}
-            </div>
-
-            {/* Categories */}
-            <div className="flex flex-wrap gap-3 mb-8">
-              {categories.map(cat => {
-                const Icon = categoryIcons[cat.id] || Gem;
-                return (
-                  <Button key={cat.id} variant="outline" className="gap-2" data-testid={`category-${cat.id}`}>
-                    <Icon className="w-4 h-4" />
-                    {isArabic ? cat.name_ar : cat.name}
-                  </Button>
-                );
-              })}
-            </div>
-
-            {/* Items Grid */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {items.length > 0 ? (
-                items
-                  .filter(item => 
-                    !searchQuery || 
-                    item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    item.title_ar?.includes(searchQuery)
-                  )
-                  .map(item => (
-                    <MarketplaceItem key={item.item_id} item={item} isArabic={isArabic} />
-                  ))
-              ) : (
-                <div className="col-span-full text-center py-12">
-                  <Gem className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-xl font-semibold mb-2">
-                    {isArabic ? 'لا توجد منتجات حالياً' : 'No items yet'}
-                  </h3>
-                  <p className="text-muted-foreground mb-4">
-                    {isArabic ? 'كن أول من يبيع تحفه!' : 'Be the first to sell your antiques!'}
-                  </p>
-                  {isAuthenticated && (
-                    <Button onClick={() => setSellModalOpen(true)} data-testid="sell-first-item-btn">
-                      {t('sell_item')}
-                    </Button>
-                  )}
-                </div>
-              )}
-            </div>
-          </TabsContent>
-
-          {/* Councils Tab */}
-          <TabsContent value="councils">
-            <div className="flex justify-between items-center mb-8">
-              <h2 className={`text-2xl font-bold ${isHeritage ? 'font-serif' : ''}`}>
-                {isArabic ? 'مجالس الحكايات' : 'Tale Councils'}
-              </h2>
-              {isAuthenticated && (
-                <Button
-                  onClick={() => setCouncilModalOpen(true)}
-                  className={`gap-2 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'}`}
-                  data-testid="host-council-btn"
-                >
-                  <Plus className="w-4 h-4" />
-                  {t('host_council')}
-                </Button>
-              )}
             </div>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {councils.length > 0 ? (
-                councils.map(council => (
-                  <CouncilCard
-                    key={council.council_id}
-                    council={council}
-                    isArabic={isArabic}
-                    onJoin={handleJoinCouncil}
-                    onStart={handleStartCouncil}
-                    isHost={user?.user_id === council.host_id}
-                  />
-                ))
-              ) : (
-                <div className="col-span-full text-center py-12">
-                  <Video className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-xl font-semibold mb-2">
-                    {isArabic ? 'لا توجد مجالس قادمة' : 'No upcoming councils'}
-                  </h3>
-                  <p className="text-muted-foreground mb-4">
-                    {isArabic ? 'استضف أول مجلس حكايات!' : 'Host the first tale council!'}
-                  </p>
-                  {isAuthenticated && (
-                    <Button onClick={() => setCouncilModalOpen(true)} data-testid="host-first-council-btn">
-                      {t('host_council')}
-                    </Button>
-                  )}
-                </div>
-              )}
+              {items
+                .filter(item => item.title.toLowerCase().includes(searchQuery.toLowerCase()))
+                .map(item => (
+                <MarketplaceItem key={item.id} item={item} isArabic={isArabic} onClick={() => handleItemClick(item)} />
+              ))}
             </div>
           </TabsContent>
 
-          {/* Academy Tab */}
+          <TabsContent value="councils">
+             <div className="flex justify-between items-center mb-8">
+                <h2 className="text-2xl font-bold">{isArabic ? 'مجالس الحكايات' : 'Tale Councils'}</h2>
+                <Button onClick={() => setCouncilModalOpen(true)} className={`gap-2 text-white font-bold ${isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#1D4ED8]'}`}>
+                  <Plus className="w-5 h-5" /> {isArabic ? 'استضافة مجلس' : 'Host Council'}
+                </Button>
+             </div>
+             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {councils.map(council => (
+                    <CouncilCard 
+                        key={council.id} 
+                        council={council} 
+                        isArabic={isArabic} 
+                        onJoin={handleJoinCouncil}
+                        onStart={handleStartCouncil}
+                        isHost={user?.id === council.host_id}
+                    />
+                ))}
+             </div>
+          </TabsContent>
+
           <TabsContent value="academy">
-            <div className="text-center py-12">
-              <GraduationCap className="w-16 h-16 mx-auto mb-4" style={{ color: themeColors.primary }} />
-              <h2 className={`text-2xl font-bold mb-4 ${isHeritage ? 'font-serif' : ''}`}>
-                {t('expertise_academy')}
-              </h2>
-              <p className="text-muted-foreground max-w-md mx-auto mb-6">
-                {isArabic
-                  ? 'قريباً: دورات احترافية في الحرف التقليدية مثل بناء السفن والنسيج والحدادة.'
-                  : 'Coming soon: Professional courses in traditional crafts like dhow building, weaving, and blacksmithing.'}
-              </p>
-              <Button
-                className={`${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'}`}
-                data-testid="academy-notify-btn"
-              >
-                {t('notify_me')}
-              </Button>
-            </div>
+             <div className="flex justify-between items-center mb-8">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">{isArabic ? 'أكاديمية الخبرات' : 'Expertise Academy'}</h2>
+                  <p className="text-muted-foreground text-sm">
+                    {isArabic ? 'تعلم مهارات تراثية وحرف يدوية مباشرة من أهل الخبرة والاختصاص.' : 'Learn traditional skills directly from experienced seniors.'}
+                  </p>
+                </div>
+                <Button onClick={() => toast.success(isArabic ? 'سيتم فتح نافذة إضافة خبرة قريباً' : 'Coming soon')} className={`gap-2 text-white font-bold h-12 px-6 rounded-xl shadow-md ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#1D4ED8] hover:bg-[#1E3A8A]'}`}>
+                  <Plus className="w-5 h-5" /> {isArabic ? 'شارك خبرتك' : 'Share Expertise'}
+                </Button>
+             </div>
+             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {academyCourses.map(course => (
+                    <AcademyCard 
+                        key={course.id} 
+                        course={course} 
+                        isArabic={isArabic}
+                        onEnroll={handleEnrollClick}
+                    />
+                ))}
+             </div>
           </TabsContent>
         </Tabs>
       </div>
 
-      {/* Modals */}
-      <SellItemModal
-        open={sellModalOpen}
-        onOpenChange={setSellModalOpen}
-        onSuccess={fetchData}
-        categories={categories}
-        isArabic={isArabic}
+      <ProductDetailsModal 
+        item={selectedItem} 
+        open={detailsModalOpen} 
+        onOpenChange={setDetailsModalOpen} 
+        isArabic={isArabic} 
       />
-      
-      <HostCouncilModal
-        open={councilModalOpen}
-        onOpenChange={setCouncilModalOpen}
-        onSuccess={fetchData}
-        isArabic={isArabic}
-      />
+
+      {/* --- 1. نافذة التسجيل في الدورة --- */}
+      <Dialog open={enrollModalOpen} onOpenChange={setEnrollModalOpen}>
+        <DialogContent className={`max-w-sm text-right border-0 overflow-hidden ${modalBg}`} dir={isArabic ? 'rtl' : 'ltr'}>
+          <DialogHeader className="pt-6 px-6">
+            <DialogTitle className={`text-2xl font-bold ${isHeritage ? 'font-serif text-[#8D1C1C]' : 'text-blue-600'}`}>
+              {isArabic ? 'تسجيل في الدورة' : 'Course Enrollment'}
+            </DialogTitle>
+            <p className={`text-sm mt-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+              {isArabic ? selectedCourse?.title_ar : selectedCourse?.title}
+            </p>
+          </DialogHeader>
+          
+          <form onSubmit={handleEnrollSubmit} className="space-y-4 px-6 pb-6 mt-4">
+            <div className="space-y-2">
+              <label className={`text-sm ${labelStyle}`}>{isArabic ? 'الاسم الكامل' : 'Full Name'}</label>
+              <Input required type="text" placeholder={isArabic ? 'أدخل اسمك الكامل' : 'Enter your full name'} className={inputStyle} />
+            </div>
+            <div className="space-y-2">
+              <label className={`text-sm ${labelStyle}`}>{isArabic ? 'رقم الهاتف' : 'Phone Number'}</label>
+              <Input required type="tel" placeholder={isArabic ? 'أدخل رقم الهاتف' : 'Enter your phone number'} className={inputStyle} />
+            </div>
+            <div className="space-y-2">
+              <label className={`text-sm ${labelStyle}`}>{isArabic ? 'البريد الإلكتروني' : 'Email Address'}</label>
+              <Input required type="email" placeholder={isArabic ? 'أدخل بريدك الإلكتروني' : 'Enter your email'} className={inputStyle} />
+            </div>
+            
+            <Button 
+              type="submit"
+              className={`w-full font-bold h-12 mt-4 text-white transition-all duration-300 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515] rounded-none shadow-[4px_4px_0px_0px_#D97706]' : 'bg-[#1D4ED8] hover:bg-[#1E3A8A] rounded-xl shadow-lg shadow-blue-500/30'}`}
+            >
+              {isArabic ? 'تأكيد التسجيل' : 'Confirm Enrollment'}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* --- 2. نافذة نجاح التسجيل (النافذة الصغيرة) --- */}
+      <Dialog open={successModalOpen} onOpenChange={setSuccessModalOpen}>
+        <DialogContent className={`max-w-xs text-center border-0 overflow-hidden ${modalBg}`} dir={isArabic ? 'rtl' : 'ltr'}>
+          <div className="flex flex-col items-center justify-center p-6 space-y-4">
+            <motion.div 
+              initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200, damping: 20 }}
+              className={`w-16 h-16 rounded-full flex items-center justify-center ${isHeritage ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-600'}`}
+            >
+              <CheckCircle2 className="w-10 h-10" />
+            </motion.div>
+            
+            <h2 className={`text-2xl font-bold ${isHeritage ? 'font-serif text-[#8D1C1C]' : (darkMode ? 'text-white' : 'text-gray-900')}`}>
+              {isArabic ? 'تم التسجيل بنجاح!' : 'Enrollment Successful!'}
+            </h2>
+            
+            <div className={`w-full p-4 rounded-xl mt-2 border ${darkMode ? 'bg-[#2A2A2A] border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
+              <p className="text-sm text-muted-foreground mb-1">{isArabic ? 'رقم التسجيل الخاص بك:' : 'Your Registration Number:'}</p>
+              <p className={`text-xl font-mono font-bold tracking-wider ${isHeritage ? 'text-[#D97706]' : 'text-[#3B82F6]'}`}>
+                {registrationNumber}
+              </p>
+            </div>
+            
+            <p className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+              {isArabic ? 'أنت الآن جزء من' : 'You are now among'}{' '}
+              <span className={`font-bold text-lg px-1 ${isHeritage ? 'text-[#8D1C1C]' : 'text-[#1D4ED8]'}`}>
+                {(selectedCourse?.enrollees || 0) + 1}
+              </span> 
+              {' '}{isArabic ? 'مسجلين في هذه الدورة.' : 'enrollees in this course.'}
+            </p>
+
+            <Button 
+              onClick={() => setSuccessModalOpen(false)}
+              className={`w-full mt-2 font-bold transition-all ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515] text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'}`}
+            >
+              {isArabic ? 'إغلاق' : 'Close'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 };

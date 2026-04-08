@@ -5,7 +5,9 @@ import { useTheme, THEMES } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Button } from '../components/ui/button';
 import { SaduDivider } from '../components/SaduPattern';
-import { Castle, Rocket, Globe, ChevronRight } from 'lucide-react';
+import { Castle, Rocket, ChevronRight } from 'lucide-react';
+// استيراد مكونات القائمة المنسدلة الاحترافية
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../components/ui/dropdown-menu';
 
 const WelcomePage = () => {
   const { selectTheme } = useTheme();
@@ -28,21 +30,35 @@ const WelcomePage = () => {
       {/* Background Pattern */}
       <div className="absolute inset-0 sadu-pattern opacity-30" />
       
-      {/* Language Selector */}
-      <div className="absolute top-6 right-6 z-20 flex items-center gap-2">
-        <Globe className="w-5 h-5 text-[#8D1C1C]" />
-        <select
-          value={language}
-          onChange={(e) => setLanguage(e.target.value)}
-          className="bg-white/80 backdrop-blur-sm border-2 border-[#8D1C1C] rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#D97706]"
-          data-testid="welcome-language-select"
-        >
-          {languages.map((lang) => (
-            <option key={lang.code} value={lang.code}>
-              {lang.nativeName}
-            </option>
-          ))}
-        </select>
+      {/* Language Selector (Updated to DropdownMenu) */}
+      <div className={`absolute top-6 z-20 ${isRTL ? 'left-6' : 'right-6'}`}>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button 
+              variant="outline" 
+              className="gap-2 font-bold text-base bg-white/80 backdrop-blur-sm border-2 border-[#8D1C1C] text-[#8D1C1C] hover:bg-[#8D1C1C] hover:text-white transition-colors duration-300"
+            >
+              {/* العلم الحالي */}
+              <span className="text-xl">
+                {languages.find(l => l.code === language)?.flag === 'KW' ? '🇰🇼' : '🇬🇧'}
+              </span>
+              {/* اسم اللغة الحالي (العربية/English) */}
+              {languages.find(l => l.code === language)?.name || 'Language'}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-36 mt-2" align={isRTL ? 'start' : 'end'}>
+            {languages.map((lng) => (
+              <DropdownMenuItem 
+                key={lng.code} 
+                onClick={() => setLanguage(lng.code)}
+                className={`gap-3 cursor-pointer ${language === lng.code ? 'bg-gray-100 font-semibold text-[#8D1C1C]' : ''}`}
+              >
+                <span className="text-xl">{lng.flag === 'KW' ? '🇰🇼' : '🇬🇧'}</span>
+                <span className="text-sm">{lng.name}</span>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-12">
@@ -93,7 +109,8 @@ const WelcomePage = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
             whileHover={{ scale: 1.02 }}
-            className="relative group"
+            className="relative group cursor-pointer"
+            onClick={() => handleSelectTheme(THEMES.HERITAGE)}
           >
             <div className="absolute inset-0 bg-[#8D1C1C] rounded-2xl transform rotate-2 group-hover:rotate-3 transition-transform" />
             <div className="relative bg-[#FDF6E3] border-4 border-[#8D1C1C] rounded-2xl p-8 shadow-xl">
@@ -125,7 +142,6 @@ const WelcomePage = () => {
               </div>
 
               <Button
-                onClick={() => handleSelectTheme(THEMES.HERITAGE)}
                 className="w-full h-14 text-lg bg-[#8D1C1C] hover:bg-[#6D1515] text-white rounded-xl shadow-[4px_4px_0px_0px_#D97706] active:shadow-none active:translate-x-1 active:translate-y-1 transition-all"
                 data-testid="select-heritage-btn"
               >
@@ -141,7 +157,8 @@ const WelcomePage = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
             whileHover={{ scale: 1.02 }}
-            className="relative group"
+            className="relative group cursor-pointer"
+            onClick={() => handleSelectTheme(THEMES.MODERN)}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-[#1D4ED8] to-[#0F172A] rounded-2xl transform -rotate-2 group-hover:-rotate-3 transition-transform" />
             <div className="relative bg-[#0F172A] border border-[#1D4ED8]/50 rounded-2xl p-8 backdrop-blur-xl">
@@ -173,7 +190,6 @@ const WelcomePage = () => {
               </div>
 
               <Button
-                onClick={() => handleSelectTheme(THEMES.MODERN)}
                 className="w-full h-14 text-lg bg-[#1D4ED8] hover:bg-[#0B7A70] text-white rounded-xl border border-white/20 backdrop-blur-sm transition-all"
                 data-testid="select-modern-btn"
               >

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom'; // تم إضافة هذا للتنقل بين الصفحات
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Button } from '../components/ui/button';
@@ -9,11 +10,7 @@ import {
   Utensils,
   Play,
   Sparkles,
-  BookOpen,
   FlaskConical,
-  Smartphone,
-  Lock,
-  Star,
   Filter,
   Clock,
   X
@@ -117,6 +114,7 @@ const CookingPage = () => {
   const { isHeritage, darkMode, themeColors } = useTheme();
   const { language } = useLanguage();
   const isArabic = language === 'ar';
+  const navigate = useNavigate(); // لتفعيل التنقل
   
   const [videos, setVideos] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -143,25 +141,6 @@ const CookingPage = () => {
   const filteredVideos = selectedCategory === 'all' 
     ? videos 
     : videos.filter(v => v.category === selectedCategory);
-
-  const features = [
-    {
-      icon: FlaskConical,
-      title: isArabic ? 'مطبخ دروازة الذكي' : 'Smart Darwaza Kitchen',
-      description: isArabic
-        ? 'ألعاب تفاعلية لتعلم الوصفات الكويتية باستخدام مساحيق طعام آمنة قابلة للخلط.'
-        : 'Interactive games to learn Kuwaiti recipes using safe, mixable food powders.',
-      color: '#EC4899'
-    },
-    {
-      icon: Smartphone,
-      title: isArabic ? 'الواقع المعزز في المطبخ' : 'AR in the Kitchen',
-      description: isArabic
-        ? 'دليل خطوة بخطوة للطهي التقليدي باستخدام تقنية الواقع المعزز.'
-        : 'Step-by-step guide to traditional cooking using AR technology.',
-      color: '#8B5CF6'
-    }
-  ];
 
   const getCategoryIcon = (id) => {
     const icons = {
@@ -206,42 +185,38 @@ const CookingPage = () => {
           </p>
         </motion.div>
 
-        {/* Features */}
-        <div className="grid md:grid-cols-2 gap-8 mb-16">
-          {features.map((feature, index) => (
-            <motion.div
-              key={feature.title}
-              initial={{ opacity: 0, x: index === 0 ? -30 : 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <SaduCard className="h-full">
-                <div className="flex items-start gap-4">
-                  <div
-                    className="w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: feature.color }}
-                  >
-                    <feature.icon className="w-8 h-8 text-white" />
-                  </div>
-                  <div>
-                    <h3 className={`text-xl font-bold mb-2 ${isHeritage ? 'font-serif' : ''}`}>
-                      {feature.title}
-                    </h3>
-                    <p className="text-muted-foreground mb-4">{feature.description}</p>
-                    <Button
-                      className="gap-2"
-                      style={{ backgroundColor: feature.color }}
-                      data-testid={`feature-${index}-btn`}
-                    >
-                      <Sparkles className="w-4 h-4" />
-                      {isArabic ? 'جرب الآن' : 'Try Now'}
-                    </Button>
-                  </div>
-                </div>
-              </SaduCard>
-            </motion.div>
-          ))}
-        </div>
+        {/* الميزة الرئيسية: مطبخ دروازة الذكي */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2 }}
+          className="mb-16 max-w-3xl mx-auto"
+        >
+          <SaduCard className="h-full text-center p-8 border-4 border-pink-500/20 hover:border-pink-500 transition-colors">
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-20 h-20 rounded-full flex items-center justify-center bg-pink-500 text-white shadow-xl">
+                <FlaskConical className="w-10 h-10" />
+              </div>
+              <div>
+                <h3 className={`text-3xl font-bold mb-4 ${isHeritage ? 'font-serif' : ''}`}>
+                  {isArabic ? 'مطبخ دروازة الذكي' : 'Smart Darwaza Kitchen'}
+                </h3>
+                <p className="text-lg text-muted-foreground mb-6">
+                  {isArabic
+                    ? 'تجربة تفاعلية خطوة بخطوة! تعلم تحضير أشهر الأطباق الكويتية مثل المجبوس والقرص عقيلي، وتعرف على أفضل المنتجات المحلية (مثل مطاحن الدقيق و KDD) لنجاح وصفتك.'
+                    : 'Interactive step-by-step experience! Learn to prepare famous Kuwaiti dishes like Machboos, using the best local products.'}
+                </p>
+                <Button
+                  onClick={() => navigate('/smart-kitchen')} // الزر يأخذك للصفحة الجديدة
+                  className="gap-2 text-lg px-8 py-6 rounded-full bg-pink-500 hover:bg-pink-600 text-white shadow-lg"
+                >
+                  <Sparkles className="w-5 h-5" />
+                  {isArabic ? 'ادخل المطبخ الآن' : 'Enter Kitchen Now'}
+                </Button>
+              </div>
+            </div>
+          </SaduCard>
+        </motion.div>
 
         <SaduDivider className="mb-16" />
 
@@ -330,33 +305,6 @@ const CookingPage = () => {
             </div>
           )}
         </div>
-
-        {/* AR Coming Soon */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`p-8 rounded-2xl text-center ${isHeritage ? 'bg-[#8D1C1C]/10' : 'bg-[#1D4ED8]/10'}`}
-        >
-          <div className={`w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-6 ${isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#1D4ED8]'}`}>
-            <Lock className="w-10 h-10 text-white" />
-          </div>
-          <h3 className={`text-2xl font-bold mb-4 ${isHeritage ? 'font-serif' : ''}`}>
-            {isArabic ? 'تجربة الواقع المعزز' : 'AR Experience'}
-          </h3>
-          <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
-            {isArabic
-              ? 'قريباً: توجيهات الواقع المعزز ستظهر فوق أدواتك الحقيقية في المطبخ لتعليمك خطوة بخطوة.'
-              : 'Coming soon: AR overlays will appear on your real kitchen tools to guide you step by step.'}
-          </p>
-          <div className="flex items-center justify-center gap-2">
-            {[1, 2, 3, 4, 5].map(i => (
-              <Star key={i} className="w-6 h-6 text-yellow-500 fill-yellow-500" />
-            ))}
-          </div>
-          <p className="text-sm text-muted-foreground mt-2">
-            {isArabic ? 'مصنف 5 نجوم من المستخدمين التجريبيين' : 'Rated 5 stars by beta testers'}
-          </p>
-        </motion.div>
       </div>
     </div>
   );
