@@ -19,13 +19,14 @@ import SeniorsPage from './pages/SeniorsPage';
 import YouthPage from './pages/YouthPage';
 import KidsPage from './pages/KidsPage';
 import CookingPage from './pages/CookingPage';
-import SmartKitchenPage from './pages/SmartKitchenPage'; // ✅ السطر الأول المضاف
+import SmartKitchenPage from './pages/SmartKitchenPage';
 import TouristsPage from './pages/TouristsPage';
 import ArabWorldPage from './pages/ArabWorldPage';
 import SubscriptionsPage from './pages/SubscriptionsPage';
 import MockPaymentPage from './pages/MockPaymentPage';
 import { LoginPage, RegisterPage } from './pages/AuthPage';
 import AuthCallback from './pages/AuthCallback';
+import ProfilePage from './pages/ProfilePage'; // ✅ السطر الأول المضاف (استيراد صفحة الحساب)
 
 import './App.css';
 
@@ -70,7 +71,7 @@ const AppRouter = () => {
           <Route path="/youth" element={<YouthPage />} />
           <Route path="/kids" element={<KidsPage />} />
           <Route path="/cooking" element={<CookingPage />} />
-          <Route path="/smart-kitchen" element={<SmartKitchenPage />} /> {/* ✅ السطر الثاني المضاف */}
+          <Route path="/smart-kitchen" element={<SmartKitchenPage />} />
           <Route path="/tourists" element={<TouristsPage />} />
           <Route path="/arab-world" element={<ArabWorldPage />} />
           <Route path="/subscriptions" element={<SubscriptionsPage />} />
@@ -79,6 +80,7 @@ const AppRouter = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/profile" element={<ProfilePage />} /> {/* ✅ السطر الثاني المضاف (تفعيل مسار الصفحة) */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

@@ -28,7 +28,8 @@ import {
   Palette,
   ChevronDown,
   Compass,
-  X
+  X,
+  UserCircle
 } from 'lucide-react';
 
 const NavLink = ({ to, icon: Icon, children, onClick, isActive }) => {
@@ -47,7 +48,6 @@ const NavLink = ({ to, icon: Icon, children, onClick, isActive }) => {
             ? `hover:bg-[#8D1C1C]/10 ${darkMode ? 'text-[#FDF6E3]' : 'text-[#1A1A1A]'}`
             : `hover:bg-[#1D4ED8]/10 ${darkMode ? 'text-[#F9FAFB]' : 'text-[#0F172A]'}`
       }`}
-      data-testid={`nav-${to.replace('/', '') || 'home'}`}
     >
       <Icon className="w-4 h-4" strokeWidth={2} />
       <span className="text-sm font-medium">{children}</span>
@@ -64,7 +64,6 @@ const NavDropdown = ({ trigger, items, isRTL, themeColors }) => {
         <Button 
           variant="ghost" 
           className={`gap-1.5 px-3 h-9 ${isHeritage ? 'hover:bg-[#8D1C1C]/10' : 'hover:bg-[#1D4ED8]/10'}`}
-          data-testid={`nav-dropdown-${trigger.label}`}
         >
           <trigger.icon className="w-4 h-4" />
           <span className="text-sm font-medium">{trigger.label}</span>
@@ -91,7 +90,6 @@ const NavDropdown = ({ trigger, items, isRTL, themeColors }) => {
                     className="w-8 h-8 rounded-lg flex items-center justify-center shadow-sm"
                     style={{ backgroundColor: item.color || themeColors.primary + '20' }}
                   >
-                    {/* عرض الإيموجي هنا إذا كان موجوداً، وإلا عرض الأيقونة العادية */}
                     {item.emoji ? (
                       <span className="text-lg drop-shadow-md">{item.emoji}</span>
                     ) : item.icon ? (
@@ -124,13 +122,11 @@ export const Navbar = () => {
 
   const isArabic = language === 'ar';
 
-  // Main navigation items
   const mainNavItems = [
     { to: '/', icon: Home, label: t('home') },
     { to: '/ai-hub', icon: Brain, label: t('ai_hub') },
   ];
 
-  // Sections dropdown (إضافة الإيموجيات هنا)
   const sectionsDropdown = {
     trigger: { icon: Users, label: isArabic ? 'الأقسام' : 'Sections' },
     items: [
@@ -163,7 +159,6 @@ export const Navbar = () => {
     ]
   };
 
-  // Explore dropdown (إضافة الإيموجيات هنا)
   const exploreDropdown = {
     trigger: { icon: Compass, label: isArabic ? 'استكشف' : 'Explore' },
     items: [
@@ -175,9 +170,16 @@ export const Navbar = () => {
         color: '#EC4899'
       },
       { 
+        to: '/smart-kitchen', 
+        emoji: '🍳', 
+        label: isArabic ? 'المطبخ الذكي' : 'Smart Kitchen',
+        description: isArabic ? 'طبخات كويتية بالخطوات' : 'Kuwaiti Recipes Step-by-Step',
+        color: '#F59E0B'
+      },
+      { 
         to: '/tourists', 
         emoji: '🗺️', 
-        label: isArabic ? 'دليل السياح' : 'Tourist Guide',
+        label: isArabic ? 'بوابة الكويت' : 'Kuwait Gateway',
         description: isArabic ? 'المعالم والثقافة' : 'Landmarks & Culture',
         color: '#3B82F6'
       },
@@ -199,7 +201,6 @@ export const Navbar = () => {
     ]
   };
 
-  // All nav items for mobile (إضافة الإيموجيات لقائمة الجوال)
   const allNavItems = [
     { to: '/', icon: Home, label: t('home'), color: themeColors.primary },
     { to: '/ai-hub', emoji: '🧠', label: t('ai_hub'), color: '#8B5CF6' },
@@ -209,15 +210,30 @@ export const Navbar = () => {
     { to: '/kids', emoji: '🎮', label: t('kids'), color: '#F59E0B' },
     { separator: true, label: isArabic ? 'استكشف' : 'Explore' },
     { to: '/cooking', emoji: '👨‍🍳', label: t('cooking'), color: '#EC4899' },
+    { to: '/smart-kitchen', emoji: '🍳', label: isArabic ? 'المطبخ الذكي' : 'Smart Kitchen', color: '#F59E0B' },
     { to: '/tourists', emoji: '🗺️', label: t('tourists'), color: '#3B82F6' },
     { to: '/arab-world', emoji: '🌍', label: t('arab_world'), color: '#10B981' },
     { separator: true, label: isArabic ? 'الحساب' : 'Account' },
+    { to: '/profile', emoji: '👤', label: isArabic ? 'حسابي' : 'My Profile', color: themeColors.primary },
     { to: '/subscriptions', emoji: '💎', label: t('subscriptions'), color: '#8B5CF6' },
   ];
 
   const handleLogout = async () => {
     await logout();
     navigate('/');
+  };
+
+  // إعدادات تصميم قائمة المستخدم المنسدلة
+  const userDropdownStyles = isHeritage ? {
+    content: darkMode ? "bg-[#2C1E12] border-2 border-[#8D1C1C] rounded-none" : "bg-[#FDF5E6] border-2 border-[#8D1C1C] rounded-none",
+    item: "rounded-none hover:bg-[#8D1C1C]/20 focus:bg-[#8D1C1C]/20 transition-colors",
+    logout: "rounded-none hover:bg-red-500/20 focus:bg-red-500/20 text-red-700 dark:text-red-400 transition-colors",
+    pattern: { backgroundImage: 'url("https://www.transparenttextures.com/patterns/arabesque.png")' }
+  } : {
+    content: darkMode ? "bg-[#0F172A]/90 backdrop-blur-2xl border border-blue-500/30 rounded-2xl shadow-[0_0_25px_rgba(37,99,235,0.2)]" : "bg-white/90 backdrop-blur-2xl border border-blue-200 rounded-2xl shadow-[0_15px_35px_rgba(37,99,235,0.15)]",
+    item: "rounded-xl hover:bg-blue-500/10 focus:bg-blue-500/10 transition-colors",
+    logout: "rounded-xl hover:bg-red-500/10 focus:bg-red-500/10 text-red-500 transition-colors",
+    pattern: {}
   };
 
   if (!theme) return null;
@@ -233,17 +249,16 @@ export const Navbar = () => {
             ? 'bg-[#0F172A]/95 backdrop-blur-xl border-b border-white/10'
             : 'bg-white/95 backdrop-blur-xl border-b border-gray-200'
       }`}
-      data-testid="main-navbar"
     >
       {isHeritage && <div className="sadu-border w-full" />}
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3" data-testid="logo-link">
+          <Link to="/" className="flex items-center gap-3">
           <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all ${
-  isHeritage ? 'bg-[#8D1C1C]' : 'bg-blue-700 shadow-[0_0_15px_rgba(29,78,216,0.8)] animate-[pulse_3s_ease-in-out_infinite]'
-}`}>
+            isHeritage ? 'bg-[#8D1C1C] rounded-none' : 'bg-blue-600 shadow-[0_0_15px_rgba(37,99,235,0.8)]'
+          }`}>
               <span className="text-white font-bold text-xl">د</span>
             </div>
             <span className={`text-xl font-bold ${
@@ -286,7 +301,7 @@ export const Navbar = () => {
             {/* Language Selector */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-9 w-9" data-testid="language-selector">
+                <Button variant="ghost" size="icon" className="h-9 w-9">
                   <Languages className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -315,7 +330,6 @@ export const Navbar = () => {
               size="icon"
               className="h-9 w-9"
               onClick={toggleDarkMode}
-              data-testid="dark-mode-toggle"
             >
               {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </Button>
@@ -327,7 +341,6 @@ export const Navbar = () => {
               className={`h-9 w-9 ${seniorMode ? 'bg-accent' : ''}`}
               onClick={toggleSeniorMode}
               title={isArabic ? 'وضع كبار السن' : 'Senior Mode'}
-              data-testid="senior-mode-toggle"
             >
               <Eye className="w-4 h-4" />
             </Button>
@@ -339,67 +352,69 @@ export const Navbar = () => {
               className="h-9 w-9"
               onClick={resetTheme}
               title={isArabic ? 'تغيير الواجهة' : 'Switch Interface'}
-              data-testid="interface-switch"
             >
               <Palette className="w-4 h-4" />
             </Button>
 
-            {/* Auth */}
+            {/* Auth User Menu */}
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="gap-2 h-9 px-2" data-testid="user-menu">
+                  <Button variant="ghost" className="gap-2 h-9 px-2">
                     {user?.picture ? (
-                      <img src={user.picture} alt={user.name} className="w-7 h-7 rounded-full" />
+                      <img src={user.picture} alt={user.name} className={`w-7 h-7 ${isHeritage ? 'rounded-none border border-[#8D1C1C]' : 'rounded-full'}`} />
                     ) : (
-                      <div className={`w-7 h-7 rounded-full flex items-center justify-center ${
-                        isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#1D4ED8]'
+                      <div className={`w-7 h-7 flex items-center justify-center ${
+                        isHeritage ? 'bg-[#8D1C1C] rounded-none' : 'bg-blue-600 rounded-full'
                       }`}>
                         <User className="w-4 h-4 text-white" />
                       </div>
                     )}
-                    <span className="hidden sm:inline text-sm">{user?.name?.split(' ')[0]}</span>
+                    <span className="hidden sm:inline text-sm font-bold">{user?.name?.split(' ')[0]}</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align={isRTL ? 'start' : 'end'} className="w-48">
-                  <DropdownMenuLabel>{user?.email}</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to="/subscriptions" className="flex items-center gap-2">
-                      <CreditCard className="w-4 h-4" />
-                      {t('subscriptions')}
+                
+                {/* 🚀 القائمة المنسدلة الاحترافية والجديدة */}
+                <DropdownMenuContent 
+                  align={isRTL ? 'start' : 'end'} 
+                  className={`w-56 p-2 mt-1 ${userDropdownStyles.content}`}
+                  style={userDropdownStyles.pattern}
+                >
+                  <DropdownMenuItem asChild className={userDropdownStyles.item}>
+                    <Link to="/profile" className="flex items-center gap-3 cursor-pointer py-3 px-3 font-bold">
+                      <UserCircle className="w-5 h-5" />
+                      <span className="text-base">{isArabic ? 'حسابي الشخصي' : 'My Profile'}</span>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="text-red-500">
-                    <LogOut className="w-4 h-4 me-2" />
-                    {t('logout')}
+
+                  <DropdownMenuItem onClick={handleLogout} className={`flex items-center gap-3 cursor-pointer py-3 px-3 font-bold mt-1 ${userDropdownStyles.logout}`}>
+                    <LogOut className="w-5 h-5" />
+                    <span className="text-base">{isArabic ? 'تسجيل الخروج' : 'Log out'}</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
               <Button
-  onClick={() => navigate('/login')}
-  size="sm"
-  className={`h-9 px-4 transition-all duration-300 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-blue-700 text-white shadow-[0_0_15px_rgba(29,78,216,0.8)] hover:shadow-[0_0_25px_rgba(29,78,216,1)] animate-[pulse_3s_ease-in-out_infinite]'}`}
-  data-testid="login-button"
->
-  {t('login')}
-</Button>
+                onClick={() => navigate('/login')}
+                size="sm"
+                className={`h-9 px-4 transition-all duration-300 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515] text-white rounded-none' : 'bg-blue-600 text-white rounded-xl shadow-[0_0_15px_rgba(37,99,235,0.6)] hover:shadow-[0_0_25px_rgba(37,99,235,0.8)]'}`}
+              >
+                {t('login')}
+              </Button>
             )}
 
             {/* Mobile Menu */}
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild className="lg:hidden">
-                <Button variant="ghost" size="icon" className="h-9 w-9" data-testid="mobile-menu-trigger">
+                <Button variant="ghost" size="icon" className="h-9 w-9">
                   <Menu className="w-5 h-5" />
                 </Button>
               </SheetTrigger>
-         <SheetContent 
-  side={isRTL ? 'right' : 'left'} 
-  className={`w-80 border-none p-0 shadow-2xl transition-colors duration-300 ${darkMode ? 'bg-[#0A0A0A] text-white' : 'bg-white text-gray-900'}`}
->
-  <div className="flex flex-col h-full py-6 px-2">                  {/* Mobile Header */}
+              <SheetContent 
+                side={isRTL ? 'right' : 'left'} 
+                className={`w-80 border-none p-0 shadow-2xl transition-colors duration-300 ${darkMode ? 'bg-[#0A0A0A] text-white' : 'bg-white text-gray-900'}`}
+              >
+                <div className="flex flex-col h-full py-6 px-2">                  
                   <div className={`p-4 border-b ${isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#1D4ED8]'}`}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -419,7 +434,6 @@ export const Navbar = () => {
                     </div>
                   </div>
 
-                  {/* Mobile Nav Items */}
                   <div className="flex-1 overflow-y-auto p-4">
                     <div className="space-y-1">
                       {allNavItems.map((item, index) => (
@@ -439,7 +453,6 @@ export const Navbar = () => {
                                 ? isHeritage ? 'bg-[#8D1C1C] text-white' : 'bg-[#1D4ED8] text-white'
                                 : 'hover:bg-accent'
                             }`}
-                            data-testid={`mobile-nav-${item.to.replace('/', '') || 'home'}`}
                           >
                             <div 
                               className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm ${
@@ -449,15 +462,12 @@ export const Navbar = () => {
                                 backgroundColor: location.pathname === item.to ? undefined : item.color + '20'
                               }}
                             >
-                              {/* عرض الإيموجي في الجوال أيضاً */}
                               {item.emoji ? (
                                 <span className="text-2xl drop-shadow-sm">{item.emoji}</span>
                               ) : item.icon ? (
                                 <item.icon 
                                   className="w-5 h-5" 
-                                  style={{ 
-                                    color: location.pathname === item.to ? 'white' : item.color 
-                                  }} 
+                                  style={{ color: location.pathname === item.to ? 'white' : item.color }} 
                                 />
                               ) : null}
                             </div>
@@ -468,12 +478,11 @@ export const Navbar = () => {
                     </div>
                   </div>
 
-                  {/* Mobile Footer */}
                   {!isAuthenticated && (
                     <div className="p-4 border-t">
                       <Button
                         onClick={() => { navigate('/login'); setMobileOpen(false); }}
-                        className={`w-full h-12 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'}`}
+                        className={`w-full h-12 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515] text-white rounded-none' : 'bg-blue-600 hover:bg-blue-700 text-white rounded-xl'}`}
                       >
                         {t('login')}
                       </Button>

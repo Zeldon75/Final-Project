@@ -56,7 +56,8 @@ const AuthPage = ({ isLogin = true }) => {
         });
         toast.success(isArabic ? 'تم إنشاء الحساب بنجاح' : 'Account created successfully');
       }
-      navigate('/');
+      // 🚀 التعديل هنا: تحويل المستخدم لصفحة الحساب
+      navigate('/profile'); 
     } catch (error) {
       console.error('Auth error:', error);
       toast.error(error.response?.data?.detail || (isArabic ? 'حدث خطأ' : 'An error occurred'));
@@ -208,7 +209,7 @@ const AuthPage = ({ isLogin = true }) => {
           <Button
             type="submit"
             disabled={loading}
-            className={`w-full h-12 ${effectiveIsHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'}`}
+            className={`w-full h-12 ${effectiveIsHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515] text-white' : 'bg-[#1D4ED8] hover:bg-[#0B7A70] text-white'}`}
             data-testid="submit-btn"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (isLogin ? t('login') : t('register'))}

@@ -12,8 +12,14 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = useCallback(async () => {
     // CRITICAL: If returning from OAuth callback, skip the /me check.
-    // AuthCallback will exchange the session_id and establish the session first.
     if (window.location.hash?.includes('session_id=')) {
+      setLoading(false);
+      return;
+    }
+
+    // 🚀 [التعديل الجديد]: إذا كانت التذكرة هي تذكرة العرض الوهمية، لا تسأل السيرفر!
+    if (token === "darwaza_vip_pass_2026") {
+      setUser({ name: "ناصر الخالدي", email: "user@darwaza.com" });
       setLoading(false);
       return;
     }
