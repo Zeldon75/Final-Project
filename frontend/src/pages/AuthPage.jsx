@@ -7,27 +7,21 @@ import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { SaduDivider } from '../components/SaduPattern';
-import { Mail, Lock, User, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-const AuthPage = ({ isLogin = true }) => {
-  const { isHeritage, darkMode, themeColors, hasSelectedTheme } = useTheme();
-  const { t, isRTL, language } = useLanguage();
-  const { login, register, loginWithGoogle } = useAuth();
+// هذه الصفحة أصبحت مخصصة لتسجيل الدخول فقط
+const AuthPage = () => {
+  const { isHeritage, darkMode, hasSelectedTheme } = useTheme();
+  const { t, language } = useLanguage();
+  const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const isArabic = language === 'ar';
   
-  // Use heritage theme defaults if no theme selected
   const effectiveIsHeritage = hasSelectedTheme ? isHeritage : true;
   const effectiveDarkMode = hasSelectedTheme ? darkMode : false;
 
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    name: '',
-    confirmPassword: ''
-  });
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -37,26 +31,10 @@ const AuthPage = ({ isLogin = true }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!isLogin && formData.password !== formData.confirmPassword) {
-      toast.error(isArabic ? 'كلمات المرور غير متطابقة' : 'Passwords do not match');
-      return;
-    }
-
     setLoading(true);
     try {
-      if (isLogin) {
-        await login(formData.email, formData.password);
-        toast.success(isArabic ? 'تم تسجيل الدخول بنجاح' : 'Logged in successfully');
-      } else {
-        await register({
-          email: formData.email,
-          password: formData.password,
-          name: formData.name
-        });
-        toast.success(isArabic ? 'تم إنشاء الحساب بنجاح' : 'Account created successfully');
-      }
-      // 🚀 التعديل هنا: تحويل المستخدم لصفحة الحساب
+      await login(formData.email, formData.password);
+      toast.success(isArabic ? 'تم تسجيل الدخول بنجاح' : 'Logged in successfully');
       navigate('/profile'); 
     } catch (error) {
       console.error('Auth error:', error);
@@ -91,20 +69,17 @@ const AuthPage = ({ isLogin = true }) => {
 
         {/* Title */}
         <h1 className={`text-2xl font-bold text-center mb-2 ${effectiveIsHeritage ? 'font-serif' : ''}`}>
-          {isLogin ? t('login') : t('register')}
+          {t('login')}
         </h1>
         <p className="text-center text-muted-foreground mb-8">
-          {isLogin
-            ? (isArabic ? 'أهلاً بعودتك! سجل دخولك للمتابعة' : 'Welcome back! Sign in to continue')
-            : (isArabic ? 'أنشئ حسابك للانضمام إلى دروازة' : 'Create your account to join Darwaza')}
+          {isArabic ? 'أهلاً بعودتك! سجل دخولك للمتابعة' : 'Welcome back! Sign in to continue'}
         </p>
 
         {/* Google Login */}
         <Button
           variant="outline"
-          className="w-full h-12 mb-6"
+          className="w-full h-12 mb-6 font-bold"
           onClick={loginWithGoogle}
-          data-testid="google-login-btn"
         >
           <svg className="w-5 h-5 me-2" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -121,42 +96,15 @@ const AuthPage = ({ isLogin = true }) => {
           <div className="flex-1 h-px bg-border" />
         </div>
 
-        {/* Form */}
+        {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {!isLogin && (
-            <div>
-              <Label htmlFor="name">{t('name')}</Label>
-              <div className="relative mt-1">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input
-                  id="name"
-                  name="name"
-                  type="text"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required={!isLogin}
-                  className="ps-10 h-12"
-                  placeholder={isArabic ? 'اسمك الكامل' : 'Your full name'}
-                  data-testid="name-input"
-                />
-              </div>
-            </div>
-          )}
-
           <div>
             <Label htmlFor="email">{t('email')}</Label>
             <div className="relative mt-1">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="ps-10 h-12"
-                placeholder="you@example.com"
-                data-testid="email-input"
+                id="email" name="email" type="email" value={formData.email} onChange={handleChange} required
+                className="ps-10 h-12" placeholder="you@example.com"
               />
             </div>
           </div>
@@ -166,15 +114,8 @@ const AuthPage = ({ isLogin = true }) => {
             <div className="relative mt-1">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
-                id="password"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                value={formData.password}
-                onChange={handleChange}
-                required
-                className="ps-10 pe-10 h-12"
-                placeholder="••••••••"
-                data-testid="password-input"
+                id="password" name="password" type={showPassword ? 'text' : 'password'} value={formData.password} onChange={handleChange} required
+                className="ps-10 pe-10 h-12" placeholder="••••••••"
               />
               <button
                 type="button"
@@ -186,45 +127,16 @@ const AuthPage = ({ isLogin = true }) => {
             </div>
           </div>
 
-          {!isLogin && (
-            <div>
-              <Label htmlFor="confirmPassword">{t('confirm_password')}</Label>
-              <div className="relative mt-1">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  required={!isLogin}
-                  className="ps-10 h-12"
-                  placeholder="••••••••"
-                  data-testid="confirm-password-input"
-                />
-              </div>
-            </div>
-          )}
-
-          <Button
-            type="submit"
-            disabled={loading}
-            className={`w-full h-12 ${effectiveIsHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515] text-white' : 'bg-[#1D4ED8] hover:bg-[#0B7A70] text-white'}`}
-            data-testid="submit-btn"
-          >
-            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (isLogin ? t('login') : t('register'))}
+          <Button type="submit" disabled={loading} className={`w-full h-12 font-bold ${effectiveIsHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515] text-white' : 'bg-[#1D4ED8] hover:bg-[#0B7A70] text-white'}`}>
+            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : t('login')}
           </Button>
         </form>
 
-        {/* Switch Auth Mode */}
-        <p className="text-center mt-6 text-sm text-muted-foreground">
-          {isLogin ? t('dont_have_account') : t('already_have_account')}{' '}
-          <Link
-            to={isLogin ? '/register' : '/login'}
-            className={`font-semibold ${effectiveIsHeritage ? 'text-[#8D1C1C]' : 'text-[#1D4ED8]'} hover:underline`}
-            data-testid="switch-auth-link"
-          >
-            {isLogin ? t('register') : t('login')}
+        {/* التوجيه لصفحة التسجيل الجديدة */}
+        <p className="text-center mt-6 text-sm text-muted-foreground font-medium">
+          {t('dont_have_account')}{' '}
+          <Link to="/register" className={`font-bold ${effectiveIsHeritage ? 'text-[#8D1C1C]' : 'text-[#1D4ED8]'} hover:underline`}>
+            {isArabic ? 'أنشئ حساباً جديداً' : 'Create a new account'}
           </Link>
         </p>
       </motion.div>
@@ -232,7 +144,6 @@ const AuthPage = ({ isLogin = true }) => {
   );
 };
 
-export const LoginPage = () => <AuthPage isLogin={true} />;
-export const RegisterPage = () => <AuthPage isLogin={false} />;
+export const LoginPage = () => <AuthPage />;
 
 export default AuthPage;

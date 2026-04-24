@@ -18,17 +18,15 @@ const HomePage = () => {
   const { t, isRTL, language } = useLanguage();
   const isArabic = language === 'ar';
 
-  // التعديل 1: تغيير استقبال الأيقونة (icon) إلى ملصق تعبيري (emoji)
   const ModuleCard = ({ emoji, title, titleAr, description, descriptionAr, to, color }) => (
     <motion.div
       whileHover={{ y: -5, scale: 1.02 }}
       className="relative group h-full"
     >
     <Link 
-  to={to} 
-  className={`block p-8 rounded-3xl h-full transition-all duration-500 ${isHeritage ? 'border-[4px] border-[#8A1538]' : 'border-2 border-white/50 hover:border-cyan-400 hover:shadow-[0_0_25px_rgba(34,211,238,0.6)]'}`} >
+      to={to} 
+      className={`block p-8 rounded-3xl h-full transition-all duration-500 ${isHeritage ? 'border-[4px] border-[#8A1538]' : 'border-2 border-white/50 hover:border-cyan-400 hover:shadow-[0_0_25px_rgba(34,211,238,0.6)]'}`} >
         <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-white shadow-lg transition-transform duration-500 group-hover:rotate-12" style={{ backgroundColor: color }}>
-          {/* التعديل 2: عرض الإيموجي بحجم كبير كأنه ملصق */}
           <span className="text-4xl drop-shadow-md">{emoji}</span>
         </div>
         <h3 className={`text-2xl font-bold mb-3 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
@@ -41,7 +39,6 @@ const HomePage = () => {
     </motion.div>
   );
 
-  // التعديل 3: إضافة الإيموجيات المناسبة لكل قسم بدل الأيقونات العادية
   const modules = [
     {
       emoji: '🧠',
@@ -79,14 +76,15 @@ const HomePage = () => {
       to: '/kids',
       color: '#F59E0B'
     },
+    // ✅ تم حذف "ركن الطبخ" وإبقاء "المطبخ الذكي" فقط كواجهة أساسية
     {
-      emoji: '👨‍🍳',
-      title: 'Cooking Corner',
-      titleAr: 'ركن الطبخ',
-      description: 'Learn traditional recipes with interactive games and AR guides.',
-      descriptionAr: 'تعلم الوصفات التقليدية مع ألعاب تفاعلية ودليل الواقع المعزز.',
-      to: '/cooking',
-      color: '#EC4899'
+      emoji: '🍳',
+      title: 'Smart Kitchen',
+      titleAr: 'المطبخ الذكي',
+      description: 'Interactive step-by-step experience to learn famous Kuwaiti dishes.',
+      descriptionAr: 'تجربة تفاعلية خطوة بخطوة لتعلم أشهر الأطباق الكويتية التقليدية.',
+      to: '/smart-kitchen',
+      color: '#F59E0B'
     },
     {
       emoji: '🗺️',
@@ -124,7 +122,7 @@ const HomePage = () => {
             >
 <h1 className={`text-5xl md:text-7xl font-bold mb-6 ${isHeritage ? 'font-serif' : 'text-blue-700 drop-shadow-[0_0_15px_rgba(29,78,216,0.8)]'}`} style={isHeritage ? { color: themeColors.primary } : {}}>
   {isArabic ? 'دروازة' : 'Darwaza'}
-</h1>              <p className={`text-xl md:text-2xl mb-8 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+</h1>               <p className={`text-xl md:text-2xl mb-8 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                 {isArabic
                   ? 'بوابتك إلى التراث الكويتي الأصيل. نربط الأجيال عبر التكنولوجيا والذكاء الاصطناعي.'
                   : 'Your gateway to authentic Kuwaiti heritage. Bridging generations through technology and AI.'}

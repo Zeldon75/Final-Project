@@ -18,39 +18,34 @@ import AIHubPage from './pages/AIHubPage';
 import SeniorsPage from './pages/SeniorsPage';
 import YouthPage from './pages/YouthPage';
 import KidsPage from './pages/KidsPage';
-import CookingPage from './pages/CookingPage';
-import SmartKitchenPage from './pages/SmartKitchenPage';
+// تم إزالة استيراد CookingPage
+import SmartKitchenPage from './pages/SmartKitchenPage'; 
 import TouristsPage from './pages/TouristsPage';
 import ArabWorldPage from './pages/ArabWorldPage';
 import SubscriptionsPage from './pages/SubscriptionsPage';
 import MockPaymentPage from './pages/MockPaymentPage';
-import { LoginPage, RegisterPage } from './pages/AuthPage';
 import AuthCallback from './pages/AuthCallback';
-import ProfilePage from './pages/ProfilePage'; // ✅ السطر الأول المضاف (استيراد صفحة الحساب)
+import ProfilePage from './pages/ProfilePage'; 
+
+// استيراد صفحات الدخول والتسجيل بشكل منفصل
+import { LoginPage } from './pages/AuthPage';
+import RegisterPage from './pages/RegisterPage'; 
 
 import './App.css';
 
 // Route wrapper that checks for auth callback
 const AppRouter = () => {
   const location = useLocation();
-  const { hasSelectedTheme, darkMode, isHeritage, selectTheme, THEMES } = useTheme();
+  const { hasSelectedTheme, darkMode, isHeritage } = useTheme();
   
-  // Check URL fragment for session_id (OAuth callback)
   if (location.hash?.includes('session_id=')) {
     return <AuthCallback />;
   }
 
-  // Allow auth pages to work even without theme selection
   const isAuthRoute = ['/login', '/register', '/auth/callback'].includes(location.pathname);
   
-  // If user hasn't selected a theme yet and not on auth page, show welcome page
   if (!hasSelectedTheme && !isAuthRoute) {
     return <WelcomePage />;
-  }
-  
-  // If on auth page without theme, temporarily use heritage theme
-  if (!hasSelectedTheme && isAuthRoute) {
-    // Don't save to localStorage, just use heritage for display
   }
 
   const effectiveIsHeritage = hasSelectedTheme ? isHeritage : true;
@@ -70,17 +65,19 @@ const AppRouter = () => {
           <Route path="/seniors" element={<SeniorsPage />} />
           <Route path="/youth" element={<YouthPage />} />
           <Route path="/kids" element={<KidsPage />} />
-          <Route path="/cooking" element={<CookingPage />} />
+          {/* تم إزالة مسار /cooking وإبقاء المطبخ الذكي */}
           <Route path="/smart-kitchen" element={<SmartKitchenPage />} />
           <Route path="/tourists" element={<TouristsPage />} />
           <Route path="/arab-world" element={<ArabWorldPage />} />
           <Route path="/subscriptions" element={<SubscriptionsPage />} />
           <Route path="/subscriptions/success" element={<SubscriptionsPage />} />
           <Route path="/payment" element={<MockPaymentPage />} />
+          
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/register" element={<RegisterPage />} /> 
+          
           <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route path="/profile" element={<ProfilePage />} /> {/* ✅ السطر الثاني المضاف (تفعيل مسار الصفحة) */}
+          <Route path="/profile" element={<ProfilePage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { SaduCard, SaduDivider } from '../components/SaduPattern';
@@ -11,234 +12,237 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/
 import {
   GraduationCap, Palette, Video, Award, ArrowRight, Briefcase, Sparkles,
   Users, Clock, BookOpen, Play, Star, CheckCircle, Lock, ChevronRight,
-  Zap, Target, TrendingUp, Heart, Share2, MessageSquare, UploadCloud, Plus
+  Zap, Target, TrendingUp, Heart, Share2, MessageSquare, UploadCloud, Plus, FileText, Trash2, ArrowLeft, Image as ImageIcon
 } from 'lucide-react';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
+// ==========================================
+// 1. المكونات الفرعية لصفحة الشباب
+// ==========================================
+
+const CourseCard = ({ course, isArabic, isHeritage, themeColors, onSelect, isOwner, onDelete }) => {
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} whileHover={{ y: -5 }} onClick={() => onSelect(course)} className="cursor-pointer relative h-full">
+      {isOwner && (
+        <button onClick={(e) => { e.stopPropagation(); onDelete(course.id); }} className="absolute top-3 left-3 z-20 w-10 h-10 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-110">
+          <Trash2 className="w-5 h-5" />
+        </button>
+      )}
+      <SaduCard className="overflow-hidden p-0 h-full flex flex-col transition-all hover:shadow-xl">
+        <div className="aspect-video relative">
+          <img src={course.image || "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop"} alt="" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+          {course.certified && (
+            <div className="absolute top-3 right-3 bg-green-500 text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1 shadow-md">
+              <Award className="w-4 h-4" /> {isArabic ? 'معتمد' : 'Certified'}
+            </div>
+          )}
+          <div className="absolute bottom-4 left-4 right-4">
+            <h3 className={`text-white font-bold text-xl leading-tight mb-1 ${isHeritage ? 'font-serif' : ''}`}>
+              {isArabic ? course.title_ar : course.title}
+            </h3>
+            <p className="text-white/90 text-sm font-medium">{isArabic ? course.instructor_ar : course.instructor}</p>
+          </div>
+        </div>
+        <div className="p-5 flex flex-col flex-grow bg-white dark:bg-slate-800">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 font-bold">
+              <span className="flex items-center gap-1"><Clock className="w-4 h-4" />{isArabic ? course.duration_ar : course.duration}</span>
+              <span className="flex items-center gap-1"><BookOpen className="w-4 h-4" />{course.lessons} {isArabic ? 'درس' : 'lessons'}</span>
+            </div>
+            <div className="flex items-center gap-1 bg-yellow-100 dark:bg-yellow-900/30 px-2 py-1 rounded-md">
+              <Star className="w-4 h-4 text-yellow-600 dark:text-yellow-400 fill-current" />
+              <span className="font-bold text-yellow-700 dark:text-yellow-400 text-sm">{course.rating || "New"}</span>
+            </div>
+          </div>
+          <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100 dark:border-gray-700">
+            <span className="font-black text-xl" style={{ color: themeColors.primary }}>{course.price}</span>
+            <Button size="sm" className={`font-bold h-10 px-6 text-white ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515] rounded-none' : 'bg-blue-600 hover:bg-blue-700 rounded-xl'}`}>
+              {isArabic ? 'التفاصيل' : 'Details'}
+            </Button>
+          </div>
+        </div>
+      </SaduCard>
+    </motion.div>
+  );
+};
+
+const DesignCard = ({ project, isArabic, isOwner, onDelete }) => {
+  return (
+    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} whileHover={{ y: -5 }} className="relative h-full">
+      {isOwner && (
+        <button onClick={onDelete} className="absolute top-3 left-3 z-20 w-9 h-9 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-110">
+          <Trash2 className="w-4 h-4" />
+        </button>
+      )}
+      <SaduCard className="overflow-hidden p-0 h-full flex flex-col border-2 transition-all hover:shadow-lg">
+        <div className="aspect-square relative">
+          <img src={project.image || "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600"} alt="" className="w-full h-full object-cover" />
+        </div>
+        <div className="p-4 flex flex-col flex-1 justify-between bg-white dark:bg-slate-800">
+          <div>
+            <h4 className="font-bold mb-1 text-lg leading-tight">{isArabic ? project.title_ar : project.title}</h4>
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-3">{isArabic ? project.author_ar : project.author}</p>
+          </div>
+          <div className="flex items-center justify-between text-sm text-gray-500 border-t border-gray-100 dark:border-gray-700 pt-3">
+            <span className="flex items-center gap-1.5 hover:text-red-500 cursor-pointer transition-colors"><Heart className="w-5 h-5" /><span className="font-bold">{project.likes}</span></span>
+            <span className="flex items-center gap-1.5 hover:text-blue-500 cursor-pointer transition-colors"><MessageSquare className="w-5 h-5" /><span className="font-bold">{project.comments}</span></span>
+          </div>
+        </div>
+      </SaduCard>
+    </motion.div>
+  );
+};
+
+// ==========================================
+// 2. واجهة مجتمع المبدعين (Darwaza X - تويتر دروازة)
+// ==========================================
+const DarwazaXCommunity = ({ isArabic, isHeritage, darkMode, onClose }) => {
+  const { user } = useAuth();
+  const [newPostText, setNewPostText] = useState("");
+  const [newPostImage, setNewPostImage] = useState(null);
+  
+  const [posts, setPosts] = useState([
+    { id: 1, author: "سالم المري", handle: "@SalemAlMarri", avatar: "https://i.pravatar.cc/150?u=salem", time: "2h", content: "توني خلصت دورة #الخط_العربي في دروازة! صراحة الأستاذ خالد ما قصر، وهذا تطبيقي لليوم. فخور جداً بالتراث! ✍️📜", image: "https://images.unsplash.com/photo-1609599006353-e629aaabfeae?w=600", likes: 145, comments: 23 },
+    { id: 2, author: "Aisha Al-Sabah", handle: "@AishaDesign", avatar: "https://i.pravatar.cc/150?u=aisha", time: "5h", content: "Just uploaded my new Sadu-inspired jacket to the Design Lab! Let me know what you guys think. #KuwaitHeritage #Fashion 🧥✨", image: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600", likes: 320, comments: 56 },
+    { id: 3, author: "عبدالله العنزي", handle: "@AbuFahad", avatar: "https://i.pravatar.cc/150?u=abdullah", time: "1d", content: "قسم المتقاعدين فكرة جبارة! اليوم حضرت (مجلس حكايات) عن الغوص في السبعينات، سوالف الكبار كلها حكم ودروس. شكراً دروازة 🙏🇰🇼", likes: 890, comments: 112 },
+    { id: 4, author: "Mona Khalid", handle: "@MonaK_Mom", avatar: "https://i.pravatar.cc/150?u=mona", time: "2d", content: "بنتي اليوم جربت ركن الأطفال في دروازة ولعبت مع الجدة لولوة الافتراضية. ما تتخيلون شكثر مستانسة وعرفت معلومات عن الكويت القديمة! 👧💖", likes: 432, comments: 45 }
+  ]);
+
+  const handlePostSubmit = () => {
+    if (!newPostText.trim() && !newPostImage) return;
+    const post = {
+      id: Date.now(),
+      author: user?.name || (isArabic ? "مستخدم دروازة" : "Darwaza User"),
+      handle: `@${user?.name?.replace(/\s/g, '') || "user"}${Math.floor(Math.random()*1000)}`,
+      avatar: "https://i.pravatar.cc/150?u=newuser",
+      time: isArabic ? "الآن" : "Just now",
+      content: newPostText,
+      image: newPostImage,
+      likes: 0,
+      comments: 0
+    };
+    setPosts([post, ...posts]);
+    setNewPostText("");
+    setNewPostImage(null);
+    toast.success(isArabic ? 'تم النشر بنجاح!' : 'Posted successfully!');
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) setNewPostImage(URL.createObjectURL(file));
+  };
+
+  const bgStyle = darkMode ? 'bg-[#000000]' : 'bg-[#F7F9F9]';
+  const borderStyle = darkMode ? 'border-gray-800' : 'border-gray-200';
+  const cardStyle = darkMode ? 'bg-[#000000] hover:bg-[#080808]' : 'bg-white hover:bg-gray-50';
+  const textStyle = darkMode ? 'text-white' : 'text-gray-900';
+  const primaryColor = isHeritage ? '#8D1C1C' : '#1D9BF0'; // Twitter Blue or Sadu Red
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 100 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 100 }} className={`fixed inset-0 z-[100] flex justify-center overflow-y-auto ${bgStyle} font-sans`} dir={isArabic ? 'rtl' : 'ltr'}>
+      {/* Header */}
+      <div className={`fixed top-0 w-full max-w-2xl flex items-center justify-between p-4 backdrop-blur-md bg-opacity-80 z-10 border-b ${borderStyle} ${bgStyle}`}>
+        <Button variant="ghost" onClick={onClose} className="rounded-full w-10 h-10 p-0"><ArrowLeft className={`w-5 h-5 ${textStyle} ${!isArabic ? 'rotate-180' : ''}`} /></Button>
+        <h2 className={`text-xl font-bold ${textStyle}`}>{isArabic ? 'مجتمع المبدعين' : 'Darwaza X'}</h2>
+        <Sparkles className="w-6 h-6" style={{ color: primaryColor }} />
+      </div>
+
+      <div className={`w-full max-w-2xl mt-16 border-x min-h-screen ${borderStyle}`}>
+        {/* Create Post Area */}
+        <div className={`p-4 border-b ${borderStyle} flex gap-4 ${cardStyle}`}>
+          <img src="https://i.pravatar.cc/150?u=newuser" alt="Avatar" className="w-12 h-12 rounded-full object-cover" />
+          <div className="flex-1">
+            <textarea 
+              value={newPostText} onChange={(e) => setNewPostText(e.target.value)}
+              placeholder={isArabic ? "ماذا يحدث في دروازة؟" : "What is happening in Darwaza?"}
+              className={`w-full bg-transparent resize-none outline-none text-xl mb-2 ${textStyle}`} rows="3"
+            />
+            {newPostImage && (
+              <div className="relative mb-3">
+                <img src={newPostImage} alt="Upload" className="w-full rounded-2xl border border-gray-700" />
+                <button onClick={() => setNewPostImage(null)} className="absolute top-2 right-2 bg-black/70 text-white rounded-full p-1"><X className="w-5 h-5" /></button>
+              </div>
+            )}
+            <div className="flex items-center justify-between pt-3 border-t border-gray-800/50">
+              <label className="cursor-pointer p-2 rounded-full hover:bg-blue-500/10 transition-colors">
+                <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                <ImageIcon className="w-5 h-5" style={{ color: primaryColor }} />
+              </label>
+              <Button onClick={handlePostSubmit} className={`rounded-full px-6 font-bold text-white`} style={{ backgroundColor: primaryColor }}>
+                {isArabic ? 'انشر' : 'Post'}
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Timeline (Posts) */}
+        <div>
+          {posts.map(post => (
+            <div key={post.id} className={`p-4 border-b ${borderStyle} flex gap-4 transition-colors ${cardStyle}`}>
+              <img src={post.avatar} alt="Avatar" className="w-12 h-12 rounded-full object-cover" />
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={`font-bold ${textStyle}`}>{post.author}</span>
+                  <span className="text-gray-500 text-sm">{post.handle} · {post.time}</span>
+                </div>
+                <p className={`text-[15px] mb-3 leading-normal ${textStyle}`}>{post.content}</p>
+                {post.image && <img src={post.image} alt="Post" className="w-full rounded-2xl border border-gray-700 mb-3" />}
+                <div className="flex items-center justify-between text-gray-500 max-w-md pe-10">
+                  <span className="flex items-center gap-2 hover:text-blue-500 cursor-pointer transition-colors"><MessageSquare className="w-5 h-5" /> {post.comments}</span>
+                  <span className="flex items-center gap-2 hover:text-green-500 cursor-pointer transition-colors"><Share2 className="w-5 h-5" /> 12</span>
+                  <span className="flex items-center gap-2 hover:text-red-500 cursor-pointer transition-colors"><Heart className="w-5 h-5" /> {post.likes}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+// ==========================================
+// 3. المكون الرئيسي (YouthPage)
+// ==========================================
 const YouthPage = () => {
   const { isHeritage, darkMode, themeColors } = useTheme();
-  const { isRTL, language } = useLanguage();
+  const { isRTL, language, t } = useLanguage();
+  const { isAuthenticated, user } = useAuth();
   const isArabic = language === 'ar';
+  const navigate = useNavigate();
   
   const [activeTab, setActiveTab] = useState('courses');
   const [selectedCourse, setSelectedCourse] = useState(null);
   
-  // حالات نموذج التوظيف
+  // حالات المجتمع والوظائف
+  const [showXCommunity, setShowXCommunity] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
   const [applyModalOpen, setApplyModalOpen] = useState(false);
   const [successModalOpen, setSuccessModalOpen] = useState(false);
 
-  // Demo Courses Data
-  const courses = [
-    {
-      id: 'sadu-weaving',
-      title: 'Sadu Weaving Fundamentals',
-      title_ar: 'أساسيات نسيج السدو',
-      instructor: 'Fatima Al-Sabah',
-      instructor_ar: 'فاطمة الصباح',
-      duration: '8 weeks',
-      duration_ar: '8 أسابيع',
-      level: 'Beginner',
-      level_ar: 'مبتدئ',
-      students: 234,
-      rating: 4.9,
-      price: '45 KWD',
-      progress: 65,
-      lessons: 24,
-      completedLessons: 16,
-      certified: true,
-      image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop',
-      description: 'Learn the ancient art of Sadu weaving from master craftswomen. This comprehensive course covers traditional patterns, color theory, and weaving techniques.',
-      description_ar: 'تعلم فن نسيج السدو القديم من الحرفيات المتمرسات. تغطي هذه الدورة الشاملة الأنماط التقليدية ونظرية الألوان وتقنيات النسيج.',
-      modules: [
-        { title: 'Introduction to Sadu', title_ar: 'مقدمة في السدو', completed: true },
-        { title: 'Materials & Tools', title_ar: 'المواد والأدوات', completed: true },
-        { title: 'Basic Patterns', title_ar: 'الأنماط الأساسية', completed: true },
-        { title: 'Color Theory', title_ar: 'نظرية الألوان', completed: false },
-        { title: 'Advanced Techniques', title_ar: 'التقنيات المتقدمة', completed: false }
-      ]
-    },
-    {
-      id: 'dhow-building',
-      title: 'Traditional Dhow Building',
-      title_ar: 'بناء المراكب الشراعية التقليدية',
-      instructor: 'Mohammed Al-Rashid',
-      instructor_ar: 'محمد الرشيد',
-      duration: '12 weeks',
-      duration_ar: '12 أسبوع',
-      level: 'Intermediate',
-      level_ar: 'متوسط',
-      students: 89,
-      rating: 4.8,
-      price: '120 KWD',
-      progress: 0,
-      lessons: 36,
-      completedLessons: 0,
-      certified: true,
-      image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600&h=400&fit=crop',
-      description: 'Master the craft of building traditional Kuwaiti dhows. Learn woodworking, naval architecture, and the history of Gulf maritime traditions.',
-      description_ar: 'أتقن حرفة بناء المراكب الشراعية الكويتية التقليدية. تعلم النجارة والهندسة البحرية وتاريخ التقاليد البحرية الخليجية.'
-    },
-    {
-      id: 'heritage-guide',
-      title: 'Heritage Tour Guide Certificate',
-      title_ar: 'شهادة مرشد سياحي تراثي',
-      instructor: 'Dr. Ahmed Al-Mutairi',
-      instructor_ar: 'د. أحمد المطيري',
-      duration: '6 weeks',
-      duration_ar: '6 أسابيع',
-      level: 'All Levels',
-      level_ar: 'جميع المستويات',
-      students: 567,
-      rating: 4.9,
-      price: '75 KWD',
-      progress: 30,
-      lessons: 18,
-      completedLessons: 5,
-      certified: true,
-      image: 'https://images.unsplash.com/photo-1571986204936-76077adb51f9?w=600&h=400&fit=crop',
-      description: 'Become a certified heritage tour guide. Learn Kuwaiti history, storytelling techniques, and visitor management.',
-      description_ar: 'كن مرشداً سياحياً معتمداً. تعلم تاريخ الكويت وتقنيات السرد وإدارة الزوار.'
-    },
-    {
-      id: 'calligraphy',
-      title: 'Arabic Calligraphy Mastery',
-      title_ar: 'إتقان الخط العربي',
-      instructor: 'Khalid Al-Duaij',
-      instructor_ar: 'خالد الدعيج',
-      duration: '10 weeks',
-      duration_ar: '10 أسابيع',
-      level: 'Beginner',
-      level_ar: 'مبتدئ',
-      students: 412,
-      rating: 4.7,
-      price: '55 KWD',
-      progress: 0,
-      lessons: 30,
-      completedLessons: 0,
-      certified: true,
-      image: 'https://images.unsplash.com/photo-1609599006353-e629aaabfeae?w=600&h=400&fit=crop',
-      description: 'Learn the beautiful art of Arabic calligraphy. Master Thuluth, Naskh, and Diwani scripts with traditional tools.',
-      description_ar: 'تعلم فن الخط العربي الجميل. أتقن خطوط الثلث والنسخ والديواني بالأدوات التقليدية.'
-    }
-  ];
+  // حالات النوافذ الجديدة (إنشاء دورة وتصميم)
+  const [createCourseModalOpen, setCreateCourseModalOpen] = useState(false);
+  const [createDesignModalOpen, setCreateDesignModalOpen] = useState(false);
+  const [courseFileName, setCourseFileName] = useState("");
+  const [designImagePreview, setDesignImagePreview] = useState(null);
 
-  // Design Lab Projects
-  const designProjects = [
-    {
-      id: 'project-1',
-      title: 'Modern Sadu Jacket',
-      title_ar: 'جاكيت سدو عصري',
-      author: 'Sara Al-Hajri',
-      author_ar: 'سارة الهاجري',
-      likes: 234,
-      comments: 45,
-      image: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600&h=400&fit=crop',
-      tags: ['Fashion', 'Sadu', 'Modern']
-    },
-    {
-      id: 'project-2',
-      title: 'Heritage Phone Case',
-      title_ar: 'غطاء هاتف تراثي',
-      author: 'Noor Al-Salem',
-      author_ar: 'نور السالم',
-      likes: 189,
-      comments: 32,
-      image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop',
-      tags: ['Accessories', 'Tech', 'Sadu']
-    },
-    {
-      id: 'project-3',
-      title: 'Kuwaiti Pattern Sneakers',
-      title_ar: 'أحذية رياضية بنقوش كويتية',
-      author: 'Faisal Al-Roumi',
-      author_ar: 'فيصل الرومي',
-      likes: 567,
-      comments: 89,
-      image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=400&fit=crop',
-      tags: ['Footwear', 'Fashion', 'Innovative']
-    },
-    {
-      id: 'project-4',
-      title: 'Traditional Motif Laptop Bag',
-      title_ar: 'حقيبة لابتوب بزخارف تقليدية',
-      author: 'Maryam Al-Shatti',
-      author_ar: 'مريم الشطي',
-      likes: 312,
-      comments: 56,
-      image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&h=400&fit=crop',
-      tags: ['Bags', 'Tech', 'Heritage']
-    }
-  ];
+  // الداتا مع ربط الهوية للحذف
+  const [courses, setCourses] = useState([
+    { id: 'c-1', title: 'Sadu Weaving Fundamentals', title_ar: 'أساسيات نسيج السدو', instructor: 'Fatima Al-Sabah', instructor_ar: 'فاطمة الصباح', duration: '8 weeks', duration_ar: '8 أسابيع', lessons: 24, rating: 4.9, price: '45 KWD', certified: true, image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600', host_id: 'system', description: 'Learn the ancient art of Sadu weaving from master craftswomen.', description_ar: 'تعلم فن نسيج السدو القديم من الحرفيات المتمرسات.' },
+    { id: 'c-2', title: 'Traditional Dhow Building', title_ar: 'بناء المراكب الشراعية', instructor: 'Mohammed Al-Rashid', instructor_ar: 'محمد الرشيد', duration: '12 weeks', duration_ar: '12 أسبوع', lessons: 36, rating: 4.8, price: '120 KWD', certified: true, image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600', host_id: 'system', description: 'Master the craft of building traditional Kuwaiti dhows.', description_ar: 'أتقن حرفة بناء المراكب الشراعية الكويتية التقليدية.' }
+  ]);
 
-  // Career Opportunities
+  const [designProjects, setDesignProjects] = useState([
+    { id: 'p-1', title: 'Modern Sadu Jacket', title_ar: 'جاكيت سدو عصري', author: 'Sara Al-Hajri', author_ar: 'سارة الهاجري', likes: 234, comments: 45, image: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600', host_id: 'system' },
+    { id: 'p-2', title: 'Heritage Phone Case', title_ar: 'غطاء هاتف تراثي', author: 'Noor Al-Salem', author_ar: 'نور السالم', likes: 189, comments: 32, image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600', host_id: 'system' }
+  ]);
+
   const careers = [
-    {
-      id: 'job-1',
-      title: 'Heritage Tour Guide',
-      title_ar: 'مرشد سياحي تراثي',
-      company: 'Kuwait Tourism Authority',
-      company_ar: 'هيئة السياحة الكويتية',
-      location: 'Kuwait City',
-      location_ar: 'مدينة الكويت',
-      type: 'Full-time',
-      type_ar: 'دوام كامل',
-      salary: '800-1200 KWD',
-      posted: '2 days ago',
-      posted_ar: 'منذ يومين',
-      requirements: ['Certificate in Heritage Tourism', 'Bilingual (Arabic/English)', '2+ years experience'],
-      requirements_ar: ['شهادة في السياحة التراثية', 'ثنائي اللغة (عربي/إنجليزي)', '+2 سنوات خبرة']
-    },
-    {
-      id: 'job-2',
-      title: 'Sadu Weaving Instructor',
-      title_ar: 'مدرب نسيج السدو',
-      company: 'Sadu House',
-      company_ar: 'بيت السدو',
-      location: 'Kuwait City',
-      location_ar: 'مدينة الكويت',
-      type: 'Part-time',
-      type_ar: 'دوام جزئي',
-      salary: '400-600 KWD',
-      posted: '1 week ago',
-      posted_ar: 'منذ أسبوع',
-      requirements: ['Expert in Sadu weaving', 'Teaching experience preferred', 'Passion for heritage'],
-      requirements_ar: ['خبير في نسيج السدو', 'يفضل الخبرة في التدريس', 'شغف بالتراث']
-    },
-    {
-      id: 'job-3',
-      title: 'Museum Curator Assistant',
-      title_ar: 'مساعد أمين متحف',
-      company: 'Kuwait National Museum',
-      company_ar: 'متحف الكويت الوطني',
-      location: 'Kuwait City',
-      location_ar: 'مدينة الكويت',
-      type: 'Full-time',
-      type_ar: 'دوام كامل',
-      salary: '900-1400 KWD',
-      posted: '3 days ago',
-      posted_ar: 'منذ 3 أيام',
-      requirements: ['Degree in History or Archaeology', 'Research skills', 'Attention to detail'],
-      requirements_ar: ['شهادة في التاريخ أو الآثار', 'مهارات البحث', 'الاهتمام بالتفاصيل']
-    },
-    {
-      id: 'job-4',
-      title: 'Heritage Fashion Designer',
-      title_ar: 'مصمم أزياء تراثية',
-      company: 'Darwaza Fashion House',
-      company_ar: 'دار دروازة للأزياء',
-      location: 'Salmiya',
-      location_ar: 'السالمية',
-      type: 'Full-time',
-      type_ar: 'دوام كامل',
-      salary: '1000-1800 KWD',
-      posted: '5 days ago',
-      posted_ar: 'منذ 5 أيام',
-      requirements: ['Fashion design degree', 'Portfolio with heritage themes', 'AI design tools knowledge'],
-      requirements_ar: ['شهادة في تصميم الأزياء', 'معرض أعمال بمواضيع تراثية', 'معرفة بأدوات التصميم بالذكاء الاصطناعي']
-    }
+    { id: 'j-1', title: 'Heritage Tour Guide', title_ar: 'مرشد سياحي تراثي', company: 'Kuwait Tourism Authority', company_ar: 'هيئة السياحة الكويتية', location: 'Kuwait City', location_ar: 'مدينة الكويت', type: 'Full-time', type_ar: 'دوام كامل', salary: '800-1200 KWD', posted: '2 days ago', posted_ar: 'منذ يومين' }
   ];
 
-  // Community Stats
   const stats = [
     { label: isArabic ? 'أعضاء نشطين' : 'Active Members', value: '2,450+', icon: Users },
     { label: isArabic ? 'دورات مكتملة' : 'Courses Completed', value: '5,670+', icon: GraduationCap },
@@ -246,46 +250,115 @@ const YouthPage = () => {
     { label: isArabic ? 'توظيفات' : 'Job Placements', value: '340+', icon: Briefcase }
   ];
 
-  // فتح نافذة التقديم للوظيفة
-  const handleApplyClick = (job) => {
-    setSelectedJob(job);
-    setApplyModalOpen(true);
+  // --- دوال الحذف والرفع والنشر ---
+  const handleDeleteCourse = (id) => {
+    setCourses(courses.filter(c => c.id !== id));
+    toast.success(isArabic ? 'تم حذف الدورة بنجاح' : 'Course deleted successfully');
   };
 
-  // إرسال طلب التوظيف
+  const handleDeleteDesign = (id) => {
+    setDesignProjects(designProjects.filter(p => p.id !== id));
+    toast.success(isArabic ? 'تم حذف التصميم بنجاح' : 'Design deleted successfully');
+  };
+
+  const handleFileUpload = (e, setFileName) => {
+    const file = e.target.files[0];
+    if (file) setFileName(file.name);
+  };
+
+  const handleImageUpload = (e, setPreview) => {
+    const file = e.target.files[0];
+    if (file) setPreview(URL.createObjectURL(file));
+  };
+
+  // توجيه لصفحة الدفع لإنشاء دورة (20 د.ك)
+  const handleCreateCourseSubmit = (e) => {
+    e.preventDefault();
+    if (!isAuthenticated) { toast.error(isArabic ? 'يرجى تسجيل الدخول' : 'Please login first'); return; }
+    
+    // حفظ بيانات الدورة مؤقتاً (محاكاة)
+    const formData = new FormData(e.target);
+    const newCourse = {
+      id: `c-${Date.now()}`,
+      title: formData.get('title'),
+      title_ar: formData.get('title'),
+      instructor: user?.name || "Expert",
+      instructor_ar: user?.name || "الخبير",
+      duration: formData.get('duration'),
+      duration_ar: formData.get('duration'),
+      lessons: 10,
+      rating: "New",
+      price: formData.get('price') + ' KWD',
+      certified: true,
+      image: "https://images.unsplash.com/photo-1571986204936-76077adb51f9?w=600",
+      host_id: user?.id || "user-new",
+      description: formData.get('description'),
+      description_ar: formData.get('description')
+    };
+    
+    setCreateCourseModalOpen(false);
+    toast.info(isArabic ? 'جاري تحويلك لصفحة الدفع (رسوم الإنشاء 20 د.ك)' : 'Redirecting to payment (20 KWD Creation Fee)');
+    
+    // بعد الدفع الوهمي، تضاف الدورة
+    setTimeout(() => {
+      setCourses([newCourse, ...courses]);
+      toast.success(isArabic ? 'تم دفع الرسوم وإنشاء الدورة بنجاح!' : 'Fee paid and course created successfully!');
+    }, 2000);
+  };
+
+  // توجيه لصفحة الدفع لإنشاء تصميم (20 د.ك)
+  const handleCreateDesignSubmit = (e) => {
+    e.preventDefault();
+    if (!isAuthenticated) { toast.error(isArabic ? 'يرجى تسجيل الدخول' : 'Please login first'); return; }
+    
+    const formData = new FormData(e.target);
+    const newDesign = {
+      id: `p-${Date.now()}`,
+      title: formData.get('title'),
+      title_ar: formData.get('title'),
+      author: user?.name || "Designer",
+      author_ar: user?.name || "المصمم",
+      likes: 0,
+      comments: 0,
+      image: designImagePreview || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600",
+      host_id: user?.id || "user-new"
+    };
+
+    setCreateDesignModalOpen(false);
+    setDesignImagePreview(null);
+    toast.info(isArabic ? 'جاري تحويلك لصفحة الدفع (رسوم الإضافة 20 د.ك)' : 'Redirecting to payment (20 KWD Addition Fee)');
+    
+    setTimeout(() => {
+      setDesignProjects([newDesign, ...designProjects]);
+      toast.success(isArabic ? 'تم دفع الرسوم وإضافة تصميمك بنجاح!' : 'Fee paid and design added successfully!');
+    }, 2000);
+  };
+
   const handleApplySubmit = (e) => {
     e.preventDefault();
     setApplyModalOpen(false);
-    setTimeout(() => {
-      setSuccessModalOpen(true);
-    }, 300);
+    setTimeout(() => setSuccessModalOpen(true), 300);
   };
 
-  // تنسيقات التبويبات المخصصة لتظهر كأزرار بارزة
+  // التنسيقات
   const tabsListBg = darkMode ? (isHeritage ? 'bg-[#2A2A2A]' : 'bg-[#1E293B]') : (isHeritage ? 'bg-[#E8DCCA]' : 'bg-gray-200/60');
   const tabTriggerStyle = `gap-2 rounded-xl transition-all duration-300 mx-1 py-2 font-bold data-[state=active]:text-white shadow-sm ` + 
-    (isHeritage 
-      ? "data-[state=active]:bg-[#8D1C1C]" 
-      : (darkMode ? "data-[state=active]:bg-[#3B82F6] data-[state=active]:shadow-[0_0_15px_rgba(59,130,246,0.6)]" : "data-[state=active]:bg-[#1D4ED8]")
-    );
+    (isHeritage ? "data-[state=active]:bg-[#8D1C1C]" : (darkMode ? "data-[state=active]:bg-[#3B82F6] data-[state=active]:shadow-[0_0_15px_rgba(59,130,246,0.6)]" : "data-[state=active]:bg-[#1D4ED8]"));
 
-  // تنسيقات النوافذ والمدخلات الذكية
   const modalBg = darkMode ? (isHeritage ? 'bg-[#1A1A1A]' : 'bg-[#0F172A]') : (isHeritage ? 'bg-[#FDF6E3]' : 'bg-white');
-  const inputStyle = darkMode 
-    ? (isHeritage ? 'bg-[#2A2A2A] border-gray-600 text-white placeholder:text-gray-400 focus:border-[#D97706]' : 'bg-[#1E293B] border-blue-900/50 text-white placeholder:text-gray-400 focus:border-blue-500 shadow-inner rounded-xl')
-    : (isHeritage ? 'bg-white border-[#8D1C1C]/30 text-[#8D1C1C] focus:border-[#8D1C1C]' : 'bg-gray-50 border-blue-200 text-gray-900 focus:border-blue-500 rounded-xl');
+  const inputStyle = darkMode ? (isHeritage ? 'bg-[#2A2A2A] border-gray-600 text-white focus:border-[#D97706]' : 'bg-[#1E293B] border-blue-900/50 text-white focus:border-blue-500 rounded-xl') : (isHeritage ? 'bg-white border-[#8D1C1C]/30 text-[#8D1C1C] focus:border-[#8D1C1C]' : 'bg-gray-50 border-blue-200 text-gray-900 focus:border-blue-500 rounded-xl');
   const labelStyle = darkMode ? 'text-gray-300' : (isHeritage ? 'text-[#8D1C1C] font-bold' : 'text-gray-700 font-semibold');
 
   return (
     <div className={`min-h-screen ${darkMode ? (isHeritage ? 'bg-[#1A1A1A]' : 'bg-[#0F172A]') : (isHeritage ? 'bg-[#FDF6E3]' : 'bg-[#F8FAFC]')}`}>
+      
+      {/* فتح مجتمع دروازة (Darwaza X) كشاشة كاملة عند الطلب */}
+      <AnimatePresence>
+        {showXCommunity && <DarwazaXCommunity isArabic={isArabic} isHeritage={isHeritage} darkMode={darkMode} onClose={() => setShowXCommunity(false)} />}
+      </AnimatePresence>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative">
-        
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
-        >
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
           <div className={`w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-6 shadow-md ${isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#1D4ED8]'}`}>
             <Sparkles className="w-10 h-10 text-white" />
           </div>
@@ -293,21 +366,14 @@ const YouthPage = () => {
             {isArabic ? 'تمكين الشباب' : 'Youth Empowerment'}
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            {isArabic
-              ? 'حوّل شغفك بالتراث إلى مهنة. تعلم، صمم، وابدأ مسيرتك المهنية.'
-              : 'Transform your passion for heritage into a career. Learn, design, and start your professional journey.'}
+            {isArabic ? 'حوّل شغفك بالتراث إلى مهنة. تعلم، صمم، وابدأ مسيرتك المهنية.' : 'Transform your passion for heritage into a career. Learn, design, and start.'}
           </p>
         </motion.div>
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
           {stats.map((stat, index) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
+            <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}>
               <SaduCard className="text-center">
                 <stat.icon className="w-8 h-8 mx-auto mb-2" style={{ color: themeColors.primary }} />
                 <p className="text-2xl font-bold">{stat.value}</p>
@@ -317,193 +383,71 @@ const YouthPage = () => {
           ))}
         </div>
 
-        {/* Main Tabs (Modified to look like segmented buttons) */}
+        {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className={`w-full grid grid-cols-3 mb-10 p-1.5 rounded-2xl shadow-sm border border-black/5 ${tabsListBg}`}>
-            <TabsTrigger value="courses" className={tabTriggerStyle} data-testid="tab-courses">
-              <GraduationCap className="w-5 h-5" />
-              {isArabic ? 'الدورات' : 'Courses'}
-            </TabsTrigger>
-            <TabsTrigger value="design" className={tabTriggerStyle} data-testid="tab-design">
-              <Palette className="w-5 h-5" />
-              {isArabic ? 'مختبر التصميم' : 'Design Lab'}
-            </TabsTrigger>
-            <TabsTrigger value="careers" className={tabTriggerStyle} data-testid="tab-careers">
-              <Briefcase className="w-5 h-5" />
-              {isArabic ? 'الوظائف' : 'Careers'}
-            </TabsTrigger>
+            <TabsTrigger value="courses" className={tabTriggerStyle}><GraduationCap className="w-5 h-5" />{isArabic ? 'الدورات' : 'Courses'}</TabsTrigger>
+            <TabsTrigger value="design" className={tabTriggerStyle}><Palette className="w-5 h-5" />{isArabic ? 'مختبر التصميم' : 'Design Lab'}</TabsTrigger>
+            <TabsTrigger value="careers" className={tabTriggerStyle}><Briefcase className="w-5 h-5" />{isArabic ? 'الوظائف' : 'Careers'}</TabsTrigger>
           </TabsList>
 
-          {/* Courses Tab */}
+          {/* 1. الدورات */}
           <TabsContent value="courses">
-            <div className="grid md:grid-cols-2 gap-6">
-              {courses.map((course, index) => (
-                <motion.div
-                  key={course.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  whileHover={{ y: -5 }}
-                  onClick={() => setSelectedCourse(course)}
-                  className="cursor-pointer"
-                >
-                  <SaduCard className="overflow-hidden p-0 h-full">
-                    <div className="aspect-video relative">
-                      <img src={course.image} alt="" className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                      {course.certified && (
-                        <div className="absolute top-3 left-3 bg-green-500 text-white px-2 py-1 rounded-full text-xs flex items-center gap-1 shadow-sm">
-                          <Award className="w-3 h-3" />
-                          {isArabic ? 'معتمد' : 'Certified'}
-                        </div>
-                      )}
-                      <div className="absolute bottom-3 left-3 right-3">
-                        <h3 className={`text-white font-bold text-xl ${isHeritage ? 'font-serif' : ''}`}>
-                          {isArabic ? course.title_ar : course.title}
-                        </h3>
-                        <p className="text-white/80 text-sm font-medium">
-                          {isArabic ? course.instructor_ar : course.instructor}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground font-medium">
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-4 h-4" />
-                            {isArabic ? course.duration_ar : course.duration}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <BookOpen className="w-4 h-4" />
-                            {course.lessons} {isArabic ? 'درس' : 'lessons'}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1 bg-yellow-100 px-2 py-0.5 rounded-full">
-                          <Star className="w-3.5 h-3.5 text-yellow-600 fill-yellow-600" />
-                          <span className="font-bold text-yellow-700 text-xs">{course.rating}</span>
-                        </div>
-                      </div>
-                      
-                      {course.progress > 0 && (
-                        <div className="mb-4 mt-2">
-                          <div className="flex justify-between text-xs mb-1 font-bold">
-                            <span>{isArabic ? 'التقدم' : 'Progress'}</span>
-                            <span style={{ color: themeColors.primary }}>{course.progress}%</span>
-                          </div>
-                          <Progress value={course.progress} className="h-2" />
-                        </div>
-                      )}
-                      
-                      <div className="flex items-center justify-between mt-2 pt-3 border-t border-gray-200/20">
-                        <span className="font-bold text-lg" style={{ color: themeColors.primary }}>{course.price}</span>
-                        <Button
-                          size="sm"
-                          className={`font-bold text-white ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'}`}
-                          data-testid={`course-${course.id}-btn`}
-                        >
-                          {course.progress > 0 ? (isArabic ? 'متابعة الدورة' : 'Continue') : (isArabic ? 'ابدأ الدورة' : 'Start')}
-                        </Button>
-                      </div>
-                    </div>
-                  </SaduCard>
-                </motion.div>
-              ))}
-            </div>
-          </TabsContent>
-
-          {/* Design Lab Tab */}
-          <TabsContent value="design">
-            <div className="flex items-center justify-between mb-6 mt-4">
-              <h3 className={`text-2xl font-bold ${isHeritage ? 'font-serif' : ''}`}>
-                {isArabic ? 'معرض أعمال المجتمع' : 'Community Gallery'}
-              </h3>
-              <Button variant="outline" className={`font-bold ${isHeritage ? 'text-[#8D1C1C] border-[#8D1C1C]' : 'text-blue-600 border-blue-600'}`}>
-                 <Plus className="w-4 h-4 me-2" /> {isArabic ? 'إضافة تصميم' : 'Add Design'}
+            <div className="flex justify-between items-center mb-6">
+              <h2 className={`text-2xl font-bold ${isHeritage ? 'font-serif text-[#8D1C1C]' : 'text-blue-600'}`}>{isArabic ? 'الدورات التدريبية' : 'Training Courses'}</h2>
+              <Button onClick={() => setCreateCourseModalOpen(true)} className={`gap-2 text-white font-bold h-10 px-6 ${isHeritage ? 'bg-[#8D1C1C] rounded-none' : 'bg-gradient-to-r from-blue-600 to-purple-600 rounded-full'}`}>
+                <Plus className="w-5 h-5" /> {isArabic ? 'إنشاء دورة (20 د.ك)' : 'Create Course (20 KWD)'}
               </Button>
             </div>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {designProjects.map((project, index) => (
-                <motion.div
-                  key={project.id}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.1 }}
-                  whileHover={{ y: -5 }}
-                >
-                  <SaduCard className="overflow-hidden p-0 h-full flex flex-col">
-                    <div className="aspect-square relative">
-                      <img src={project.image} alt="" className="w-full h-full object-cover" />
-                    </div>
-                    <div className="p-4 flex flex-col flex-1 justify-between">
-                      <div>
-                        <h4 className="font-bold mb-1 text-lg leading-tight">{isArabic ? project.title_ar : project.title}</h4>
-                        <p className="text-sm text-muted-foreground font-medium mb-3">{isArabic ? project.author_ar : project.author}</p>
-                      </div>
-                      <div className="flex items-center justify-between text-sm text-muted-foreground border-t border-gray-100 pt-3">
-                        <span className="flex items-center gap-1.5 hover:text-red-500 cursor-pointer transition-colors">
-                          <Heart className="w-4 h-4" />
-                          <span className="font-bold">{project.likes}</span>
-                        </span>
-                        <span className="flex items-center gap-1.5 hover:text-blue-500 cursor-pointer transition-colors">
-                          <MessageSquare className="w-4 h-4" />
-                          <span className="font-bold">{project.comments}</span>
-                        </span>
-                      </div>
-                    </div>
-                  </SaduCard>
-                </motion.div>
+            <div className="grid md:grid-cols-2 gap-6">
+              {courses.map(course => (
+                <CourseCard key={course.id} course={course} isArabic={isArabic} isHeritage={isHeritage} themeColors={themeColors} onSelect={setSelectedCourse} isOwner={course.host_id === (user?.id || "user-new")} onDelete={handleDeleteCourse} />
               ))}
             </div>
           </TabsContent>
 
-          {/* Careers Tab */}
+          {/* 2. مختبر التصميم */}
+          <TabsContent value="design">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className={`text-2xl font-bold ${isHeritage ? 'font-serif text-[#8D1C1C]' : 'text-blue-600'}`}>{isArabic ? 'معرض أعمال المجتمع' : 'Community Gallery'}</h3>
+              <Button onClick={() => setCreateDesignModalOpen(true)} variant="outline" className={`font-bold h-10 px-6 ${isHeritage ? 'text-[#8D1C1C] border-[#8D1C1C] rounded-none' : 'text-blue-600 border-blue-600 rounded-full'}`}>
+                <Plus className="w-4 h-4 me-2" /> {isArabic ? 'إضافة تصميم (20 د.ك)' : 'Add Design (20 KWD)'}
+              </Button>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {designProjects.map(project => (
+                <DesignCard key={project.id} project={project} isArabic={isArabic} isOwner={project.host_id === (user?.id || "user-new")} onDelete={() => handleDeleteDesign(project.id)} />
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* 3. الوظائف */}
           <TabsContent value="careers">
             <div className="space-y-4">
-              {careers.map((job, index) => (
-                <motion.div
-                  key={job.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
+              {careers.map(job => (
+                <motion.div key={job.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
                   <SaduCard className="hover:shadow-md transition-shadow">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                       <div className="flex-1">
                         <div className="flex items-start gap-4">
-                          <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm relative overflow-hidden">
-                            <div className="absolute inset-0 opacity-15" style={{ backgroundColor: themeColors.primary }}></div>
-                            <Briefcase className="w-7 h-7 relative z-10" style={{ color: themeColors.primary }} />
+                          <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm relative overflow-hidden bg-blue-100">
+                            <Briefcase className="w-7 h-7 text-blue-600 relative z-10" />
                           </div>
                           <div>
-                            <h3 className={`font-bold text-xl mb-1 ${isHeritage ? 'font-serif' : ''}`}>
-                              {isArabic ? job.title_ar : job.title}
-                            </h3>
+                            <h3 className="font-bold text-xl mb-1">{isArabic ? job.title_ar : job.title}</h3>
                             <p className="text-muted-foreground font-medium">{isArabic ? job.company_ar : job.company}</p>
                             <div className="flex flex-wrap gap-2 mt-3">
-                              <span className={`text-xs px-2.5 py-1 rounded-md font-bold ${darkMode ? 'bg-[#1E293B] text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
-                                {isArabic ? job.location_ar : job.location}
-                              </span>
-                              <span className={`text-xs px-2.5 py-1 rounded-md font-bold ${darkMode ? 'bg-[#1E293B] text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
-                                {isArabic ? job.type_ar : job.type}
-                              </span>
-                              <span className="text-xs bg-green-100/80 text-green-700 border border-green-200 px-2.5 py-1 rounded-md font-bold">
-                                {job.salary}
-                              </span>
+                              <span className="text-xs px-2.5 py-1 rounded-md font-bold bg-gray-100 text-gray-700">{isArabic ? job.location_ar : job.location}</span>
+                              <span className="text-xs px-2.5 py-1 rounded-md font-bold bg-gray-100 text-gray-700">{isArabic ? job.type_ar : job.type}</span>
+                              <span className="text-xs bg-green-100 text-green-700 px-2.5 py-1 rounded-md font-bold">{job.salary}</span>
                             </div>
                           </div>
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-3 justify-center">
-                        <span className="text-xs font-semibold text-muted-foreground bg-black/5 px-2 py-1 rounded-md">
-                          {isArabic ? job.posted_ar : job.posted}
-                        </span>
-                        <Button 
-                          onClick={() => handleApplyClick(job)}
-                          className={`font-bold px-6 h-11 text-white ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515] rounded-lg shadow-sm' : 'bg-[#1D4ED8] hover:bg-[#1E3A8A] rounded-xl shadow-md'}`}
-                        >
+                        <span className="text-xs font-semibold text-muted-foreground bg-black/5 px-2 py-1 rounded-md">{isArabic ? job.posted_ar : job.posted}</span>
+                        <Button onClick={() => handleApplyClick(job)} className="font-bold px-6 h-11 text-white bg-[#1D4ED8] hover:bg-[#1E3A8A] rounded-xl shadow-md">
                           {isArabic ? 'تقدم الآن' : 'Apply Now'}
-                          <ChevronRight className={`w-4 h-4 ms-1 ${isRTL ? 'rotate-180' : ''}`} />
                         </Button>
                       </div>
                     </div>
@@ -514,167 +458,166 @@ const YouthPage = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Community CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`mt-16 p-8 rounded-3xl shadow-sm border border-black/5 ${isHeritage ? 'bg-[#8D1C1C]/5' : 'bg-[#1D4ED8]/5'}`}
-        >
+        {/* مجتمع المبدعين (CTA لفتح شاشة منصة X) */}
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className={`mt-16 p-8 rounded-3xl shadow-sm border border-black/5 ${isHeritage ? 'bg-[#8D1C1C]/5' : 'bg-[#1D4ED8]/5'}`}>
           <div className="flex flex-col md:flex-row items-center gap-8">
             <div className="flex-1 text-center md:text-start">
               <Users className="w-12 h-12 mb-4 mx-auto md:mx-0" style={{ color: themeColors.primary }} />
-              <h3 className={`text-3xl font-bold mb-4 ${isHeritage ? 'font-serif' : ''}`}>
-                {isArabic ? 'انضم لمجتمع المبدعين' : 'Join the Creators Community'}
-              </h3>
+              <h3 className={`text-3xl font-bold mb-4 ${isHeritage ? 'font-serif text-[#8D1C1C]' : 'text-blue-600'}`}>{isArabic ? 'انضم لمجتمع المبدعين (Darwaza X)' : 'Join Darwaza X Community'}</h3>
               <p className="text-muted-foreground font-medium mb-6 text-lg max-w-xl mx-auto md:mx-0">
-                {isArabic
-                  ? 'تواصل مع شباب يشاركونك الشغف بالتراث. شارك أعمالك واحصل على إلهام جديد.'
-                  : 'Connect with youth who share your passion for heritage. Share your work and get inspired.'}
+                {isArabic ? 'منصة اجتماعية كاملة! تواصل، غرد، وشارك شغفك بالتراث مع الآلاف من شباب دروازة.' : 'A full social platform! Connect, post, and share your heritage passion with thousands.'}
               </p>
-              <Button
-                size="lg"
-                className={`h-14 px-8 font-bold text-lg text-white ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515] rounded-xl shadow-[4px_4px_0px_0px_#D97706]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70] rounded-2xl shadow-lg'}`}
-              >
-                {isArabic ? 'انضم الآن مجاناً' : 'Join For Free'}
+              <Button onClick={() => setShowXCommunity(true)} size="lg" className={`h-14 px-8 font-bold text-lg text-white ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515] rounded-xl shadow-[4px_4px_0px_0px_#D97706]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70] rounded-2xl shadow-lg'}`}>
+                {isArabic ? 'افتح مجتمع المبدعين' : 'Open Creators Community'}
                 <ChevronRight className={`w-5 h-5 ms-2 ${isRTL ? 'rotate-180' : ''}`} />
               </Button>
-            </div>
-            <div className="flex -space-x-4">
-              {[1,2,3,4,5].map(i => (
-                <div key={i} className={`w-16 h-16 rounded-full border-4 ${darkMode ? 'border-[#0F172A]' : 'border-white'} shadow-md opacity-${100 - (i*10)}`} style={{ backgroundColor: themeColors.primary }} />
-              ))}
-              <div className={`w-16 h-16 rounded-full border-4 ${darkMode ? 'border-[#0F172A] bg-[#1E293B]' : 'border-white bg-gray-100'} flex items-center justify-center text-sm font-bold shadow-md`}>
-                +500
-              </div>
             </div>
           </div>
         </motion.div>
       </div>
 
-      {/* --- نوافذ تفاصيل الدورات --- */}
-      <Dialog open={!!selectedCourse} onOpenChange={() => setSelectedCourse(null)}>
-        <DialogContent className={`max-w-2xl max-h-[90vh] overflow-y-auto ${modalBg}`}>
-          {selectedCourse && (
-            <>
-              <DialogHeader>
-                <DialogTitle className={`text-2xl font-bold pt-4 ${isHeritage ? 'font-serif text-[#8D1C1C]' : 'text-blue-600'}`}>
-                  {isArabic ? selectedCourse.title_ar : selectedCourse.title}
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-5 px-1 pb-4">
-                <div className="aspect-video rounded-2xl overflow-hidden shadow-md">
-                  <img src={selectedCourse.image} alt="" className="w-full h-full object-cover" />
-                </div>
-                
-                <p className={`text-lg font-medium leading-relaxed ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                  {isArabic ? selectedCourse.description_ar : selectedCourse.description}
-                </p>
-                
-                {selectedCourse.modules && (
-                  <div className="mt-6">
-                    <h4 className={`font-bold mb-4 text-xl ${isHeritage ? 'text-[#8D1C1C]' : ''}`}>{isArabic ? 'محتوى الدورة' : 'Course Modules'}</h4>
-                    <div className="space-y-3">
-                      {selectedCourse.modules.map((module, i) => (
-                        <div key={i} className={`flex items-center gap-4 p-4 rounded-xl border ${module.completed ? (darkMode ? 'bg-green-900/20 border-green-800' : 'bg-green-50 border-green-100') : (darkMode ? 'bg-[#2A2A2A] border-gray-700' : 'bg-gray-50 border-gray-200')}`}>
-                          {module.completed ? (
-                            <CheckCircle className="w-6 h-6 text-green-500 flex-shrink-0" />
-                          ) : (
-                            <Lock className="w-6 h-6 text-muted-foreground flex-shrink-0" />
-                          )}
-                          <span className={`font-bold text-lg ${module.completed ? (darkMode ? 'text-green-400' : 'text-green-800') : (darkMode ? 'text-gray-400' : 'text-gray-500')}`}>
-                            {isArabic ? module.title_ar : module.title}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                <Button className={`w-full h-14 text-lg font-bold mt-6 shadow-md text-white ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515] rounded-xl' : 'bg-[#1D4ED8] hover:bg-[#1E3A8A] rounded-2xl'}`}>
-                  {selectedCourse.progress > 0 ? (isArabic ? 'متابعة الدورة' : 'Continue Course') : (isArabic ? 'ابدأ الدورة' : 'Start Course')}
-                </Button>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* ========================================================= */}
+      {/* النوافذ المنبثقة للإنشاء والدفع */}
+      {/* ========================================================= */}
 
-      {/* --- 1. نافذة التقديم على الوظيفة --- */}
-      <Dialog open={applyModalOpen} onOpenChange={setApplyModalOpen}>
-        <DialogContent className={`max-w-md text-right border-0 overflow-hidden shadow-2xl ${modalBg}`} dir={isArabic ? 'rtl' : 'ltr'}>
+      {/* نافذة إنشاء دورة (دفع 20 د.ك) */}
+      <Dialog open={createCourseModalOpen} onOpenChange={setCreateCourseModalOpen}>
+        <DialogContent aria-describedby={undefined} className={`max-w-xl text-right border-0 overflow-hidden ${modalBg}`} dir={isArabic ? 'rtl' : 'ltr'}>
           <DialogHeader className="pt-6 px-6">
-            <DialogTitle className={`text-2xl font-bold ${isHeritage ? 'font-serif text-[#8D1C1C]' : 'text-blue-600'}`}>
-              {isArabic ? 'تقديم طلب توظيف' : 'Submit Job Application'}
+            <DialogTitle className={`text-3xl font-black ${isHeritage ? 'font-serif text-[#8D1C1C]' : 'text-blue-600'}`}>
+              {isArabic ? 'إنشاء دورة تدريبية' : 'Create a Training Course'}
             </DialogTitle>
-            <p className={`text-sm mt-1 font-medium ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-              {isArabic ? selectedJob?.title_ar : selectedJob?.title} - {isArabic ? selectedJob?.company_ar : selectedJob?.company}
-            </p>
           </DialogHeader>
-          
-          <form onSubmit={handleApplySubmit} className="space-y-4 px-6 pb-6 mt-4">
-            <div className="space-y-2">
-              <label className={`text-sm ${labelStyle}`}>{isArabic ? 'الاسم الكامل' : 'Full Name'}</label>
-              <Input required type="text" placeholder={isArabic ? 'أدخل اسمك الثلاثي' : 'Enter your full name'} className={inputStyle} />
-            </div>
-            <div className="space-y-2">
-              <label className={`text-sm ${labelStyle}`}>{isArabic ? 'رقم الهاتف' : 'Phone Number'}</label>
-              <Input required type="tel" placeholder={isArabic ? 'مثال: 965XXXXXXXX' : 'e.g., 965XXXXXXXX'} className={inputStyle} />
-            </div>
-            <div className="space-y-2">
-              <label className={`text-sm ${labelStyle}`}>{isArabic ? 'البريد الإلكتروني' : 'Email Address'}</label>
-              <Input required type="email" placeholder={isArabic ? 'أدخل بريدك الإلكتروني' : 'Enter your email'} className={inputStyle} />
+          <form onSubmit={handleCreateCourseSubmit} className="space-y-4 px-6 pb-6 mt-4">
+            <div className="bg-yellow-100 dark:bg-yellow-900/30 p-4 rounded-xl border border-yellow-300 flex items-center justify-between mb-4">
+               <div>
+                 <p className="font-bold text-yellow-800 dark:text-yellow-500">{isArabic ? 'رسوم إنشاء الدورة' : 'Course Creation Fee'}</p>
+                 <p className="text-sm text-yellow-700 dark:text-yellow-600">{isArabic ? 'تدفع لمرة واحدة للمراجعة والاستضافة' : 'One-time fee for review and hosting'}</p>
+               </div>
+               <span className="text-2xl font-black text-yellow-800 dark:text-yellow-500">20 د.ك</span>
             </div>
             
-            {/* خانة رفع السيرة الذاتية */}
-            <div className="space-y-2 pt-2">
-              <label className={`text-sm ${labelStyle}`}>{isArabic ? 'السيرة الذاتية (CV)' : 'Upload CV'}</label>
-              <label className={`flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-xl cursor-pointer transition-colors ${darkMode ? 'border-gray-600 hover:border-gray-400 bg-black/20' : 'border-gray-300 hover:border-blue-400 bg-gray-50/50'}`}>
-                <div className="flex items-center justify-center gap-3">
-                  <UploadCloud className={`w-6 h-6 ${isHeritage ? 'text-[#8D1C1C]' : 'text-blue-500'}`} />
-                  <p className={`text-sm font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                    {isArabic ? 'اضغط هنا لرفع الملف (PDF)' : 'Click to upload (PDF)'}
-                  </p>
-                </div>
-                <input type="file" className="hidden" accept=".pdf,.doc,.docx" required />
+            <div className="space-y-2">
+              <label className={`text-sm ${labelStyle}`}>{isArabic ? 'اسم الدورة' : 'Course Name'}</label>
+              <Input name="title" required type="text" placeholder={isArabic ? 'مثال: تصميم الأزياء التراثية' : 'e.g., Heritage Fashion Design'} className={inputStyle} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className={`text-sm ${labelStyle}`}>{isArabic ? 'مدة الدورة' : 'Duration'}</label>
+                <Input name="duration" required type="text" placeholder={isArabic ? 'مثال: 4 أسابيع' : 'e.g., 4 Weeks'} className={inputStyle} />
+              </div>
+              <div className="space-y-2">
+                <label className={`text-sm ${labelStyle}`}>{isArabic ? 'سعر اشتراك الدورة للمتدرب' : 'Course Price'}</label>
+                <Input name="price" required type="number" placeholder="45" className={inputStyle} />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className={`text-sm ${labelStyle}`}>{isArabic ? 'رقم الهاتف للتنسيق' : 'Phone Number'}</label>
+              <Input required type="tel" placeholder="+965 00000000" className={inputStyle} dir="ltr" />
+            </div>
+            <div className="space-y-2">
+              <label className={`text-sm ${labelStyle}`}>{isArabic ? 'شهادة الخبرة (PDF/صورة)' : 'Experience Certificate'}</label>
+              <label className="w-full h-16 border-2 border-dashed rounded-xl flex items-center justify-center cursor-pointer hover:bg-black/5 transition-colors relative overflow-hidden" style={{ borderColor: themeColors.primary }}>
+                <input type="file" accept=".pdf,image/*" className="hidden" onChange={(e) => handleFileUpload(e, setCourseFileName)} required />
+                <FileText className={`w-6 h-6 mr-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
+                <span className={`text-sm font-bold ${labelStyle}`}>{courseFileName ? courseFileName : (isArabic ? 'اختر الملف' : 'Select File')}</span>
               </label>
             </div>
-            
-            <Button 
-              type="submit"
-              className={`w-full font-bold h-12 mt-6 text-white transition-all duration-300 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515] rounded-xl shadow-[4px_4px_0px_0px_#D97706]' : 'bg-[#1D4ED8] hover:bg-[#1E3A8A] rounded-xl shadow-lg shadow-blue-500/30'}`}
-            >
-              {isArabic ? 'إرسال الطلب' : 'Submit Application'}
+            <div className="space-y-2">
+              <label className={`text-sm ${labelStyle}`}>{isArabic ? 'وصف الدورة' : 'Description'}</label>
+              <textarea name="description" required rows="2" className={`w-full p-3 resize-none focus:outline-none ${inputStyle}`} />
+            </div>
+            <Button type="submit" className={`w-full font-bold h-14 mt-4 text-xl text-white ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515] rounded-none' : 'bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl'}`}>
+              <Lock className="w-5 h-5 ml-2" /> {isArabic ? 'انتقل للدفع (20 د.ك)' : 'Proceed to Pay (20 KWD)'}
             </Button>
           </form>
         </DialogContent>
       </Dialog>
 
-      {/* --- 2. نافذة نجاح التقديم --- */}
-      <Dialog open={successModalOpen} onOpenChange={setSuccessModalOpen}>
-        <DialogContent className={`max-w-xs text-center border-0 overflow-hidden shadow-2xl ${modalBg}`} dir={isArabic ? 'rtl' : 'ltr'}>
-          <div className="flex flex-col items-center justify-center p-6 space-y-4">
-            <motion.div 
-              initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200, damping: 20 }}
-              className={`w-20 h-20 rounded-full flex items-center justify-center shadow-inner ${isHeritage ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-600'}`}
-            >
-              <CheckCircle className="w-12 h-12" />
-            </motion.div>
+      {/* نافذة إضافة تصميم (دفع 20 د.ك) */}
+      <Dialog open={createDesignModalOpen} onOpenChange={setCreateDesignModalOpen}>
+        <DialogContent aria-describedby={undefined} className={`max-w-xl text-right border-0 overflow-hidden ${modalBg}`} dir={isArabic ? 'rtl' : 'ltr'}>
+          <DialogHeader className="pt-6 px-6">
+            <DialogTitle className={`text-3xl font-black ${isHeritage ? 'font-serif text-[#8D1C1C]' : 'text-blue-600'}`}>
+              {isArabic ? 'إضافة تصميم للمختبر' : 'Add Design to Lab'}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleCreateDesignSubmit} className="space-y-4 px-6 pb-6 mt-4">
+            <div className="bg-yellow-100 dark:bg-yellow-900/30 p-4 rounded-xl border border-yellow-300 flex items-center justify-between mb-4">
+               <div>
+                 <p className="font-bold text-yellow-800 dark:text-yellow-500">{isArabic ? 'رسوم عرض التصميم' : 'Design Display Fee'}</p>
+               </div>
+               <span className="text-2xl font-black text-yellow-800 dark:text-yellow-500">20 د.ك</span>
+            </div>
             
-            <h2 className={`text-2xl font-bold mt-2 ${isHeritage ? 'font-serif text-[#8D1C1C]' : (darkMode ? 'text-white' : 'text-gray-900')}`}>
-              {isArabic ? 'تم تقديم الطلب بنجاح' : 'Application Submitted!'}
-            </h2>
-            
-            <p className={`text-sm font-bold bg-opacity-20 px-4 py-2 rounded-lg ${darkMode ? 'text-gray-300 bg-gray-800' : 'text-gray-700 bg-gray-100'}`}>
-              {isArabic ? 'سيتم إشعارك لاحقًا' : 'You will be notified later'}
-            </p>
+            <label className="w-full h-32 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-black/5 transition-colors relative overflow-hidden" style={{ borderColor: themeColors.primary }}>
+              <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, setDesignImagePreview)} required />
+              {designImagePreview ? (
+                <img src={designImagePreview} alt="Preview" className="w-full h-full object-cover" />
+              ) : (
+                <><UploadCloud className="w-8 h-8 mb-2 text-gray-400" /><span className={`text-sm font-bold ${labelStyle}`}>{isArabic ? 'إرفاق صورة التصميم' : 'Upload Design Image'}</span></>
+              )}
+            </label>
 
-            <Button 
-              onClick={() => setSuccessModalOpen(false)}
-              className={`w-full mt-4 font-bold transition-all h-11 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515] text-white rounded-lg' : 'bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-xl'}`}
-            >
-              {isArabic ? 'إغلاق' : 'Close'}
+            <div className="space-y-2">
+              <label className={`text-sm ${labelStyle}`}>{isArabic ? 'اسم التصميم' : 'Design Name'}</label>
+              <Input name="title" required type="text" placeholder={isArabic ? 'مثال: حذاء رياضي بنقش كويتي' : 'e.g., Kuwaiti Pattern Sneakers'} className={inputStyle} />
+            </div>
+            <div className="space-y-2">
+              <label className={`text-sm ${labelStyle}`}>{isArabic ? 'رقم الهاتف للتواصل' : 'Phone Number'}</label>
+              <Input required type="tel" placeholder="+965 00000000" className={inputStyle} dir="ltr" />
+            </div>
+            
+            <Button type="submit" className={`w-full font-bold h-14 mt-4 text-xl text-white ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515] rounded-none' : 'bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl'}`}>
+              <Lock className="w-5 h-5 ml-2" /> {isArabic ? 'انتقل للدفع (20 د.ك)' : 'Proceed to Pay (20 KWD)'}
             </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* نوافذ التقديم للوظائف */}
+      <Dialog open={applyModalOpen} onOpenChange={setApplyModalOpen}>
+        <DialogContent aria-describedby={undefined} className={`max-w-md text-right border-0 ${modalBg}`} dir={isArabic ? 'rtl' : 'ltr'}>
+          <DialogHeader className="pt-6 px-6">
+            <DialogTitle className={`text-2xl font-bold ${isHeritage ? 'font-serif text-[#8D1C1C]' : 'text-blue-600'}`}>{isArabic ? 'تقديم طلب توظيف' : 'Submit Application'}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleApplySubmit} className="space-y-4 px-6 pb-6 mt-4">
+            <div className="space-y-2"><label className={labelStyle}>{isArabic ? 'الاسم' : 'Name'}</label><Input required className={inputStyle} /></div>
+            <div className="space-y-2"><label className={labelStyle}>{isArabic ? 'الهاتف' : 'Phone'}</label><Input required type="tel" className={inputStyle} /></div>
+            <div className="space-y-2 pt-2">
+              <label className={`text-sm ${labelStyle}`}>{isArabic ? 'السيرة الذاتية (CV)' : 'Upload CV'}</label>
+              <label className={`flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-xl cursor-pointer ${darkMode ? 'border-gray-600 bg-black/20' : 'border-gray-300 bg-gray-50/50'}`}>
+                <UploadCloud className="w-6 h-6 text-blue-500 mb-2" />
+                <p className="text-sm font-medium">{isArabic ? 'رفع الملف (PDF)' : 'Upload (PDF)'}</p>
+                <input type="file" className="hidden" accept=".pdf" required />
+              </label>
+            </div>
+            <Button type="submit" className={`w-full font-bold h-12 mt-6 text-white ${isHeritage ? 'bg-[#8D1C1C] rounded-none' : 'bg-blue-600 rounded-xl'}`}>{isArabic ? 'إرسال' : 'Submit'}</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={successModalOpen} onOpenChange={setSuccessModalOpen}>
+        <DialogContent aria-describedby={undefined} className={`max-w-xs text-center border-0 ${modalBg}`} dir={isArabic ? 'rtl' : 'ltr'}>
+          <div className="flex flex-col items-center justify-center p-6 space-y-4">
+            <CheckCircle className="w-16 h-16 text-green-500" />
+            <h2 className="text-2xl font-bold">{isArabic ? 'تم تقديم الطلب بنجاح' : 'Application Submitted!'}</h2>
+            <Button onClick={() => setSuccessModalOpen(false)} className="w-full mt-4 bg-gray-200 text-gray-800 hover:bg-gray-300 font-bold">{isArabic ? 'إغلاق' : 'Close'}</Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* نافذة تفاصيل الدورة (عرض فقط) */}
+      <Dialog open={!!selectedCourse} onOpenChange={() => setSelectedCourse(null)}>
+        <DialogContent aria-describedby={undefined} className={`max-w-xl text-right border-0 ${modalBg}`} dir={isArabic ? 'rtl' : 'ltr'}>
+          {selectedCourse && (
+            <div className="p-6">
+              <h2 className="text-2xl font-bold mb-4">{isArabic ? selectedCourse.title_ar : selectedCourse.title}</h2>
+              <img src={selectedCourse.image} alt="" className="w-full h-48 object-cover rounded-xl mb-4" />
+              <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">{isArabic ? selectedCourse.description_ar : selectedCourse.description}</p>
+              <Button className={`w-full font-bold h-12 text-white ${isHeritage ? 'bg-[#8D1C1C] rounded-none' : 'bg-blue-600 rounded-xl'}`}>{isArabic ? 'اشترك الآن' : 'Enroll Now'}</Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 

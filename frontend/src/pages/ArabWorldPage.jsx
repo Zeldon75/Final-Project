@@ -1,104 +1,563 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Button } from '../components/ui/button';
 import { SaduCard, SaduDivider } from '../components/SaduPattern';
 import { 
-  Globe, 
-  ChevronRight, 
-  MapPin, 
-  Users, 
-  BookOpen, 
-  Utensils,
-  Play,
-  X,
-  ExternalLink
+  Globe, ChevronRight, MapPin, Users, BookOpen, Utensils,
+  Play, X, Hammer, Music, Landmark, Shirt, ArrowRight, ArrowLeft, Video, ExternalLink
 } from 'lucide-react';
-import axios from 'axios';
-
-const API_URL = process.env.REACT_APP_BACKEND_URL;
 
 const YouTubeEmbed = ({ videoId, title, onClose }) => {
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        className="relative w-full max-w-4xl bg-black rounded-2xl overflow-hidden"
+        initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+        className="relative w-full max-w-5xl bg-black rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)]"
         onClick={e => e.stopPropagation()}
       >
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/30 transition-colors"
-          data-testid="close-video-btn"
-        >
-          <X className="w-5 h-5 text-white" />
+        <button onClick={onClose} className="absolute top-4 right-4 z-10 w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/40 transition-colors">
+          <X className="w-6 h-6 text-white" />
         </button>
-        <div className="aspect-video">
-          <iframe
-            width="100%"
-            height="100%"
-            src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`}
-            title={title}
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="w-full h-full"
-          />
+        <div className="aspect-video w-full">
+          <iframe width="100%" height="100%" src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`} title={title} frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
         </div>
       </motion.div>
     </motion.div>
   );
 };
 
-const CountryCard = ({ country, isArabic, isHeritage, themeColors, isSelected, onClick }) => {
+// ==========================================
+// الموسوعة الثقافية مع الوصف الطويل والروابط (16 دولة)
+// ==========================================
+const arabCountriesData = [
+  {
+    code: 'KW', region: 'Gulf', name_ar: 'دولة الكويت', name: 'Kuwait', flag: '🇰🇼', flag_image_url: 'https://flagcdn.com/w1280/kw.png', 
+    video_id: 'EGZvJqpc6uU', video_title_ar: 'وثائقي: الكويت قديماً وحديثاً', video_title: 'Documentary: Kuwait Past & Present',
+    dish: { name_ar: 'المكبوس', name: 'Machboos', image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?q=80&w=600' },
+    details: [
+      { id: 'cuisine', icon: Utensils, title_ar: 'المطبخ التقليدي', title: 'Cuisine', 
+        desc_ar: 'يتميز المطبخ الكويتي بتنوعه الغني وتأثره بخطوط التجارة البحرية القديمة التي ربطت الكويت بالهند وبلاد فارس. يعتبر "المكبوس" الطبق الوطني الأول، ويُحضر بعناية فائقة باستخدام الأرز البسمتي مع اللحم أو الدجاج أو أسماك الخليج الطازجة مثل الزبيدي، ويُبهر بمزيج خاص من التوابل والزعفران. لا تكتمل المائدة دون أطباق مثل المطبق، المموش، والجريش التي تعكس أصالة الماضي. وفي قسم الحلويات، يبرز "قرص العقيلي" الهش المعطر بالهيل، والدرابيل المقرمشة، وصب القفشة التي تزين موائد شهر رمضان المبارك، مما يعكس كرم الضيافة الكويتية الأصيلة وحبهم للاجتماع على موائد عامرة.', 
+        desc: 'Kuwaiti cuisine is characterized by its rich diversity and influence from ancient maritime trade routes connecting Kuwait to India and Persia. "Machboos" is the premier national dish, carefully prepared using Basmati rice with meat, chicken, or fresh Gulf fish like Zubaidi, seasoned with a special blend of spices and saffron. The table is incomplete without dishes like Mutabbaq, Mumawwash, and Jareesh. In sweets, the delicate "Qers Oqaily" scented with cardamom stands out, along with crispy Darabeel and Sab Al-Qafsha, reflecting true Kuwaiti hospitality.', 
+        link: 'https://aishwzafran.com/blog/%D8%A7%D8%B4%D9%87%D8%B1-%D8%A7%D9%83%D9%84%D8%A7%D8%AA-%D8%A7%D9%84%D9%83%D9%88%D9%8A%D8%AA' },
+      { id: 'crafts', icon: Hammer, title_ar: 'الحرف اليدوية', title: 'Crafts', 
+        desc_ar: 'شكلت الحرف اليدوية عصب الحياة في الكويت قديماً، حيث ارتبطت بالبحر والصحراء. تتصدر "القلافة" (صناعة السفن الخشبية) قائمة هذه الحرف، فقد أبدع الكويتيون في صناعة سفن البوم والسنبوك التي جابت بحار العالم. في البادية، برزت حرفة "السدو" وهي نسيج وبر الإبل وشعر الماعز لصناعة بيوت الشعر والخيام بزخارف هندسية تعكس طبيعة الصحراء. كما عُرفت الكويت ببراعة صاغتها في صياغة الذهب التقليدي كـ "المرتعشة" و"الهامة"، مما يبرز ذوقاً رفيعاً وحرفية تتوارثها الأجيال وتحافظ عليها الدولة حتى اليوم كجزء من هويتها الوطنية.', 
+        desc: 'Handicrafts formed the lifeblood of ancient Kuwait, deeply connected to the sea and desert. "Qallafa" (wooden dhow building) tops this list, as Kuwaitis masterfully built Boom and Sanbouk ships that sailed the world\'s seas. In the desert, "Sadu" weaving emerged, using camel hair to create tents with geometric patterns reflecting desert nature. Kuwait was also known for its masterful traditional gold crafting, such as the "Merta\'sha", highlighting a refined taste and craftsmanship passed down through generations.', 
+        link: 'https://www.kuwait-history.net/vb/showthread.php?t=1880' },
+      { id: 'folklore', icon: Music, title_ar: 'الفنون والفلكلور', title: 'Folklore', 
+        desc_ar: 'ينبض الفلكلور الكويتي بإيقاعات تعكس حياة الأجداد بين قسوة البحر وهدوء الصحراء. فن "الصوت العربي" يُعد من أعرق الفنون الموسيقية التي تُعزف على العود والمرواس. أما في رحلات الغوص الشاقة بحثاً عن اللؤلؤ، فقد كان غناء "الفجري" هو الونيس والدافع للبحارة والغواصين لتحمل الصعاب. في المناسبات والأفراح، تتصدر رقصة "السامري" المشهد بأشعارها النبطية العاطفية، إلى جانب "العرضة" بشقيها البرية والبحرية، والتي تُؤدى بالسيوف والطبول تعبيراً عن الشجاعة والولاء والاحتفال بالانتصارات والأعياد الوطنية.', 
+        desc: 'Kuwaiti folklore pulses with rhythms reflecting the ancestors\' lives between the harsh sea and tranquil desert. The "Sawt" art is one of the oldest musical forms, played on the Oud and Mirwas. During arduous pearl diving journeys, "Fjiri" singing was the companion and motivator for sailors. In celebrations, the "Samri" dance takes center stage with its emotional Nabati poetry, alongside the "Ardha" (both land and sea versions), performed with swords and drums to express courage, loyalty, and celebration of national victories.', 
+        link: 'https://alwatan.kuwait.tt/articledetails.aspx?id=478936&yearquarter=20162' },
+      { id: 'architecture', icon: Landmark, title_ar: 'العمارة والمعالم', title: 'Architecture', 
+        desc_ar: 'تمزج عمارة الكويت بين الحداثة المذهلة والتراث العريق. تقف "أبراج الكويت" كأيقونة عالمية ترمز لنهضة الدولة المعاصرة بتصميمها المستوحى من المباخر والمكاحل. وفي قلب العاصمة، يحكي "كشك الشيخ مبارك" تفاصيل بدايات التنظيم الإداري والسياسي. أما العمارة السكنية القديمة فتتجلى في "البيت الكويتي القديم" المبني من صخر البحر والطين، والذي ينقسم بذكاء إلى الحوش الداخلي للتهوية والخصوصية، والدهريز (الممر)، والليوان الذي يقي من شمس الصيف الحارقة، مما يمثل هندسة معمارية تكيفت بعبقرية مع المناخ والتقاليد.', 
+        desc: 'Kuwaiti architecture blends stunning modernity with deep-rooted heritage. The "Kuwait Towers" stand as a global icon symbolizing the modern state\'s renaissance, with a design inspired by traditional incense burners. In the heart of the capital, the "Sheikh Mubarak Kiosk" tells the story of early political organization. Ancient residential architecture is evident in the traditional Kuwaiti house built from sea rock and mud, cleverly divided into an inner courtyard (Hosh), hallway (Dehreez), and a shaded colonnade (Liwan) adapting perfectly to the climate.', 
+        link: 'https://www.kuna.net.kw/ArticleDetails.aspx?id=2684934&language=ar' },
+      { id: 'clothing', icon: Shirt, title_ar: 'الأزياء التقليدية', title: 'Clothing', 
+        desc_ar: 'يعكس الزي الكويتي حشمة وأناقة تناسب البيئة الصحراوية والمناخ الحار. يرتدي الرجل الكويتي "الدشداشة" البيضاء صيفاً والداكنة شتاءً، يعلوها "الغترة" (غطاء الرأس) و"العقال" الأسود، وفي المناسبات الرسمية يرتدي "البشت" المطرّز بخيوط الزري الذهبية كرمز للوقار. أما المرأة، فتتألق بـ "الدراعة" الواسعة المطرزة، وفي الأعراس ترتدي "الثوب الهاشمي" الفاخر المصنوع من الحرير الرقيق. الفتيات الصغيرات كن يرتدين "البخنق" الأسود المطرز بخيوط ذهبية حول الوجه، مما يشكل لوحة فنية من الأزياء التي تحافظ على هويتها حتى اليوم.', 
+        desc: 'Kuwaiti attire reflects modesty and elegance suited for the desert environment. Kuwaiti men wear the white "Dishdasha" in summer and dark ones in winter, topped with a "Ghutra" (headdress) and black "Agal". For formal occasions, the gold-embroidered "Bisht" is worn as a symbol of dignity. Women shine in the wide, embroidered "Dara\'a", and at weddings, they wear the luxurious silk "Hashemi Dress". Young girls used to wear the gold-embroidered black "Makhnaq", forming a beautiful sartorial heritage maintained to this day.', 
+        link: 'https://www.skynewsarabia.com/video/1025230-%D8%A7%D9%84%D9%83%D9%88%D9%8A%D8%AA-%D8%A7%D9%94%D8%B2%D9%8A%D8%A7%D8%A1-%D8%AA%D8%B1%D8%A7%D8%AB%D9%8A%D8%A9-%D8%AA%D9%88%D8%A7%D9%83%D8%A8-%D8%A7%D9%84%D8%B9%D8%B5%D8%B1' },
+      { id: 'traditions', icon: Users, title_ar: 'التقاليد الاجتماعية', title: 'Traditions', 
+        desc_ar: 'تتميز الكويت بنسيج اجتماعي مترابط تتصدره "الديوانية"، وهي المجلس الذي يجمع الرجال يومياً لتبادل الأحاديث، مناقشة القضايا العامة، وحل المشكلات، وتعتبر برلماناً مصغراً ومدرسة للأجيال. من التقاليد الجميلة طقوس "النون"، وهي احتفالية بسيطة ومفرحة تقام عند بزوغ أول سن للطفل أو عندما يبدأ المشي، حيث تُرمى الحلويات والمكسرات فوق رأسه ليتسابق الأطفال لجمعها. كما يبرز كرم الضيافة الكويتي في استقبال الضيوف بالبخور والقهوة العربية الممزوجة بالهيل، مما يعكس دفء العلاقات وترابط المجتمع في السراء والضراء.', 
+        desc: 'Kuwait features a cohesive social fabric spearheaded by the "Diwaniya", a daily gathering place for men to chat, discuss public issues, and solve problems, acting as a mini-parliament and school for generations. A beautiful tradition is the "Noon" ritual, a joyful celebration held when a child gets their first tooth or starts walking, where sweets and nuts are thrown over their head for children to collect. Kuwaiti hospitality also shines through welcoming guests with incense and Arabic cardamom coffee, reflecting warm societal bonds.', 
+        link: 'https://www.consult-club.com/post/%D8%A7%D9%84%D9%81%D9%87%D8%AF-%D8%A7%D9%84%D9%86%D9%88%D8%A7%D8%AE%D8%B0%D8%A9-%D9%88%D8%A7%D9%84%D8%B4%D9%85%D9%84%D8%A7%D9%86-%D8%A7%D9%84%D8%B1%D9%88%D9%85%D9%8A-%D9%81%D9%8A-%D8%A7%D9%84%D9%83%D9%88%D9%8A%D8%AA-%D8%AC%D8%B3%D9%88%D8%B1-%D9%85%D9%86-%D8%A7%D9%84%D8%AA%D8%A7%D8%B1%D9%8A%D8%AE-%D8%AA%D8%B1%D8%A8%D8%B7-%D8%A8%D9%8A%D9%86-%D8%A7%D9%84%D8%B9%D8%A7%D8%A6%D9%84%D8%A7%D8%AA-%D9%84%D8%A7%D9%83%D8%AB%D8%B1-%D9%85%D9%86-100-%D8%B3%D9%86%D8%A9' }
+    ]
+  },
+  {
+    code: 'SA', region: 'Gulf', name_ar: 'السعودية', name: 'Saudi Arabia', flag: '🇸🇦', flag_image_url: 'https://flagcdn.com/w1280/sa.png',
+    video_id: 'vP9S_UCepR8', video_title_ar: 'وثائقي: تراث المملكة', video_title: 'Documentary: Saudi Heritage',
+    dish: { name_ar: 'الكبسة النجدية', name: 'Najdi Kabsa', image: 'https://images.unsplash.com/photo-1599869152285-8025232810fb?q=80&w=600' },
+    details: [
+      { id: 'cuisine', icon: Utensils, title_ar: 'المطبخ التقليدي', title: 'Cuisine', 
+        desc_ar: 'المطبخ السعودي عبارة عن فسيفساء نكهات تختلف من منطقة لأخرى. تتسيد "الكبسة النجدية" الموائد ببهاراتها العطرية ولحمها المطهو مع الأرز. في الحجاز يبرز "السليق الطائفي" وهو أرز يطبخ بالحليب والمرق ويقدم مع الدجاج المحمر. أما في الجنوب، فيعبر "الحنيذ" عن براعة الطهي، حيث يدفن اللحم في حفرة تحت الأرض مع أغصان المرخ ليعطيه نكهة فريدة. ولا ننسى "الجريش" و"المرقوق" كأطباق دافئة شعبية، و"الكليجا القصيمية" المحشوة بدبس التمر والبهارات كأيقونة للحلويات التقليدية التي تقدم مع القهوة.', 
+        desc: 'Saudi cuisine is a mosaic of flavors that varies by region. The "Najdi Kabsa" dominates tables with its aromatic spices and meat cooked with rice. In the Hijaz, "Taifi Saleeq" stands out, which is rice cooked with milk and broth served with roasted chicken. In the south, "Haneeth" showcases culinary skill, where meat is buried in an underground pit with Marakh branches for a unique flavor. Popular warm dishes like "Jareesh" and "Margoug" are essential, alongside "Qassimi Kleija" stuffed with date syrup as a traditional sweet icon.', 
+        link: 'https://saudipedia.com/%D8%A7%D9%84%D9%85%D8%B7%D8%A8%D8%AE-%D8%A7%D9%84%D8%B3%D8%B9%D9%88%D8%AF%D9%8A' },
+      { id: 'crafts', icon: Hammer, title_ar: 'الحرف اليدوية', title: 'Crafts', 
+        desc_ar: 'تتميز الحرف اليدوية السعودية بارتباطها الوثيق ببيئة كل منطقة. في الجنوب، تبدع الأيادي في صناعة "الجنابي" (الخناجر التقليدية) المطعمة بالفضة والتي تعتبر رمزاً للوجاهة والشجاعة. وفي الأحساء شرقاً، تتوارث العائلات حرفة خياطة "البشوت" (المشالح) يدوياً بخيوط الذهب الدقيقة، لتُصدَّر إلى كافة دول الخليج. كما يُعد "القط العسيري" من أبرز الفنون الحرفية، وهو فن نقش جدران المنازل من الداخل بألوان ونقوش هندسية زاهية تقوم به نساء منطقة عسير، وقد أُدرج ضمن قائمة التراث العالمي لليونسكو لجماله وتفرده.', 
+        desc: 'Saudi handicrafts are closely tied to the environment of each region. In the south, artisans excel in making "Janabi" (traditional daggers) inlaid with silver, symbolizing prestige and courage. In Al-Ahsa, families inherit the craft of hand-sewing "Bishts" (cloaks) using fine gold threads. "Al-Qatt Al-Asiri" is a prominent craft, an art of painting the interior walls of houses with bright geometric patterns, performed by women in the Asir region, and is listed in UNESCO\'s World Heritage for its beauty and uniqueness.', 
+        link: 'https://saudipedia.com/%D8%A7%D9%84%D8%AD%D8%B1%D9%81-%D8%A7%D9%84%D9%8A%D8%AF%D9%88%D9%8A%D8%A9-%D9%81%D9%8A-%D8%A7%D9%84%D8%B3%D8%B9%D9%88%D8%AF%D9%8A%D8%A9' },
+      { id: 'folklore', icon: Music, title_ar: 'الفنون والفلكلور', title: 'Folklore', 
+        desc_ar: 'تتنوع الفنون الأدائية في المملكة بتنوع جغرافيتها لتشكل إرثاً ثقافياً مذهلاً. "العرضة النجدية" (العرضة السعودية) هي الرقصة الرسمية للبلاد، تُؤدى بالسيوف والطبول وتتغنى بأمجاد الوطن وبطولاته. في المنطقة الغربية (الحجاز)، يشتهر "المزمار الحجازي" الذي يُؤدى بالعصي على إيقاع الطبول في المناسبات والأفراح، بالإضافة إلى "المجرور الطائفي" العريق. أما في جبال الجنوب، فتؤدى رقصة "الخطوة الجنوبية" بشكل جماعي متناغم يجسد روح التكاتف والتماسك بين أفراد المجتمع في القرى والمدن على حد سواء.', 
+        desc: 'Performing arts in the Kingdom vary with its geography, forming an amazing cultural legacy. The "Najdi Ardha" is the official state dance, performed with swords and drums, singing of the nation\'s glories. In the Hijaz, the "Hijazi Mizmar" is famous, performed with sticks to the rhythm of drums during celebrations, alongside the ancient "Taifi Majrour". In the southern mountains, the "Southern Khatwa" dance is performed in a harmonious group setting, embodying the spirit of solidarity and cohesion among community members.', 
+        link: 'https://saudipedia.com/%D9%85%D8%A8%D8%A7%D8%AF%D8%B1%D8%A9-%D8%A7%D9%84%D9%85%D8%B3%D8%A7%D8%B1%D8%A7%D8%AA-%D8%A7%D9%84%D8%AA%D8%AF%D8%B1%D9%8A%D8%A8%D9%8A%D8%A9-%D9%81%D9%8A-%D8%A7%D9%84%D8%AB%D9%82%D8%A7%D9%81%D8%A9-%D9%88%D8%A7%D9%84%D9%81%D9%86%D9%88%D9%86' },
+      { id: 'architecture', icon: Landmark, title_ar: 'العمارة والمعالم', title: 'Architecture', 
+        desc_ar: 'تمتلك السعودية كنزاً من المعالم المعمارية التاريخية التي تروي قصص حقبات مختلفة. يبرز "قصر المصمك" في الرياض كشاهد عريق على تأسيس المملكة الحديثة مبنياً من الطين اللبن. في الشمال الغربي، تبهر "مدائن صالح" (الحجر) في العلا العالم بواجهاتها النبطية المنحوتة بالصخر. وفي الدرعية، يعكس "حي الطريف" العمارة النجدية الأصيلة بقصوره الطينية الشامخة. أما في مدينة جدة التاريخية (البلد)، فتخطف الأنظار بيوتها المزينة بـ "الرواشين" الخشبية البديعة التي صُممت بعبقرية لتسمح بمرور النسيم وتوفر الخصوصية التامة لأهل الدار.', 
+        desc: 'Saudi Arabia possesses a treasure trove of historical architectural landmarks. The "Masmak Fort" in Riyadh stands as a witness to the founding of the modern Kingdom, built of mudbrick. In the northwest, "Madain Saleh" (Hegra) in AlUla dazzles the world with its rock-carved Nabataean facades. In Diriyah, the "At-Turaif" district reflects authentic Najdi architecture. In historic Jeddah, houses decorated with exquisite wooden "Rawashin" catch the eye, brilliantly designed to allow breezes to pass while providing complete privacy.', 
+        link: 'https://saudipedia.com/search?query=%D9%85%D8%B9%D8%A7%D9%84%D9%85' },
+      { id: 'clothing', icon: Shirt, title_ar: 'الأزياء التقليدية', title: 'Clothing', 
+        desc_ar: 'الزي السعودي هوية وطنية راسخة تختلف تفاصيلها من منطقة لأخرى. يرتدي الرجل السعودي الثوب الأبيض غالباً، يعلوه "الشماغ" الأحمر أو الغترة البيضاء، ويثبت بـ "العقال" الأسود أو المقصب في الأعياد، ويرتدي "الدقلة" والمشلح في المناسبات الكبرى. أما أزياء النساء فهي بحر من الألوان والتطريزات، ففي نجد يُلبس "المقطع" والثوب المسرح، وفي الحجاز يرتدين "الزبون" و"المحرمة"، بينما تتميز نساء الجنوب بارتداء الثياب المطرزة بخيوط ملونة تعكس طبيعة أزهار عسير، مع ارتداء البرقع أو الشيلة كغطاء للرأس.', 
+        desc: 'Saudi attire is a firm national identity with details varying by region. Men typically wear a white Thobe, topped with a red "Shemagh" or white Ghutra, secured by a black "Agal". They wear the "Daglah" and Mishal (Bisht) on major occasions. Women\'s clothing is a sea of colors and embroidery; in Najd, the "Muqta\'a" is worn. In Hijaz, they wear the "Zaboun", while women in the south wear dresses embroidered with colorful threads reflecting Asir\'s nature, along with a Burqa or Shayla as a head cover.', 
+        link: 'https://saudipedia.com/%D9%82%D8%A7%D8%A6%D9%85%D8%A9-%D9%85%D9%81%D8%B1%D8%AF%D8%A7%D8%AA-%D8%B9%D8%A7%D9%85%D9%8A%D8%A9-%D9%84%D8%A3%D8%B3%D9%85%D8%A7%D8%A1-%D8%A7%D9%84%D9%85%D9%84%D8%A7%D8%A8%D8%B3-%D9%81%D9%8A-%D8%A7%D9%84%D8%B3%D8%B9%D9%88%D8%AF%D9%8A%D8%A9' },
+      { id: 'traditions', icon: Users, title_ar: 'التقاليد الاجتماعية', title: 'Traditions', 
+        desc_ar: 'الكرم والضيافة هما حجر الزاوية في التقاليد السعودية. تبدأ مراسم الضيافة دائماً بتقديم "القهوة السعودية" المعطرة بالهيل والزعفران والمقرونة بأفخر أنواع التمور، ولتقديم القهوة قواعد صارمة تُمسك باليد اليسرى والفنجان باليمنى. تتجلى في البادية قيم "الرفادة" والمروءة، حيث يفتح البدوي خيمته للغريب ويقاسمه زاده. وتحتفل الأسر السعودية بالمناسبات والأعياد باجتماعات عائلية كبيرة، حيث تُذبح الذبائح وتُمد الموائد، وتُعد المجالس مقراً لتوارث العادات والقصص ونقل قيم الاحترام والتوقير لكبار السن للأجيال الشابة.', 
+        desc: 'Generosity and hospitality are the cornerstones of Saudi traditions. Hospitality always begins with serving "Saudi Coffee" scented with cardamom and saffron, paired with the finest dates. Serving coffee has strict rules (holding the Dallah in the left hand and the cup in the right). In the desert, values of "Rifada" and chivalry are evident, where a Bedouin opens his tent to a stranger. Saudi families celebrate Eid with large family gatherings where feasts are prepared, and majlises serve as centers for passing down values of respect for elders to young generations.', 
+        link: 'https://saudipedia.com/search?query=%D8%A7%D9%84%D8%AA%D9%82%D8%A7%D9%84%D9%8A%D8%AF' }
+    ]
+  },
+  {
+    code: 'BH', region: 'Gulf', name_ar: 'مملكة البحرين', name: 'Bahrain', flag: '🇧🇭', flag_image_url: 'https://flagcdn.com/w1280/bh.png',
+    video_id: 'fQvkTx3oUNc', video_title_ar: 'وثائقي: لؤلؤة الخليج', video_title: 'Documentary: Pearl of the Gulf',
+    dish: { name_ar: 'المحمر', name: 'Muhammar', image: 'https://images.unsplash.com/photo-1628151015968-3a4429e9ef04?q=80&w=600' },
+    details: [
+      { id: 'cuisine', icon: Utensils, title_ar: 'المطبخ التقليدي', title: 'Cuisine', 
+        desc_ar: 'يعتمد المطبخ البحريني بشكل كبير على خيرات البحر والتوابل الهندية التي امتزجت عبر التجارة لتشكل نكهة فريدة. يُعد طبق "المحمر" وهو أرز محلى بالدبس والسكر يقدم مع أسماك الصافي أو الكنعد المقلية من أشهر الأطباق. وتعتبر "التكة البحرينية" ذات النكهة الحامضة الفريدة بالليمون الأسود (اللومي) طعاماً شعبياً لا يعلى عليه. كما تشتهر البحرين بـ "المضروبة" و"الهريس". أما التاج على مائدة الحلويات فهو بلا منازع "حلوى الشويطر" البحرينية الملكية، والتي تُصنع من النشا والزعفران والمكسرات وتقدم كرمز للضيافة في كل بيت.', 
+        desc: 'Bahraini cuisine relies heavily on the bounty of the sea and Indian spices that blended through trade to create a unique flavor. "Muhammar", a sweet rice dish made with date syrup and sugar served with fried Safi or Kingfish, is a famous dish. "Bahraini Tikka" with its unique tangy flavor from black lime (Loomi) is a top street food. Bahrain is also famous for "Madhrouba" and "Harees". The crown jewel of sweets is undoubtedly the royal "Showaiter Halwa", made of starch, saffron, and nuts, served as a symbol of hospitality in every home.', 
+        link: 'https://almatar.com/blog/ar/%D8%A7%D9%84%D8%A3%D9%83%D9%84%D8%A7%D8%AA-%D8%A7%D9%84%D8%A8%D8%AD%D8%B1%D9%8A%D9%86%D9%8A%D8%A9-%D8%A7%D9%84%D8%B4%D8%B9%D8%A8%D9%8A%D8%A9/' },
+      { id: 'crafts', icon: Hammer, title_ar: 'الحرف اليدوية', title: 'Crafts', 
+        desc_ar: 'تتجذر الحرف اليدوية في وجدان الشعب البحريني وتاريخه. تتربع "صناعة الفخار" في قرية "عالي" على عرش الحرف، حيث يستخدم الحرفيون الطين المحلي لصنع أوانٍ وتنانير مبدعة تُنقش يدوياً. كما تشتهر قرية "بني جمرة" بصناعة النسيج اليدوي الفاخر باستخدام أنوال خشبية تقليدية لإنتاج الأزر والمشالح. ولا غنى عن صناعة السلال والحُصر من سعف النخيل في القرى الزراعية (السفافة)، بالإضافة إلى الحرفة التاريخية الأهم وهي "صياغة الذهب واللؤلؤ" التي جعلت من تجار البحرين رواداً في صياغة أفخم الحلي المطعمة باللؤلؤ الطبيعي (الدانة).', 
+        desc: 'Handicrafts are rooted in the conscience and history of the Bahraini people. "Pottery making" in the village of "A\'ali" sits on the throne of crafts, where artisans use local clay to create creative, hand-engraved vessels. The village of "Bani Jamra" is famous for fine hand weaving using traditional wooden looms to produce garments. Basketry from palm fronds (Saffafa) is essential in agricultural villages, alongside the most important historical craft, "Gold and Pearl crafting," which made Bahraini merchants pioneers in crafting the finest jewelry inlaid with natural pearls.', 
+        link: 'https://culture.gov.bh/ar/events/s,4785/s,4788/s,5035/s,5225/' },
+      { id: 'folklore', icon: Music, title_ar: 'الفنون والفلكلور', title: 'Folklore', 
+        desc_ar: 'يحفل الفلكلور البحريني بالفنون المرتبطة بالعمل والاحتفالات. فن "الدق على الحب" يُعزف على جرار الماء الفخارية الكبيرة ويرافق الأغاني الشعبية. في مواسم الأعياد والأفراح، تخرج النساء والشابات لأداء فن "المراداة"، وهي رقصة جماعية حركية وشعرية تُؤدى في براحات الفرجان (الساحات المفتوحة) مرتديات أجمل الثياب الملونة والذهب. الفنون الأفرو-خليجية مثل "الطنبورة" و"الليوة" تضفي طابعاً إيقاعياً صاخباً ومميزاً للجزيرة. وبالطبع، أهازيج وفنون "الفجري" التي تم توارثها من بحارة وغواصي اللؤلؤ تشكل جوهر الطرب الأصيل.', 
+        desc: 'Bahraini folklore is full of arts associated with work and celebrations. The art of "Daq Ala Al-Hab" is played on large clay water jugs and accompanies folk songs. During Eid seasons and weddings, women and young girls perform the "Muradah", a group rhythmic and poetic dance performed in open courtyards wearing colorful clothes and gold. Afro-Gulf arts like "Tamboura" and "Liwa" add a loud and distinct rhythmic character. Naturally, the chants and arts of "Fjiri" inherited from pearl divers form the core of authentic Tarab (music).', 
+        link: 'https://folkculturebh.org/ar/?issue=3&page=article&id=222' },
+      { id: 'architecture', icon: Landmark, title_ar: 'العمارة والمعالم', title: 'Architecture', 
+        desc_ar: 'عمارة البحرين هي مزيج عبقري بين الاستفادة من البيئة والتجارة. تقف "قلعة البحرين" العظيمة كشاهد على حضارة دلمون التي تعود لآلاف السنين. في المحرق، يوثق "مسار اللؤلؤ" المدرج عالمياً قصة اقتصاد اللؤلؤ عبر بيوت التجار العريقة مثل "بيت سيادي"، والتي تتميز بنوافذها الخشبية الدقيقة، والأبواب المنحوتة المطعمة بالمسامير النحاسية. تعتبر "البراجيل" (ملاقف الهواء) من أهم الملامح المعمارية في بيوت البحرين القديمة، حيث صُممت كأنظمة تبريد طبيعية تسحب نسيم البحر إلى غرف المنزل الداخلية للتخفيف من حرارة الصيف القاسية.', 
+        desc: 'Bahrain\'s architecture is a brilliant mix of utilizing the environment and trade. The great "Bahrain Fort" stands as a witness to the Dilmun civilization dating back thousands of years. In Muharraq, the globally listed "Pearling Path" documents the pearl economy through ancient merchant houses like "Siyadi House", characterized by intricate wooden windows and carved doors inlaid with brass nails. "Barjeel" (wind catchers) are a key architectural feature in old Bahraini houses, designed as natural cooling systems to draw sea breezes into the rooms to mitigate harsh summer heat.', 
+        link: 'https://ar.tripadvisor.com/Attractions-g293996-Activities-c47-Bahrain.html' },
+      { id: 'clothing', icon: Shirt, title_ar: 'الأزياء التقليدية', title: 'Clothing', 
+        desc_ar: 'يتميز الزي الشعبي البحريني بألوانه الزاهية وتطريزاته التي تخطف الأنظار. تتباهى العروس البحرينية والنساء في المناسبات بارتداء "الثوب النشل"، وهو ثوب فضفاض واسع يُصنع من حرير ناعم ويُطرز بكثافة بخيوط الذهب والفضة (الزري) في أشكال هندسية ونباتية مبهرة، ويُلبس فوق الدراعة. في الأيام العادية، ترتدي الفتيات "المشمر" وهو غطاء شفاف ورقيق بألوان هادئة. أما الرجل البحريني فيحافظ على أناقته بـ "الثوب" الدشداشة البيضاء الناصعة، والغترة والعقال، ويرتدي البشت الفاخر الذي يُصنع محلياً في المناسبات الرسمية والأعياد.', 
+        desc: 'Bahraini folk dress is characterized by bright colors and eye-catching embroidery. Bahraini brides and women on special occasions proudly wear the "Al-Nashal Dress", a wide, loose dress made of soft silk and heavily embroidered with gold and silver threads (Zari) in dazzling geometric and floral shapes, worn over the Dara\'a. On regular days, girls wear the "Mishmar", a sheer, delicate cover in soft colors. The Bahraini man maintains his elegance with the crisp white "Thobe", Ghutra, and Agal, wearing locally made luxurious Bishts for formal occasions.', 
+        link: 'https://www.pinterest.com/nahlanaseeb66/%D8%A7%D9%84%D8%A3%D8%B2%D9%8A%D8%A7%D8%A1-%D8%A7%D9%84%D8%B4%D8%B9%D8%A8%D9%8A%D8%A9-%D8%A7%D9%84%D8%A8%D8%AD%D8%B1%D9%8A%D9%86%D9%8A%D8%A9/' },
+      { id: 'traditions', icon: Users, title_ar: 'التقاليد الاجتماعية', title: 'Traditions', 
+        desc_ar: 'يتسم المجتمع البحريني بالتسامح والترابط الوثيق الذي يتجلى في العادات والمناسبات. احتفالية "القرقاعون" في منتصف شهر رمضان هي تقليد متوارث، حيث يجوب الأطفال الفرجان مرتدين الأزياء الشعبية ويطرقون الأبواب ليجمعوا الحلويات والمكسرات وهم يغنون أهازيج مبهجة. كما شكلت رحلات "الغوص" بحثاً عن اللؤلؤ في (الهيرات) الهوية البحرينية، حيث تتودع العائلات رجالها بشجاعة في طقوس مؤثرة وتستقبلهم باحتفالات كبرى عند العودة (القفال). إضافة إلى ذلك، تعتبر "الغبقة" الرمضانية من أهم تقاليد التواصل المستمرة بين العائلات.', 
+        desc: 'Bahraini society is characterized by tolerance and tight-knit bonds evident in customs and events. The "Gergaoon" celebration in mid-Ramadan is an inherited tradition where children roam the neighborhoods in folk costumes, knocking on doors to collect sweets and nuts while singing joyful songs. Pearl "Diving" journeys in the (Heyrat) shaped the Bahraini identity, where families courageously bid farewell to their men in moving rituals and welcome them back with grand celebrations (Al-Qaffal). Additionally, the Ramadan "Ghabqa" is a key tradition for family socializing.', 
+        link: 'https://almatar.com/blog/ar/%d8%ab%d9%82%d8%a7%d9%81%d8%a9-%d9%88%d8%aa%d9%82%d8%a7%d9%84%d9%8a%d8%af-%d8%a7%d9%84%d8%a8%d8%ad%d8%b1%d9%8a%d9%86/' }
+    ]
+  },
+  {
+    code: 'QA', region: 'Gulf', name_ar: 'دولة قطر', name: 'Qatar', flag: '🇶🇦', flag_image_url: 'https://flagcdn.com/w1280/qa.png',
+    video_id: '6nOPl0rTUPw', video_title_ar: 'وثائقي: الدوحة الثقافية', video_title: 'Documentary: Cultural Doha',
+    dish: { name_ar: 'المجبوس القطري', name: 'Qatari Majboos', image: 'https://images.unsplash.com/photo-1541518763669-27fef04b14ea?q=80&w=600' },
+    details: [
+      { id: 'cuisine', icon: Utensils, title_ar: 'المطبخ التقليدي', title: 'Cuisine', 
+        desc_ar: 'يحظى المطبخ القطري بشعبية واسعة لطعمه الغني بالتوابل واعتماده على اللحوم والمأكولات البحرية. "المجبوس القطري" هو سلطان المائدة، حيث يُطبخ الأرز ببطء مع مرق اللحم أو المأكولات البحرية، ويُعطر بالليمون المجفف والقرنفل والزعفران. كما تتألق أطباق مثل "الثريد" (خبز الرقاق المغموس بمرق الخضار واللحم) و"المضروبة" التي تضرب فيها المكونات حتى تصبح ناعمة وسلسة. وللإفطار والتحلية، لا بديل عن "البلاليط"، وهي شعرية مطبوخة بالسكر والزعفران والورد، وتُقدم مغطاة بقرص من البيض المقلي في تمازج فريد بين المالح والحلو.', 
+        desc: 'Qatari cuisine is highly popular for its rich, spicy taste and its reliance on meat and seafood. "Qatari Majboos" is the sultan of the table, where rice is slow-cooked with meat or seafood broth, scented with dried lime, cloves, and saffron. Dishes like "Thareed" (flatbread soaked in vegetable and meat broth) and "Madhrouba" (ingredients beaten until smooth) also shine. For breakfast and dessert, "Balaleet" is irreplaceable: sweetened vermicelli cooked with saffron and rose water, topped with a fried egg omelet in a unique savory-sweet mix.', 
+        link: 'https://visitqatar.com/qa-ar/about-qatar/cuisine' },
+      { id: 'crafts', icon: Hammer, title_ar: 'الحرف اليدوية', title: 'Crafts', 
+        desc_ar: 'ترتبط الحرف القطرية بتاريخ البلاد البحري والبدوي. من أهم الفنون النسائية التطريز بـ "الزري" و"النقدة"، حيث يتم نسج خيوط الفضة والذهب بدقة متناهية على العباءات والملابس الخفيفة كالبطولة (البرقع). كما برع القطريون الأوائل في "صناعة السفن" الخشبية كالشوعي والبقارة باستخدام أخشاب التيك المتينة لرحلات الغوص وصيد اللؤلؤ. ولا يمكن إغفال حرفة صناعة "أدوات الصقارة"، حيث تصنع "البراقع" الجلدية المزينة لتغطية أعين الصقور، و"السبوق" التي تربط بأرجلها، وهي أدوات تعكس حب القطريين وارتباطهم برياضة القنص الأصيلة.', 
+        desc: 'Qatari crafts are linked to the country\'s maritime and Bedouin history. A key women\'s art is embroidery with "Zari" and "Naqda", where silver and gold threads are meticulously woven onto Abayas and light garments like the Batoola (Burqa). Early Qataris excelled in "Dhow building" (like Shu\'ai and Baqqara) using durable teak wood for pearl diving. Crafting "Falconry tools" cannot be overlooked, making decorated leather "Burqas" to cover falcons\' eyes and "Sabouq" tied to their legs, reflecting the Qatari love for the authentic sport of falconry.', 
+        link: 'https://visitqatar.com/qa-ar/about-qatar/traditions/arts-crafts' },
+      { id: 'folklore', icon: Music, title_ar: 'الفنون والفلكلور', title: 'Folklore', 
+        desc_ar: 'يُعد الفلكلور القطري مرآة تعكس الشجاعة والارتباط بالبحر. تتصدر "العرضة القطرية" الاحتفالات الوطنية والأعراس، وهي رقصة حرب قديمة يؤديها الرجال صفوفاً حاملين السيوف والبنادق القديمة على إيقاع الطبول وإنشاد القصائد الحماسية. وفي مجال الفن البحري، يبرز فن "النهمة"، حيث يقوم "النهام" (مغني السفينة) بإلقاء مواويل شجية وحزينة لتحفيز البحارة على سحب الحبال ورفع الأشرعة بقوة وتزامن. إضافة لذلك، تعتبر فنون "الرزيف" و"السامري" من الأهازيج والفنون الجماعية التي تشعل ليالي الأفراح في قطر وتجمع أفراد القبائل معاً.', 
+        desc: 'Qatari folklore is a mirror reflecting courage and connection to the sea. The "Qatari Ardha" leads national celebrations and weddings; an ancient war dance performed by men in rows holding swords and old rifles to the rhythm of drums and enthusiastic poetry. In maritime arts, "Nahma" stands out, where the "Nahham" (ship\'s singer) sings melancholic chants to motivate sailors to pull ropes and raise sails with strength. Arts like "Razif" and "Samri" are group chants that ignite wedding nights in Qatar and bring tribe members together.', 
+        link: 'https://visitqatar.com/qa-ar/things-to-do/art-culture' },
+      { id: 'architecture', icon: Landmark, title_ar: 'العمارة والمعالم', title: 'Architecture', 
+        desc_ar: 'تحتضن قطر مزيجاً ساحراً بين ناطحات السحاب المذهلة والمباني التراثية التي حُوفظ عليها بعناية. يُعد "سوق واقف" في قلب الدوحة تحفة معمارية حية بممراته المتعرجة وأسقفه الخشبية المبنية من الدنجل وسعف النخل. وفي الشمال، تقف "قلعة الزبارة" الشامخة كأحد مواقع التراث العالمي لليونسكو، بأبراجها الدائرية والمربعة التي كانت تحمي هذه المدينة التجارية العريقة. كما تتميز العمارة القطرية القديمة بـ "أبراج الحمام" المخروطية، والبيوت ذات الجدران السميكة والنوافذ الخشبية المزخرفة (المشربيات) التي كانت توفر الظل في الصحراء القاحلة.', 
+        desc: 'Qatar hosts a magical mix of stunning skyscrapers and carefully preserved heritage buildings. "Souq Waqif" in the heart of Doha is a living architectural masterpiece with its winding alleys and wooden roofs made of Danjal and palm fronds. In the north, the towering "Al Zubarah Fort" stands as a UNESCO World Heritage site, with circular and square towers that protected this ancient trading town. Old Qatari architecture also features conical "Pigeon Towers" and thick-walled houses with decorated wooden windows (Mashrabiyas) that provided shade in the arid desert.', 
+        link: 'https://visitqatar.com/qa-ar/things-to-do/art-culture/heritage-sites' },
+      { id: 'clothing', icon: Shirt, title_ar: 'الأزياء التقليدية', title: 'Clothing', 
+        desc_ar: 'يحافظ المجتمع القطري بشدة على زيه الوطني الذي يمثل هويته الثقافية. يرتدي الرجل "الدشداشة" (الثوب) التي تتميز في قطر بياقة فريدة (كولا) وزر بارز عند الرقبة، وغالباً ما يُختار اللون الأبيض الناصع صيفاً، مع "الغترة" البيضاء (التي تُطوى بطريقة "الكوبرا" الشائعة بين الشباب) والعقال ذو الخيوط المتدلية أحياناً. المرأة القطرية ترتدي "العباية" السوداء المحتشمة التي تحولت إلى لوحة فنية لتنوع وكثافة التطريز الأسود عليها، إلى جانب غطاء الرأس (الشيلة)، وفي المناسبات يتم ارتداء الأثواب المرصعة والمطرزة بخيوط الذهب الفاخرة.', 
+        desc: 'Qatari society strictly maintains its national dress, representing its cultural identity. Men wear the "Dishdasha" (Thobe), which in Qatar features a unique collar and a prominent button at the neck, usually crisp white in summer, paired with a white "Ghutra" (often folded in the "Cobra" style popular among youth) and an Agal sometimes with dangling cords. Qatari women wear the modest black "Abaya", which has turned into a canvas of intricate black embroidery, along with a headscarf (Shayla). For events, dresses studded and embroidered with luxury gold threads are worn.', 
+        link: 'https://taqaled.com/s/%D8%B9%D8%A7%D8%AF%D8%A7%D8%AA-%D9%88%D8%AA%D9%82%D8%A7%D9%84%D9%8A%D8%AF-%D9%82%D8%B7%D8%B1-%D9%81%D9%8A-%D8%A7%D9%84%D9%85%D9%84%D8%A7%D8%A8%D8%B3' },
+      { id: 'traditions', icon: Users, title_ar: 'التقاليد الاجتماعية', title: 'Traditions', 
+        desc_ar: 'تلعب التقاليد الاجتماعية في قطر دوراً كبيراً في ربط الماضي بالحاضر. رياضة "القنص" (الصيد بالصقور) ليست مجرد هواية، بل هي موروث يعلم الصبر والجلد والرجولة، وتقام لها مهرجانات وبطولات كبرى يجتمع فيها أمهر الصقارين. تُعتبر "المجالس" القطرية بمثابة أكاديميات مصغرة يتم فيها تداول الشعر والأدب وحل النزاعات، وتقديم القهوة فيها تحكمه قواعد الاحترام حيث يُصب للضيف الأكبر سناً أو مقاماً أولاً. كما تهتم العائلات بـ "الغبقة" الرمضانية التي تجمع الأصدقاء لتناول أشهى المأكولات في ليالي رمضان وسط أجواء من المودة الخالصة.', 
+        desc: 'Social traditions in Qatar play a huge role in linking the past with the present. "Qans" (Falconry) is not just a hobby, but a heritage that teaches patience, endurance, and manhood, with major festivals gathering the most skilled falconers. Qatari "Majlises" are like mini-academies where poetry, literature, and conflict resolution occur. Serving coffee here is governed by rules of respect, poured first for the eldest or most esteemed guest. Families also cherish the Ramadan "Ghabqa", bringing friends together for delicious food during Ramadan nights in an atmosphere of pure affection.', 
+        link: 'https://visitqatar.com/qa-ar/about-qatar/traditions' }
+    ]
+  },
+  {
+    code: 'OM', region: 'Gulf', name_ar: 'سلطنة عمان', name: 'Oman', flag: '🇴🇲', flag_image_url: 'https://flagcdn.com/w1280/om.png',
+    video_id: 'S7ez6qaCmCE', video_title_ar: 'وثائقي: تراث عمان الأصيل', video_title: 'Documentary: Authentic Omani Heritage',
+    dish: { name_ar: 'الشواء العماني', name: 'Omani Shuwa', image: 'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=600' },
+    details: [
+      { id: 'cuisine', icon: Utensils, title_ar: 'المطبخ التقليدي', title: 'Cuisine', 
+        desc_ar: 'يمتاز المطبخ العماني بأصالة أطباقه التي تُحضر في المناسبات والأعياد الكبرى. يقف "الشواء العماني" كأعظم هذه الأطباق، حيث يتم تتبيل اللحم بخليط بهارات عتيقة ويُلف بورق الموز أو الشوع، ثم يُدفن في "تنور" تحت الأرض ليطهى على الجمر ببطء لمدة تصل إلى 24 ساعة، ليخرج بلحم يذوب في الفم. وتشمل الموائد العمانية "الهريس" و"العرسية" (أرز ولحم مهروس). ولا يخلو بيت من "الحلوى العمانية" السلطانية، التي تُطبخ لساعات في قدور نحاسية ضخمة مع السكر الأحمر، المكسرات، الزعفران، وماء الورد، وتقدم كرمز حتمي للضيافة.', 
+        desc: 'Omani cuisine is distinguished by authentic dishes prepared for major occasions and Eids. "Omani Shuwa" stands as the greatest of these; meat is marinated with an ancient spice blend, wrapped in banana or Shuwa leaves, and buried in an underground "Tandoor" to slow-cook on embers for up to 24 hours, yielding melt-in-the-mouth meat. Omani tables include "Harees" and "Arsiyah" (mashed rice and meat). No home is without the Royal "Omani Halwa", cooked for hours in huge copper pots with red sugar, nuts, saffron, and rose water, served as a mandatory symbol of hospitality.', 
+        link: 'https://lookinmena.com/%d8%a3%d8%b4%d9%87%d8%b1-%d9%85%d8%a3%d9%83%d9%88%d9%84%d8%a7%d8%aa-%d8%a7%d9%84%d9%85%d8%b7%d8%a8%d8%ae-%d8%a7%d9%84%d8%b9%d9%8f%d9%85%d8%a7%d9%86%d9%8a/' },
+      { id: 'crafts', icon: Hammer, title_ar: 'الحرف اليدوية', title: 'Crafts', 
+        desc_ar: 'تنفرد سلطنة عمان بحرف يدوية عريقة تجسد كبرياء الدولة. تتصدر "صناعة الخنجر العماني" هذه الحرف، فالخنجر ليس مجرد سلاح بل هوية وطنية وشعار يُلبس على الخصر، ويُصاغ مقبضه من قرون الحيوانات وُيزين بنقوش فضية دقيقة ومتقنة جداً. كما تتفوق عمان في صياغة الفضيات للنساء كالمجوهرات والقلائد الثقيلة (الشمروخ). في محافظة ظفار الجنوبية، تنتعش حرفة استخراج "لبان الذكر" النادر من أشجار اللبان، والذي استُخدم منذ آلاف السنين كبخور عطري ودواء، وشكل ثروة وتجارة ربطت عمان بالعالم القديم.', 
+        desc: 'Oman boasts ancient handicrafts that embody the nation\'s pride. "Omani Dagger (Khanjar) making" leads these crafts; it is not just a weapon but a national identity and emblem worn on the waist, its handle crafted from animal horns and decorated with highly intricate silver engravings. Oman also excels in silverware for women, like heavy jewelry and necklaces (Shamroukh). In the southern Dhofar governorate, the craft of extracting rare "Frankincense" from trees flourishes, used for thousands of years as aromatic incense and medicine, forming a wealth that connected Oman to the ancient world.', 
+        link: 'https://alkhaleejonline.net/%D8%AB%D9%82%D8%A7%D9%81%D8%A9-%D9%88%D9%81%D9%86/%D8%A7%D9%84%D8%AD%D9%90%D8%B1%D9%81-%D8%A7%D9%84%D8%AA%D9%82%D9%84%D9%8A%D8%AF%D9%8A%D8%A9-%D8%A3%D9%8A%D9%82%D9%88%D9%86%D8%A9-%D8%AA%D8%B1%D8%A7%D8%AB%D9%8A%D8%A9-%D8%AA%D8%B1%D8%B3%D9%85-%D9%87%D9%88%D9%8A%D8%A9-%D8%B3%D9%84%D8%B7%D9%86%D8%A9-%D8%B9%D9%8F%D9%85%D8%A7%D9%86-%D8%A7%D9%84%D8%AA%D8%A7%D8%B1%D9%8A%D8%AE%D9%8A%D8%A9' },
+      { id: 'folklore', icon: Music, title_ar: 'الفنون والفلكلور', title: 'Folklore', 
+        desc_ar: 'تتميز الفنون العمانية بالتنوع الجغرافي الفريد بين الجبل والساحل. "فن الرزحة" هو الفن الرجالي الأول، حيث يُستعرض بالسيوف والتروس بقفزات عالية في الهواء على إيقاعات الطبول (الكاسر والرحماني) مع إلقاء قصائد المدح والفخر. وفي التجمعات، يُقام "فن الميدان" وهو ساحة للمبارزة الشعرية المرتجلة بكلمات مبطنة وذكية. أما في محافظة ظفار، فتُؤدى رقصة "البرعة" الشبابية المرحة والخفيفة بالسيف والخنجر، والتي سُجلت في اليونسكو كتراث إنساني غير مادي، مما يثبت غنى السلطنة وعمق فنونها.', 
+        desc: 'Omani arts are characterized by a unique geographic diversity between mountain and coast. "Razha" is the premier men\'s art, featuring sword and shield performances with high leaps into the air to the rhythms of drums (Kaser and Rahmani) while reciting poems of praise and pride. In gatherings, "Al-Midan" is held, an arena for improvised poetic dueling with subtle, clever words. In Dhofar, the joyful and light youth dance "Al-Bar\'ah" is performed with swords and daggers, registered by UNESCO as intangible human heritage, proving the Sultanate\'s richness and artistic depth.', 
+        link: 'https://www.kuna.net.kw/ArticleDetails.aspx?id=1883501&language=ar' },
+      { id: 'architecture', icon: Landmark, title_ar: 'العمارة والمعالم', title: 'Architecture', 
+        desc_ar: 'العمارة العمانية تعكس تاريخاً طويلاً من القوة الهندسية الدفاعية والمدنية. تضم عمان أكثر من 500 قلعة وحصن عظيم، من أبرزها "قلعة نزوى" ببرجها الدائري الأضخم في شبه الجزيرة العربية، وقلعتي "الجلالي والميراني" اللتان تحرسان ميناء مسقط. المعلم المعماري والمائي الأهم هو نظام "الأفلاج"، وهو عبارة عن هندسة قديمة ومذهلة لشق قنوات المياه من الجبال وتوزيعها بإنصاف على المزارع والقرى بواسطة الجاذبية، وقد اعتُبرت أفلاج عمان (مثل فلج دارس) من عجائب التراث العالمي لليونسكو لاعتمادها على الروح الجماعية والبراعة.', 
+        desc: 'Omani architecture reflects a long history of defensive and civil engineering prowess. Oman houses over 500 great forts and castles, notably "Nizwa Fort" with the largest circular tower in the Arabian Peninsula, and the "Jalali and Mirani" forts guarding Muscat\'s port. The most crucial architectural and water landmark is the "Aflaj" system, an amazing ancient engineering of cutting water channels from mountains and distributing them fairly to farms and villages using gravity. Oman\'s Aflaj (like Falaj Daris) are considered UNESCO World Heritage wonders for their reliance on community spirit and ingenuity.', 
+        link: 'https://alarab.co.uk/%D8%A7%D9%84%D8%B9%D9%85%D8%A7%D8%B1%D8%A9-%D8%A7%D9%84%D8%B9%D9%8F%D9%85%D8%A7%D9%86%D9%8A%D8%A9-%D8%AA%D8%A7%D8%B1%D9%8A%D8%AE-%D9%88%D8%AD%D8%B6%D8%A7%D8%B1%D8%A9-%D8%AA%D8%AA%D9%88%D8%A7%D8%B5%D9%84%D8%A7%D9%86-%D9%81%D9%8A-%D8%A7%D9%84%D8%A8%D9%86%D8%A7%D8%A1-%D8%A7%D9%84%D9%85%D8%B9%D8%A7%D8%B5%D8%B1' },
+      { id: 'clothing', icon: Shirt, title_ar: 'الأزياء التقليدية', title: 'Clothing', 
+        desc_ar: 'الأزياء في عمان تُعتبر من الأكثر تميزاً وانفراداً في الخليج. الرجل العماني يرتدي "الدشداشة" التي لا ياقة لها وبها خيط يتدلى من الصدر يسمى (الفراخة) يُعطر بدهن العود. وعلى الرأس يوضع "المصر" (العمامة الملونة المصنوعة من الصوف أو الكشمير) في المناسبات الرسمية، أو "الكمة" (القبعة الدائرية المطرزة يدوياً) في الأيام العادية. وطبعاً، لا يكتمل الزي إلا بحزام من الفضة يثبت عليه الخنجر. أزياء النساء العمانيات تتميز بالألوان الزاهية وتتكون من الدشداشة القصيرة، السروال المطرز بالزري، وغطاء الرأس المزخرف (الوقاية).', 
+        desc: 'Omani clothing is considered among the most distinctive and unique in the Gulf. The Omani man wears a collarless "Dishdasha" with a string dangling from the chest called (Farakha) scented with Oud oil. On the head, the "Mussar" (a colorful turban made of wool or cashmere) is worn for formal occasions, or the "Kumma" (a hand-embroidered circular cap) for regular days. Naturally, the outfit is incomplete without a silver belt holding the Dagger. Omani women\'s dresses feature bright colors, comprising a short Dishdasha, Zari-embroidered trousers, and a decorated head cover (Wiqaya).', 
+        link: 'https://sadeelsaidalhashmy.blogspot.com/' },
+      { id: 'traditions', icon: Users, title_ar: 'التقاليد الاجتماعية', title: 'Traditions', 
+        desc_ar: 'يُعرف المجتمع العماني بأنه مجتمع شديد الترابط والتهذيب ويعطي احتراماً قدسياً للضيوف. يبدأ الترحيب العماني برش الضيف بـ "ماء الورد العماني" المقطر في الجبل الأخضر، مع تقديم القهوة والحلوى والتمر. النظام الاجتماعي الأبرز هو "السبلة" (المجلس العام للقرية أو القبيلة)، وهي المكان الذي يجتمع فيه الرجال في الأفراح والأتراح لمناقشة شؤون حياتهم وإصلاح ذات البين، وتُعد مدرسة لتعليم الشباب آداب الحديث والسنع. كما يُظهر العمانيون تكاتفاً منقطع النظير في مواسم الحصاد وجني التمور ضمن أجواء أسرية مفرحة.', 
+        desc: 'The Omani society is known for being highly cohesive, polite, and giving sacred respect to guests. Omani welcoming starts by sprinkling the guest with "Omani Rosewater" distilled in Jabal Akhdar, along with serving coffee, Halwa, and dates. The most prominent social system is the "Sablah" (the public council of the village or tribe), a place where men gather in joys and sorrows to discuss life matters and reconcile differences, serving as a school to teach youth manners and etiquette. Omanis also show unparalleled solidarity during harvest and date-picking seasons in a joyful family atmosphere.', 
+        link: 'https://almatar.com/blog/ar/%D8%A7%D9%83%D8%AA%D8%B4%D9%81-%D8%A7%D9%84%D8%B9%D8%A7%D8%AF%D8%A7%D8%AA-%D9%88%D8%A7%D9%84%D8%AA%D9%82%D8%A7%D9%84%D9%8A%D8%AF-%D8%A7%D9%84%D8%B9%D9%85%D8%A7%D9%86%D9%8A%D8%A9/' }
+    ]
+  },
+  {
+    code: 'AE', region: 'Gulf', name_ar: 'الإمارات', name: 'UAE', flag: '🇦🇪', flag_image_url: 'https://flagcdn.com/w1280/ae.png',
+    video_id: 'DrSpXsBcghI', video_title_ar: 'وثائقي: الأصالة الإماراتية', video_title: 'Documentary: Emirati Authenticity',
+    dish: { name_ar: 'الهريس واللقيمات', name: 'Harees & Luqaimat', image: 'https://images.unsplash.com/photo-1626200419109-383637e6f366?q=80&w=600' },
+    details: [
+      { id: 'cuisine', icon: Utensils, title_ar: 'المطبخ التقليدي', title: 'Cuisine', 
+        desc_ar: 'يتميز المطبخ الإماراتي الشعبي بأصالة مكوناته المستمدة من البحر والصحراء والتجارة مع التوابل. يعد "المجبوس" و"المالح" من الأطباق الرئيسية، ولكن يبرز "الهريس" كملك مائدة المناسبات وشهر رمضان، وهو عبارة عن لحم وقمح يُدقان معاً لعدة ساعات حتى يتجانسا تماماً ويزين بالسمن المحلي. كما تحظى "المضروبة" بمكانة خاصة، فضلاً عن خبز "الرقاق" وخبز "الخمير". في صنف الحلويات، لا يُقاوم طعم "اللقيمات" الذهبية والمقرمشة، والتي تُغمس فور قليها في "الدبس" (عسل التمر) لتعطي مزيجاً رائعاً من الحلاوة الأصيلة المرفقة بالقهوة العربية.', 
+        desc: 'Traditional Emirati cuisine is distinguished by the authenticity of its ingredients derived from the sea, desert, and spice trade. "Majboos" and "Maleh" are main dishes, but "Harees" emerges as the king of occasion and Ramadan tables, consisting of meat and wheat pounded together for hours until completely blended and garnished with local ghee. "Madhrouba" also holds a special place, as well as "Riqaq" and "Khamir" breads. In sweets, golden crispy "Luqaimat" is irresistible, dipped immediately after frying in "Dibs" (date syrup) to give a wonderful mix of authentic sweetness accompanied by Arabic coffee.', 
+        link: 'https://www.visitdubai.com/ar/articles/emirati-food-in-dubai' },
+      { id: 'crafts', icon: Hammer, title_ar: 'الحرف اليدوية', title: 'Crafts', 
+        desc_ar: 'لطالما كانت الحرف اليدوية في الإمارات تجسيداً لإعادة تدوير مواد البيئة المحلية. اشتهرت النساء بحرفة "السفّافة" و"الخوص"، حيث تقص سعف النخيل وتنظف وتُجدل لتصنع منها السلال والمخاريف (أغطية الطعام) والمهفات (مراوح يدوية). وفي مجال الخياطة، برزت حرفة "التلّي"، وهي تطريز معقد بأسلاك فضية وذهبية لتزيين أكمام أثواب النساء لتضفي عليها لمعاناً وبريقاً. كما اشتهر الرجال بصناعة الفخاريات في المناطق الجبلية، وصناعة شباك الصيد (القراقير) وسفن الصيد التي وفرت مصدر الرزق الأساسي للسكان قبل اكتشاف النفط.', 
+        desc: 'Handicrafts in the UAE have long embodied the recycling of local environmental materials. Women were famous for the craft of "Saffafa" and "Khos", where palm fronds are cut, cleaned, and braided to make baskets, Makharif (food covers), and Mahafat (hand fans). In sewing, the craft of "Talli" stood out, an intricate embroidery with silver and gold wires decorating women\'s dress sleeves to add shine and sparkle. Men were famous for making pottery in mountainous areas, and crafting fishing nets (Gargour) and fishing boats that provided the primary livelihood before oil discovery.', 
+        link: 'https://www.bayut.com/mybayut/ar/%D8%A7%D9%84%D8%AD%D8%B1%D9%81-%D8%A7%D9%84%D9%8A%D8%AF%D9%88%D9%8A%D8%A9-%D8%A7%D9%84%D9%82%D8%AF%D9%8A%D9%85%D8%A9-%D8%A7%D9%84%D8%A7%D9%85%D8%A7%D8%B1%D8%A7%D8%AA/' },
+      { id: 'folklore', icon: Music, title_ar: 'الفنون والفلكلور', title: 'Folklore', 
+        desc_ar: 'يعبر الفلكلور الإماراتي عن فخر القبيلة وانتماء الإنسان لأرضه. الرقصة الرسمية الأبرز هي "العيالة"، والتي تُشبه العرضة، ويصطف فيها الرجال صفين متقابلين متماسكين تعبيراً عن التضامن والوحدة مرددين الأشعار النبطية. وتعتبر "اليولة" الاستعراض الأكثر شعبية بين الشباب، حيث تعتمد على خفة الحركة وتدوير السلاح (البندقية الوهمية) ورميه عالياً في الهواء ثم التقاطه برشاقة. في قلب الصحراء، تنتشر "التغرودة"، وهي أشعار ملحنة كان يلقيها البدو لتسلية أنفسهم وحث الإبل على الإسراع في المسير الطويل.', 
+        desc: 'Emirati folklore expresses tribal pride and human belonging to the land. The most prominent official dance is "Al-Ayala", similar to Ardha, where men line up in two facing rows holding hands to express solidarity and unity while reciting Nabati poetry. "Yowla" is the most popular performance among youth, relying on agility, spinning a weapon (replica rifle), throwing it high in the air, and catching it gracefully. In the heart of the desert, "Al-Taghrooda" spreads, which are melodic poems Bedouins recited to entertain themselves and urge camels to speed up during long treks.', 
+        link: 'https://abudhabiculture.ae/ar/cultural-sites/culture-centers/heritage-village' },
+      { id: 'architecture', icon: Landmark, title_ar: 'العمارة والمعالم', title: 'Architecture', 
+        desc_ar: 'بينما تلامس أبراج الإمارات الحديثة السحاب، لا تزال عمارة الأجداد حاضرة وموثقة بقوة. يمثل "حي الفهيدي" في دبي التاريخية شاهداً حياً على نمط البناء بالأحجار المرجانية والجص. كانت المعضلة الأكبر قديماً هي حرارة الصيف، فابتكر البناؤون "البراجيل" (ملاقف الهواء المربعة على أسطح المنازل) لاصطياد النسيم البارد وتوجيهه لداخل غرف المنزل. كما تمثل الحصون الدفاعية، مثل حصن الجاهلي في العين وقصر الحصن، إرثاً يجسد قوة ومناعة التحصينات القديمة التي حمت الواحات والمناطق الاستراتيجية، وهي الآن متاحف مفتوحة للزوار.', 
+        desc: 'While modern UAE towers touch the clouds, ancestral architecture remains strongly present and documented. The "Al Fahidi" district in historic Dubai stands as a living witness to building with coral stones and gypsum. The biggest dilemma historically was summer heat, so builders invented "Barjeel" (square wind catchers on rooftops) to catch cool breezes and channel them into the rooms. Defensive forts, like Al Jahili Fort in Al Ain and Qasr Al Hosn, represent a legacy embodying the strength of ancient fortifications that protected oases and strategic areas, now acting as open museums.', 
+        link: 'https://abudhabiculture.ae/ar/abu-dhabi-museums/zayed-national-museum' },
+      { id: 'clothing', icon: Shirt, title_ar: 'الأزياء التقليدية', title: 'Clothing', 
+        desc_ar: 'يتسم الزي الإماراتي بالبساطة الأنيقة. يرتدي الرجل "الكندورة"، وهي تتميز في الإمارات بعدم وجود ياقة حول الرقبة وبوجود "الكركوشة" (طربوشة أو خيط مجدول يتدلى من الصدر). ويُلبس معها الغترة والعقال، وفي المناسبات يتم لبس البشت. أما الأزياء النسائية فتحظى بجماليات خاصة، حيث تلبس المرأة "المخور" (ثوب مطرز الصدر بخيوط الزري اللامعة)، و"الشيلة" السوداء لتغطية الرأس. ومن أبرز الملامح التاريخية للمرأة الإماراتية هو "البرقع الإماراتي" الذهبي اللامع الذي يصنع من قماش خاص ليغطي جزءاً من الوجه ويمنح وقاراً وجمالاً فريداً.', 
+        desc: 'Emirati attire is characterized by elegant simplicity. Men wear the "Kandura", which in the UAE is distinct for having no collar around the neck and featuring a "Karkousha" (a braided tassel dangling from the chest). It is worn with a Ghutra and Agal, and a Bisht on occasions. Women\'s attire has special aesthetics, where women wear the "Mukhawar" (a dress with a chest embroidered with shiny Zari threads) and a black "Shayla" to cover the head. A prominent historical feature for Emirati women is the shiny golden "Emirati Burqa" made from special fabric covering part of the face, granting unique dignity and beauty.', 
+        link: 'https://www.bayut.com/mybayut/ar/%D9%85%D9%84%D8%A7%D8%A8%D8%B3-%D8%A7%D9%84%D8%A7%D9%85%D8%A7%D8%B1%D8%A7%D8%AA-%D8%A7%D9%84%D8%AA%D9%82%D9%84%D9%8A%D8%AF%D9%8A%D8%A9/' },
+      { id: 'traditions', icon: Users, title_ar: 'التقاليد الاجتماعية', title: 'Traditions', 
+        desc_ar: 'ترتكز التقاليد الإماراتية على احترام كبار السن، الكرم، والارتباط بالبيئة الأصيلة. يعتبر الاحتفاء بـ "شجرة الغاف" جزءاً من التقاليد، فهي شجرة الصحراء الصامدة التي كانت تشكل ظلاً وملتقى للمجالس البدوية. لا يزال الإماراتيون يحيون رياضات أجدادهم عبر إقامة المهرجانات الكبرى لـ "سباقات الهجن" (الجمال) التي تجذب الآلاف، ومنافسات الغوص وسباقات القوارب الشراعية الخشبية (المحامل) للحفاظ على الموروث البحري. وتبقى أبواب "المجالس" الإماراتية مفتوحة لتعزيز اللحمة الاجتماعية وتبادل الترحيب المعتاد بتقديم القهوة والتمر كرمز للضيافة المطلقة.', 
+        desc: 'Emirati traditions center on respecting elders, generosity, and connection to the authentic environment. Celebrating the "Ghaf tree" is part of tradition; it\'s the resilient desert tree that provided shade and a meeting place for Bedouin councils. Emiratis still revive their ancestors\' sports by holding major festivals for "Camel Racing" attracting thousands, and diving and wooden dhow boat sailing competitions to preserve maritime heritage. Emirati "Majlis" doors remain open to enhance social cohesion and exchange the customary welcome of serving coffee and dates as a symbol of absolute hospitality.', 
+        link: 'https://almatar.com/blog/ar/%D9%83%D9%84-%D9%85%D8%A7-%D8%AA%D8%B1%D9%8A%D8%AF-%D9%85%D8%B9%D8%B1%D9%81%D8%AA%D9%87-%D8%B9%D9%86-%D8%A7%D9%84%D8%B9%D8%A7%D8%AF%D8%A7%D8%AA-%D9%88%D8%A7%D9%84%D8%AA%D9%82%D8%A7%D9%84%D9%8A%D8%AF/' }
+    ]
+  },
+
+  // ---------------- بلدان الشام ----------------
+  {
+    code: 'SY', region: 'Levant', name_ar: 'سوريا', name: 'Syria', flag: '🇸🇾', flag_image_url: 'https://flagcdn.com/w1280/sy.png',
+    video_id: 'LQ2NoAVLEak', video_title_ar: 'وثائقي: عبق الشام', video_title: 'Documentary: Scent of the Levant',
+    dish: { name_ar: 'الكبة الحلبية', name: 'Aleppian Kibbeh', image: 'https://images.unsplash.com/photo-1628151574041-94943f5509a9?q=80&w=600' },
+    details: [
+      { id: 'cuisine', icon: Utensils, title_ar: 'المطبخ التقليدي', title: 'Cuisine', 
+        desc_ar: 'يعتبر المطبخ السوري من أعرق المطابخ في المنطقة، ويمزج ببراعة بين النكهات الحامضة، الحلوة، والمالحة. تتربع "الكبة الحلبية" على عرش المطبخ وتتنوع لأكثر من 20 نوعاً كالكبة المشوية، المقلية، واللبنية. من أشهر أطباق المائدة السورية: المحاشي (الباذنجان والكوسا المحشوة باللحم والأرز)، والمقبلات الغنية كالمتبل، الحمص، واليلنجي (ورق العنب بزيت الزيتون). والشاورما السورية أصبحت علامة عالمية بامتياز. في الحلويات، لا تُقاوم "البقلاوة" الدمشقية المحشوة بالفستق والمشبعة بالسمن العربي، بالإضافة إلى المعمول، وحلاوة الجبن الطازجة التي تشتهر بها مدينة حماة وحمص.', 
+        desc: 'The Syrian cuisine is one of the most ancient in the region, masterfully blending sour, sweet, and savory flavors. "Aleppian Kibbeh" sits on the throne of the cuisine with over 20 types, such as grilled, fried, and labneh-based Kibbeh. Famous Syrian table dishes include Mahashi (stuffed eggplants and zucchini with meat and rice), and rich appetizers like Mutabbal, Hummus, and Yalanji (vine leaves in olive oil). Syrian Shawarma has become a global trademark. In sweets, Damascene "Baklava" stuffed with pistachios and soaked in Arabic ghee is irresistible, along with Ma\'amoul, and fresh Halawet El Jibn famous in Hama and Homs.', 
+        link: 'https://syrianpedia.com/mtbhsori/' },
+      { id: 'crafts', icon: Hammer, title_ar: 'الحرف اليدوية', title: 'Crafts', 
+        desc_ar: 'لطالما كانت الأسواق السورية، كـ "سوق الحميدية"، مركزاً لحرف يدوية عريقة صدرت منتجاتها لأوروبا قديماً. يتميز حرفيو دمشق بفن "الموزاييك" (الصدف المُطعم بالخشب) الذي يُصنع منه أفخر الصناديق والمفروشات. وصناعة "الزجاج المنفوخ" بأسلوبه اليدوي الساحر لا يزال حياً في بعض الورش. في مجال النسيج، النول اليدوي ينتج حرير "البروكار" الدمشقي العريق الذي ارتدته ملكات العالم، و"الآغباني" وهو قماش قطني أو حريري مطرز يدوياً بخيوط ذهبية. ولا يمكن نسيان أمجاد الحدادة في صياغة "السيف الدمشقي" المصنوع من الفولاذ الجوهري الذي عُرف بصلابته الأسطورية.', 
+        desc: 'Syrian markets, like "Souq Al-Hamidiyah", have always been centers for ancient handicrafts exported to Europe in the past. Damascus artisans excel in the art of "Mosaic" (wood inlaid with mother-of-pearl) used to make luxurious boxes and furniture. The magical hand-blown "Glass making" is still alive in some workshops. In textiles, the handloom produces the ancient Damascene "Brocade" silk worn by world queens, and "Aghbani", a cotton or silk fabric hand-embroidered with gold threads. We cannot forget the blacksmithing glory of crafting the "Damascus Sword" made of Wootz steel known for its legendary hardness.', 
+        link: 'https://sana.sy/economy/2437031/' },
+      { id: 'folklore', icon: Music, title_ar: 'الفنون والفلكلور', title: 'Folklore', 
+        desc_ar: 'تتميز سوريا بطرب وفن أصيل أسس لمدارس موسيقية عربية كاملة. تشتهر مدينة حلب بـ "القدود الحلبية" والموشحات الأندلسية التي أبدع فيها فنانون عظام. في الأعراس والمناسبات السعيدة بدمشق، تزف العريس "العراضة الشامية"، وهي فرقة تقدم استعراضاً بالأصوات الجهورية والأشعار واللعب بالسيوف وسط أجواء حماسية لا مثيل لها. وللفن الصوفي والروحاني مكانة كبرى متمثلاً في "رقص السماح" التراثي، حيث يقوم المؤدون بحركات إيقاعية جماعية رصينة تتناغم مع الإيقاعات المعقدة للغناء العربي الكلاسيكي.', 
+        desc: 'Syria is distinguished by authentic Tarab and art that founded entire Arab musical schools. The city of Aleppo is famous for "Aleppian Qudud" and Andalusian Muwashshahat, where great artists excelled. In weddings and happy occasions in Damascus, the groom is escorted by the "Shami Arada", a band putting on a performance of loud vocals, poetry, and swordplay in an unmatched enthusiastic atmosphere. Sufi and spiritual art hold a major place, represented by the traditional "Samah Dance", where performers execute sober group rhythmic movements that harmonize with the complex rhythms of classical Arabic singing.', 
+        link: 'https://www.independentarabia.com/node/143026/%D8%AB%D9%82%D8%A7%D9%81%D8%A9/%D9%81%D9%86%D9%88%D9%86/%D9%85%D8%A7-%D8%A3%D8%A8%D8%B1%D8%B2-%D8%A7%D9%84%D9%81%D9%86%D9%88%D9%86-%D8%A7%D9%84%D8%B4%D8%A7%D9%85%D9%8A%D8%A9-%D8%A7%D9%84%D9%82%D8%AF%D9%8A%D9%85%D8%A9%D8%9F' },
+      { id: 'architecture', icon: Landmark, title_ar: 'العمارة والمعالم', title: 'Architecture', 
+        desc_ar: 'تقف العمارة السورية كأرشيف حي لتاريخ الحضارات المتعاقبة. "الجامع الأموي" بدمشق يعتبر درة العمارة الإسلامية بقبابه الفخمة وفسيفسائه الذهبية. وفي حلب، ترتفع "قلعة حلب" كواحدة من أضخم وأقدم قلاع العالم. أما "البيت الدمشقي" (البيت العربي)، فهو معجزة معمارية مصممة للخصوصية والراحة، حيث الواجهات الخارجية مصمتة، بينما الداخل جنة مصغرة (أرض الديار) تتوسطها "البحرة" والنوافير، وتحيط بها أشجار النارنج والياسمين، وتتميز الغرف (القاعات) بالزخارف الخشبية البديعة على الأسقف (العجمي).', 
+        desc: 'Syrian architecture stands as a living archive of successive civilizations\' history. The "Umayyad Mosque" in Damascus is considered the jewel of Islamic architecture with its grand domes and golden mosaics. In Aleppo, the "Citadel of Aleppo" rises as one of the largest and oldest castles in the world. The "Damascene House" (Arab house) is an architectural miracle designed for privacy and comfort; exterior facades are solid, while the interior is a mini-paradise (Ard Al-Diyar) centered by a "Bahra" (fountain), surrounded by bitter orange and jasmine trees, with rooms (Qaat) featuring exquisite wooden ceiling decorations (Ajami).', 
+        link: 'https://www.noonpost.com/35322/' },
+      { id: 'clothing', icon: Shirt, title_ar: 'الأزياء التقليدية', title: 'Clothing', 
+        desc_ar: 'يتسم الزي التراثي السوري بالأصالة والهيبة. الزي التقليدي للرجل الشامي يتألف من "الشروال" الواسع والمريح ذو اللون الأسود، والصدرية المطرزة، و"الزنار" وهو حزام عريض من الحرير يُلف حول الخصر لحمل الخنجر أو المحفظة، ويكتمل المظهر بوضع "الطربوش" الأحمر على الرأس. أما أزياء النساء، فقد كانت قديماً تتمثل في "الملاية" السوداء التي تلف الجسد بالكامل و"المنديل" الشفاف الذي يغطي الوجه عند الخروج. وفي الداخل وخلال المناسبات، ترتدي النساء الفساتين التراثية المطرزة الحريرية والمخملية التي تعكس براعة النساجين في بلاد الشام.', 
+        desc: 'Traditional Syrian attire is characterized by authenticity and prestige. The traditional dress for the Shami man consists of wide, comfortable black "Shirwal" (trousers), an embroidered vest, and a "Zunnar", a wide silk sash wrapped around the waist to carry a dagger or wallet, completed by wearing a red "Tarboush" on the head. As for women\'s clothing, historically it was the black "Malaya" completely wrapping the body and a sheer "Mandeel" covering the face when going out. Indoors and during occasions, women wear heritage silk and velvet embroidered dresses reflecting the mastery of Levant weavers.', 
+        link: 'https://ellemanarabia.com/%D8%AB%D9%82%D8%A7%D9%81%D8%A9/%D9%86%D8%B4%D8%A7%D8%B7%D8%A7%D8%AA-%D8%AB%D9%82%D8%A7%D9%81%D9%8A%D8%A9/%D9%85%D9%86-%D8%AD%D8%B1%D9%8A%D8%B1-%D8%AF%D9%85%D8%B4%D9%82-%D8%A5%D9%84%D9%89-%D8%B9%D8%A8%D8%A7%D8%A1%D8%A9-%D8%A7%D9%84%D8%A8%D8%A7%D8%AF%D9%8A%D8%A9-%D8%AA%D8%A7%D8%B1%D9%8A%D8%AE-%D8%A7%D9%84/' },
+      { id: 'traditions', icon: Users, title_ar: 'التقاليد الاجتماعية', title: 'Traditions', 
+        desc_ar: 'يتميز المجتمع السوري بالدفء والعادات العائلية العميقة. من أقدم التقاليد ثقافة المقاهي الشعبية، حيث كان يرتادها الناس للاستماع إلى "الحكواتي" الذي يسرد السير الشعبية وقصص البطولات مثل عنترة بن شداد. يعتبر "الحمام الدمشقي" (حمام السوق) طقساً اجتماعياً هاماً، خصوصاً للعروسين قبل الزفاف، ترافقه الأناشيد والبخور. كما يعتبر طقس تحضير "المونة" من الثوابت الراسخة في كل بيت، حيث تجتمع نساء العائلة في أواخر الصيف لتحضير وتخزين مؤونة الشتاء من المكدوس السوري الشهير، والمربيات، وزيت الزيتون، والبرغل، في أجواء من التعاون والألفة.', 
+        desc: 'Syrian society is characterized by warmth and deep family customs. One of the oldest traditions is the popular cafe culture, where people went to listen to the "Hakawati" (Storyteller) narrating folk epics and tales of heroism like Antarah ibn Shaddad. The "Damascene Hammam" (public bath) is an important social ritual, especially for newlyweds before the wedding, accompanied by chants and incense. The ritual of preparing the "Mouneh" is firmly established in every home, where family women gather in late summer to prepare and store winter supplies of the famous Syrian Makdous, jams, olive oil, and bulgur, in an atmosphere of cooperation and familiarity.', 
+        link: 'https://turathamman.com/%D8%A3%D8%A8%D8%B1%D8%B2-%D8%A7%D9%84%D8%B9%D8%A7%D8%AF%D8%A7%D8%AA-%D9%88%D8%A7%D9%84%D8%AA%D9%82%D8%A7%D9%84%D9%8A%D8%AF-%D9%81%D9%8A-%D8%B3%D9%88%D8%B1%D9%8A%D8%A7/' }
+    ]
+  },
+  {
+    code: 'LB', region: 'Levant', name_ar: 'لبنان', name: 'Lebanon', flag: '🇱🇧', flag_image_url: 'https://flagcdn.com/w1280/lb.png',
+    video_id: 'vwxo2iqzH_A', video_title_ar: 'وثائقي: طبيعة وتراث لبنان', video_title: 'Documentary: Lebanon Nature & Heritage',
+    dish: { name_ar: 'المازة والتبولة', name: 'Mezze & Tabbouleh', image: 'https://images.unsplash.com/photo-1541518763669-27fef04b14ea?q=80&w=600' },
+    details: [
+      { id: 'cuisine', icon: Utensils, title_ar: 'المطبخ التقليدي', title: 'Cuisine', 
+        desc_ar: 'يُعد المطبخ اللبناني سفيراً عالمياً للطعام الصحي واللذيذ المعتمد على زيت الزيتون، الخضار الطازجة، والليمون. تبدأ المائدة بـ "المازة" الغنية التي تضم العشرات من الأطباق الصغيرة، وتتصدرها "التبولة" المنعشة، "الفتوش"، "الحمص"، و"المتبل". تعتبر "الكبة النيئة" الممزوجة بالبرغل والنعناع من الأطباق التي تعبر عن براعة القرى اللبنانية، إلى جانب المشاوي المشكلة التي تملأ رائحتها القرى في عطلة نهاية الأسبوع. كما لا يمكن تفويت المعجنات مثل "الصفيحة البعلبكية" الشهية والمنقوشة بالزعتر التي تعتبر فطوراً أساسياً لكل فئات المجتمع اللبناني.', 
+        desc: 'Lebanese cuisine is a global ambassador for healthy, delicious food based on olive oil, fresh vegetables, and lemon. The table starts with the rich "Mezze", comprising dozens of small dishes, led by refreshing "Tabbouleh", "Fattoush", "Hummus", and "Mutabbal". "Raw Kibbeh" mixed with bulgur and mint is a dish expressing the mastery of Lebanese villages, alongside mixed grills whose aroma fills villages on weekends. One cannot miss pastries like the delicious "Baalbeki Sfiha" and Za\'atar Manoushe, which are a staple breakfast for all classes of Lebanese society.', 
+        link: 'https://libshop.fr/en/best-traditional-dishes-lebanon/' },
+      { id: 'crafts', icon: Hammer, title_ar: 'الحرف اليدوية', title: 'Crafts', 
+        desc_ar: 'تعكس الحرف اللبنانية جمال البيئة الجبلية ووفرة غاباتها. يعتبر "حفر الخشب"، وخاصة خشب أرز لبنان الخالد، من أبرز الحرف التي تُنتج تحفاً ومجسمات وصناديق تذكارية. في بلدة "راشيا الوادي" التاريخية، لا تزال صناعة الفخار والأباريق التقليدية صامدة تُصنع بأيادي حرفيين مهرة. أما في جنوب لبنان، وتحديداً في مدينة "جزين"، فتنفرد البلاد بصناعة السكاكين والأشواك وأدوات المائدة الفاخرة بمقابض مصنوعة من قرون الحيوانات والمطعمة بالفضة وعظام الطيور، والتي تُقدم غالباً كهدايا رسمية رفيعة المستوى من الدولة اللبنانية لضيوفها.', 
+        desc: 'Lebanese crafts reflect the beauty of the mountainous environment and its abundant forests. "Wood carving", especially of the immortal Lebanon Cedar wood, is among the most prominent crafts producing antiques, models, and souvenir boxes. In the historic town of "Rashaya El-Wadi", traditional pottery and pitcher making remains resilient, crafted by skilled artisans. In southern Lebanon, specifically "Jezzine", the country is uniquely known for crafting luxurious knives, forks, and tableware with handles made of animal horns inlaid with silver and bird bones, often presented as high-level official gifts from the Lebanese state to its guests.', 
+        link: 'https://livelebanon.annahar.com/Crafts/index.html' },
+      { id: 'folklore', icon: Music, title_ar: 'الفنون والفلكلور', title: 'Folklore', 
+        desc_ar: 'تتميز الفنون الفلكلورية في لبنان بالطاقة والحيوية المستمدة من صلابة جبالها. تعتبر "الدبكة اللبنانية" الجبلية رمزاً وطنياً يُعبر عن الفرح والاتحاد، وتُؤدى بضربات أقدام قوية وإيقاع متسارع يرافقه المزمار (المجوز) والطبلة. الفن اللفظي الأكثر أصالة هو "الزجل"، وهو حوار وشعر ارتجالي مُغنى يُقام على شكل مبارزات فكرية وسرعة بديهة بين الشعراء، وقد أُدرج على لائحة اليونسكو للتراث غير المادي. وتكتمل ليالي السمر القروية والمواويل العاطفية بإنشاد "الميجانا" و"العتابا" التي تروي قصص الحب، الغربة، والحنين للوطن.', 
+        desc: 'Folkloric arts in Lebanon are characterized by energy and vitality drawn from the firmness of its mountains. The mountainous "Lebanese Dabke" is a national symbol expressing joy and unity, performed with strong foot stomps and a rapid rhythm accompanied by the Mijwiz (flute) and Tabla (drum). The most authentic verbal art is "Zajal", a sung improvisational poetry dialogue held as intellectual duels of quick wit between poets, listed on UNESCO\'s Intangible Heritage. Village evening gatherings and emotional chants are completed by singing "Mijana" and "Ataba", telling stories of love, alienation, and nostalgia for the homeland.', 
+        link: 'https://folklore201.wordpress.com/category/%D8%A7%D9%84%D9%81%D9%84%D9%83%D9%84%D9%88%D8%B1-%D8%A7%D9%84%D9%84%D8%A8%D9%86%D8%A7%D9%86%D9%8A/' },
+      { id: 'architecture', icon: Landmark, title_ar: 'العمارة والمعالم', title: 'Architecture', 
+        desc_ar: 'تتزين جبال وساحل لبنان بآثار تروي تعاقب الرومان والفينيقيين والعثمانيين. تعتبر "معابد بعلبك" (هيليوبوليس) من أعظم الهياكل الرومانية المحفوظة في العالم بعمدانها الشاهقة. مدينة "جبيل" (بيبلوس) تقف كأقدم مدينة مأهولة وتصدرت الأبجدية للعالم. يمثل "قصر بيت الدين" في جبل الشوف أيقونة العمارة العربية اللبنانية بساحاته ونافوراته وقناطره المذهلة. وتتميز القرى اللبنانية التقليدية، مثل "دير القمر"، ببيوتها الحجرية العتيقة ذات "السقوف القرميدية الحمراء" والنوافذ ذات الثلاث قناطر، والتي أصبحت رمزاً بصرياً يختصر الجمال المعماري اللبناني.', 
+        desc: 'Lebanon\'s mountains and coast are adorned with ruins narrating the succession of Romans, Phoenicians, and Ottomans. The "Baalbek Temples" (Heliopolis) are among the greatest preserved Roman structures in the world with their towering columns. The city of "Byblos" (Jbeil) stands as the oldest inhabited city and exported the alphabet to the world. "Beiteddine Palace" in Mount Chouf represents an icon of Arab-Lebanese architecture with its amazing courtyards, fountains, and arches. Traditional Lebanese villages, like "Deir El Qamar", feature ancient stone houses with "red tiled roofs" and triple-arched windows, becoming a visual symbol summarizing Lebanese architectural beauty.', 
+        link: 'https://bbooklb.com/%D8%A7%D9%84%D9%85%D8%B9%D8%A7%D9%84%D9%85-%D8%A7%D9%84%D8%A3%D8%AB%D8%B1%D9%8A%D8%A9-%D9%88%D8%A7%D9%84%D8%AA%D8%A7%D8%B1%D9%8A%D8%AE%D9%8A%D8%A9-%D9%81%D9%8A-%D8%A8%D9%8A%D8%B1%D9%88%D8%AA/' },
+      { id: 'clothing', icon: Shirt, title_ar: 'الأزياء التقليدية', title: 'Clothing', 
+        desc_ar: 'اللباس اللبناني التراثي، رغم ندرة ارتدائه يومياً الآن، يمثل هوية فلكلورية راسخة تظهر في المهرجانات. يرتدي رجال القرى الجبلية "الشروال" الأسود الفضفاض، والقميص الأبيض، تعلوه الصدرية، ويُعتمر على الرأس "اللبادة"، وهي قبعة أسطوانية قديمة جداً تصنع من صوف الغنم الملبد لحماية الرأس من برد الجبال، وتُسدل العباءة المقلمة على الأكتاف. تاريخياً، كانت أميرات جبل لبنان يرتدين "الطنطور"، وهو قبعة فضية أو ذهبية مخروطية وطويلة جداً تُثبت على الرأس ويتدلى منها حجاب من الحرير الشفاف، مما كان يدل على مكانة المرأة الاجتماعية ورفعتها.', 
+        desc: 'Traditional Lebanese dress, though rarely worn daily now, represents a solid folkloric identity seen in festivals. Mountain village men wear loose black "Shirwal", a white shirt topped with a vest, and on the head, the "Labbadeh", a very ancient cylindrical cap made of felted sheep wool to protect the head from mountain cold, with a striped cloak draped over the shoulders. Historically, princesses of Mount Lebanon wore the "Tantour", a very long conical silver or gold hat fixed on the head from which a sheer silk veil draped, indicating the woman\'s social status and elevation.', 
+        link: 'https://www.lebarmy.gov.lb/ar/content/%D8%A3%D8%B2%D9%8A%D8%A7%D8%A1-%D8%AA%D8%B1%D8%A7%D8%AB%D9%8A%D8%A9-%D9%88%D9%82%D8%B5%D8%A9-%D8%A7%D9%84%D9%82%D9%85%D8%A7%D8%B4-%D9%88%D8%AD%D9%8A%D8%A7%D9%83%D8%AA%D9%87-%D9%81%D9%8A-%D9%84%D8%A8%D9%86%D8%A7%D9%86-%D9%88%D8%B3%D9%88%D8%B1%D9%8A%D8%A7-%D9%88%D9%81%D9%84%D8%B3%D8%B7%D9%8A%D9%86' },
+      { id: 'traditions', icon: Users, title_ar: 'التقاليد الاجتماعية', title: 'Traditions', 
+        desc_ar: 'المجتمع اللبناني شغوف بالحياة والاجتماعات العائلية المليئة بالود. تعتبر "الترويقة" (الإفطار الصباحي اللبناني) طقساً يومياً تتجمع فيه الأسرة أو الأصدقاء حول المناقيش الساخنة المخبوزة على الصاج وكوب القهوة الثقيلة (الركوة). الحياة في "الضيعة" (القرية الجبلية) تتميز بالتكاتف والترابط المجتمعي الشديد، حيث لا يزال الأهالي يمارسون تقليد المونة وتحضير "الكشك" (برغل ولبن مجفف) تحت شمس الخريف. ورغم التطور والانفتاح الثقافي الكبير، يحرص اللبنانيون بشدة على قضاء عطلة يوم الأحد في القرى الجبلية للالتقاء بالعائلة الكبيرة وصنع ولائم الشواء.', 
+        desc: 'Lebanese society is passionate about life and warm family gatherings. The "Terwi\'a" (Lebanese morning breakfast) is a daily ritual where family or friends gather around hot Manoushes baked on a Saj and a cup of strong coffee (Rakwe). Life in the "Day\'a" (mountain village) is characterized by extreme community solidarity and bonding, where locals still practice the tradition of Mouneh and preparing "Kishk" (dried bulgur and yogurt) under the autumn sun. Despite great development and cultural openness, the Lebanese fiercely ensure spending Sundays in mountain villages to meet extended family and host BBQ feasts.', 
+        link: 'https://folkculturebh.org/ar/index.php?issue=27&page=article&id=503' }
+    ]
+  },
+  {
+    code: 'JO', region: 'Levant', name_ar: 'الأردن', name: 'Jordan', flag: '🇯🇴', flag_image_url: 'https://flagcdn.com/w1280/jo.png',
+    video_id: 'hL7nSsWplAI', video_title_ar: 'وثائقي: حضارة الأردن', video_title: 'Documentary: Jordanian Civilization',
+    dish: { name_ar: 'المنسف الأردني', name: 'Jordanian Mansaf', image: 'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=600' },
+    details: [
+      { id: 'cuisine', icon: Utensils, title_ar: 'المطبخ التقليدي', title: 'Cuisine', 
+        desc_ar: 'يُعتبر "المنسف" الأردني رمزاً للهوية والكرم الأردني وتُعقد عليه الصلحات والتحالفات. يتكون المنسف من لحم الخروف البلدي المطبوخ بمرق "الجميد" (اللبن المجفف الفريد المذاق)، ويُسكب فوق الأرز الموضوع على خبز الشراك المحمص، ويُزين بالصنوبر واللوز واللوز المحمص ويؤكل تقليدياً باليد اليمنى. في شمال الأردن تشتهر أطباق مثل "المكمورة" (طبقات عجين محشوة بالدجاج والبصل). أما في الجنوب والبادية، فنجد "الرشوف" (حساء العدس والجميد)، وطريقة "الزرب" المذهلة حيث يُدفن اللحم والدجاج مع الخضار في برميل تحت رمال الصحراء الساخنة ليُشوى على الحطب.', 
+        desc: 'The Jordanian "Mansaf" is a symbol of Jordanian identity and generosity, over which reconciliations and alliances are made. Mansaf consists of local lamb cooked in "Jameed" broth (uniquely flavored dried yogurt), poured over rice placed on toasted Shrak bread, garnished with pine nuts and roasted almonds, and traditionally eaten with the right hand. In northern Jordan, dishes like "Makmoura" (dough layers stuffed with chicken and onions) are famous. In the south and desert, we find "Rashoof" (lentil and Jameed soup), and the amazing "Zarb" method where meat, chicken, and vegetables are buried in a barrel under hot desert sands to BBQ on firewood.', 
+        link: 'https://migrationology.com/jordanian-food/' },
+      { id: 'crafts', icon: Hammer, title_ar: 'الحرف اليدوية', title: 'Crafts', 
+        desc_ar: 'تعكس الحرف الأردنية ثراء البيئة وتنوع حضاراتها. في مدينة مأدبا، يتم الحفاظ على الفن البيزنطي التاريخي المتمثل في "فن الفسيفساء"، حيث تُنضد قطع الحجارة الدقيقة لتشكيل لوحات فنية مذهلة وخرائط جغرافية قديمة. البدو في وادي رم والأغوار يتميزون بنسج "البسط البدوية" والمفروشات بخيوط صوف الغنم وشعر الماعز بألوان صارخة وزخارف تعبر عن حياة الخيمة. وفي مدينة العقبة، أبدع الحرفيون في فن "الرسم بالرمل الملون" من جبال البتراء وتعبئته داخل زجاجات صغيرة لتكوين مشاهد صحراوية وإبل، لتصبح من أجمل التذكارات السياحية الأردنية.', 
+        desc: 'Jordanian crafts reflect the richness of the environment and diversity of its civilizations. In Madaba, the historical Byzantine art of "Mosaic" is preserved, where tiny stone pieces are arranged to form amazing artworks and ancient geographical maps. Bedouins in Wadi Rum and the Jordan Valley excel in weaving "Bedouin Rugs" and furnishings using sheep wool and goat hair threads in striking colors and patterns expressing tent life. In Aqaba, artisans creatively mastered "Colored Sand Art" using sand from Petra\'s mountains, filling small bottles to form desert and camel scenes, becoming one of Jordan\'s most beautiful tourist souvenirs.', 
+        link: 'https://www.rscn.org.jo/handicrafts/workshop/list' },
+      { id: 'folklore', icon: Music, title_ar: 'الفنون والفلكلور', title: 'Folklore', 
+        desc_ar: 'يتميز الفلكلور الأردني بالدبكات البدوية والريفية التي تنبض بالحماس والفروسية. "الدبكة الأردنية" بآلتها الرئيسية (اليرغول أو المجوز) تُشعل الأعراس، وأبرز حركاتها "الجوفية" و"الدلعونا". أما في البادية، فيسيطر فن "السامر"، وهو رقصة وغناء جماعي للرجال يقفون في صف ويعبرون عن الشهامة دون آلات موسيقية بل بالتصفيق والأشعار المرتجلة. الآلة الموسيقية الخالدة في الصحراء هي "الربابة" ذات الوتر الواحد، والتي يصاحبها الشاعر البدوي لرواية القصص الملحمية القديمة مثل "تغريبة بني هلال" أو للتعبير عن الشوق والبطولات بصوت حزين وعميق.', 
+        desc: 'Jordanian folklore features Bedouin and rural Dabkes pulsating with enthusiasm and chivalry. The "Jordanian Dabke", with its main instrument (Yarghoul or Mijwiz), ignites weddings, with notable movements like "Jofiya" and "Dal\'ouna". In the desert, the "Samer" art dominates, a group dance and singing by men standing in a line expressing gallantry without musical instruments, relying on clapping and improvised poetry. The immortal musical instrument in the desert is the single-stringed "Rababa", accompanied by the Bedouin poet narrating ancient epic tales like "Bani Hilal Epic" or expressing longing and heroics with a deep, sorrowful voice.', 
+        link: 'https://middle-east-online.com/en/node/335102' },
+      { id: 'architecture', icon: Landmark, title_ar: 'العمارة والمعالم', title: 'Architecture', 
+        desc_ar: 'يحتضن الأردن إحدى عجائب الدنيا السبع الجديدة: "مدينة البتراء" الوردية، وهي عاصمة الأنباط المحفورة بالكامل داخل الجبال الصخرية الوردية، ويقف "الخزنة" فيها كأعظم واجهة معمارية في التاريخ القديم. في الشمال، تبرز مدينة "جرش" كأكبر المدن الرومانية المحافظ عليها في العالم بمسارحها وشوارعها المبلطة وساحة "الألف عمود". وفي العاصمة عمان، يتربع "المدرج الروماني" الضخم وسط البلد. كما تتوزع القلاع الدفاعية الصليبية والإسلامية مثل قلعة عجلون وقلعة الكرك، والتي صممت بهندسة عسكرية معقدة للسيطرة على طرق التجارة بين الشام والحجاز.', 
+        desc: 'Jordan hosts one of the New Seven Wonders of the World: the Rose City of "Petra", the Nabataean capital carved entirely into pink rocky mountains, with "The Treasury" standing as the greatest architectural facade in ancient history. In the north, "Jerash" emerges as the largest preserved Roman city in the world with its theaters, paved streets, and the "Thousand Columns" plaza. In the capital, Amman, the massive "Roman Theater" sits downtown. Crusader and Islamic defensive castles like Ajloun and Karak Castles are distributed, designed with complex military engineering to control trade routes between the Levant and Hijaz.', 
+        link: 'https://www.tripadvisor.com.eg/Attractions-g293985-Activities-c47-t3-Jordan.html' },
+      { id: 'clothing', icon: Shirt, title_ar: 'الأزياء التقليدية', title: 'Clothing', 
+        desc_ar: 'يمثل الزي الأردني الفخر والانتماء العشائري. رمز الرجل الأردني هو "الشماغ الأحمر المهدب"، حيث تزيد كثافة "الهدب" (الخيوط البيضاء المتدلية من أطراف الشماغ) من قيمة الزي وجماله، ويُلبس مع "العقال" والكبر (الثوب الواسع). لباس المرأة الأردنية تحفة فنية، وأشهره "الثوب المدرقة" المصنوع من قماش داكن والمطرز تطريزاً كثيفاً يدوياً بخيوط حمراء وزاهية، وتختلف الغرزات ونقوش التطريز جغرافياً (مثل التطريز السلطي أو الكركي) لتدل على مسقط رأس المرأة. وتعتمر النساء "العصابة" أو غطاء الرأس المعصب الذي يضفي طابعاً من الحشمة المهيبة.', 
+        desc: 'Jordanian dress represents pride and tribal belonging. The symbol of the Jordanian man is the "Fringed Red Shemagh", where the density of the "Hudub" (white threads dangling from the edges) increases the outfit\'s value and beauty, worn with an "Agal" and Kibar (wide thobe). The Jordanian woman\'s dress is a masterpiece, most famous being the "Mudraqa Dress" made of dark fabric and heavily hand-embroidered with red and bright threads. The stitches and embroidery patterns vary geographically (like Salti or Karaki embroidery) to indicate the woman\'s hometown. Women wear the "Isaba" or banded head cover adding a majestic modesty.', 
+        link: 'https://www.skynewsarabia.com/varieties/669082-%D8%A7%D9%84%D8%B2%D9%8A-%D8%A7%D9%84%D8%AA%D9%82%D9%84%D9%8A%D8%AF%D9%8A-%D8%A7%D9%84%D8%A7%D9%94%D8%B1%D8%AF%D9%86%D9%8A-%D9%86%D8%AA%D8%A7%D8%AC-%D8%AD%D8%B6%D8%A7%D8%B1%D9%8A-%D8%B9%D8%A8%D8%B1-%D8%A7%D9%84%D9%82%D8%B1%D9%88%D9%86' },
+      { id: 'traditions', icon: Users, title_ar: 'التقاليد الاجتماعية', title: 'Traditions', 
+        desc_ar: 'التقاليد الأردنية هي قانون اجتماعي غير مكتوب مبني على الكرامة والمروءة. "القهوة العربية المرة" هي لغة بحد ذاتها؛ يُدق البن بـ "المهباش" بصوت موسيقي لجلب الضيوف، ويقوم المُضيف (المُعزب) بصب القهوة واقِفاً ويمسك الدلة باليسرى والفنجان باليمنى، وهناك معانٍ صامتة لهز الفنجان أو وضعه على الأرض كطلب حاجة من المضيف. كما يبرز مفهوم "الفزعة" وهو الاستجابة السريعة والجماعية لنجدة ومساعدة أي شخص في مأزق أو في الأفراح. الكرم الأردني يصل لمرحلة إجبار الضيف على البقاء للغداء (المنسف) تقديراً لمكانته واحتراماً لوجوده.', 
+        desc: 'Jordanian traditions are an unwritten social code based on dignity and chivalry. "Bitter Arabic Coffee" is a language in itself; coffee beans are pounded in a "Mihbash" with a musical sound to attract guests. The host (Mu\'azib) pours coffee standing, holding the Dallah in the left and cup in the right. There are silent meanings to shaking the cup or placing it on the ground indicating a request from the host. The concept of "Fazaa" is prominent, a rapid, collective response to rescue and help anyone in trouble or in joys. Jordanian generosity reaches the point of insisting the guest stays for lunch (Mansaf) out of appreciation and respect.', 
+        link: 'https://mawdoo3.com/%D8%A3%D8%A8%D8%B1%D8%B2_%D8%B9%D8%A7%D8%AF%D8%A7%D8%AA_%D9%88%D8%AA%D9%82%D8%A7%D9%84%D9%8A%D8%AF_%D8%A7%D9%84%D8%A3%D8%B1%D8%AF%D9%86' }
+    ]
+  },
+  {
+    code: 'PS', region: 'Levant', name_ar: 'فلسطين', name: 'Palestine', flag: '🇵🇸', flag_image_url: 'https://flagcdn.com/w1280/ps.png',
+    video_id: 'YMRQ8BaYCOg', video_title_ar: 'وثائقي: فلسطين الأصالة', video_title: 'Documentary: Authentic Palestine',
+    dish: { name_ar: 'المسخن الفلسطيني', name: 'Palestinian Musakhan', image: 'https://images.unsplash.com/photo-1628151015968-3a4429e9ef04?q=80&w=600' },
+    details: [
+      { id: 'cuisine', icon: Utensils, title_ar: 'المطبخ التقليدي', title: 'Cuisine', 
+        desc_ar: 'يعتمد المطبخ الفلسطيني بشكل أساسي على زيت الزيتون البكر والزعتر والمنتجات الزراعية الريفية. "المسخن" هو الطبق الوطني الأيقوني المكون من خبز الطابون المشبع بزيت الزيتون والبصل المكرمل مع السماق البلدي، تعلوه قطع الدجاج المحمرة والمكسرات. في مدينة الخليل تُشتهر "القدرة الخليلية" (أرز ولحم مع الحمص يطبخ في جرة نحاسية أو فخارية داخل فرن الحطب). وتتفرد القرى بـ "المفتول" المبروم يدوياً، وصواني "المقلوبة". أما مسك الختام، فهو الساحرة "الكنافة النابلسية" المذابة بجبن نابلس وعطر السمن البلدي والقطر والتي وصلت شهرتها للعالمية.', 
+        desc: 'Palestinian cuisine primarily relies on virgin olive oil, thyme (Za\'atar), and rural agricultural products. "Musakhan" is the iconic national dish consisting of Taboon bread soaked in olive oil and caramelized onions with local sumac, topped with roasted chicken and nuts. In Hebron, the "Hebron Qidra" is famous (rice and meat with chickpeas cooked in a brass or clay pot inside a wood oven). Villages are unique for hand-rolled "Maftoul" and pans of "Maqluba". The grand finale is the enchanting "Nabulsi Knafeh", melted with Nabulsi cheese, scented with local ghee and syrup, whose fame has reached the world.', 
+        link: 'https://www.travelpalestine.ps/ar/Category/2/%D8%A7%D9%84%D9%85%D8%B7%D8%A8%D8%AE-%D8%A7%D9%84%D9%81%D9%84%D8%B3%D8%B7%D9%8A%D9%86%D9%8A' },
+      { id: 'crafts', icon: Hammer, title_ar: 'الحرف اليدوية', title: 'Crafts', 
+        desc_ar: 'تحتفظ فلسطين بحرف يدوية متجذرة في أراضي مدنها المقدسة. مدينة الخليل تتألق بصناعة "الزجاج اليدوي المنفوخ" الملون والخزف (السيراميك الخليلي) ذو النقوش الزرقاء والنباتية الرائعة. مدينة بيت لحم تعتبر المركز العالمي لـ "نحت خشب الزيتون"، حيث يقوم الحرفيون بتحويل أخشاب شجر الزيتون المبارك إلى تحف فنية ودينية استثنائية. وفي مدينة جبل النار (نابلس)، تستمر حرفة صناعة "الصابون النابلسي" التقليدي والمصنوع من زيت الزيتون الصافي 100% والمطبوخ في مصابن تاريخية قبة، وهو من أجود وأقدم أنواع الصابون الطبيعي في العالم.', 
+        desc: 'Palestine preserves handicrafts rooted in the lands of its holy cities. Hebron shines with the making of colored "hand-blown glass" and ceramics (Hebron Ceramic) with magnificent blue and floral motifs. Bethlehem is considered the global center for "Olive Wood Carving", where artisans transform the wood of the blessed olive tree into exceptional artistic and religious masterpieces. In the Mountain of Fire (Nablus), the craft of traditional "Nabulsi Soap" continues, made from 100% pure olive oil and cooked in historical domed soap factories, being one of the finest and oldest natural soaps in the world.', 
+        link: 'https://www.travelpalestine.ps/ar/Category/22/%D8%A7%D9%84%D8%AD%D8%B1%D9%81-%D8%A7%D9%84%D9%8A%D8%AF%D9%88%D9%8A%D8%A9' },
+      { id: 'folklore', icon: Music, title_ar: 'الفنون والفلكلور', title: 'Folklore', 
+        desc_ar: 'يجسد الفلكلور الفلسطيني تمسك الشعب بأرضه وتراثه المقاوم. تعتبر "الدبكة الفلسطينية" الروح النابضة للشارع، وهي رقصة جماعية قوية وحماسية تُدق فيها الأقدام بالأرض بقوة تعبيراً عن التجذر فيها، وترافقها آلات اليرغول والشبابة. في الأفراح القروية والزفات، يبرز فن "الحداء"، وهو غناء ومحاورة زجلية بين شاعرين (الحدايين) يمشيان أمام موكب العريس. كما يحمل الفلاحون تراثاً غنائياً عظيماً يُنشد في "موسم قطاف الزيتون"، وهي ترويدة وأهازيج تُخفف عنهم تعب العمل وتتغنى ببركة الشجرة وصمود الفلاح على أرضه رغم كل الظروف.', 
+        desc: 'Palestinian folklore embodies the people\'s adherence to their land and resistant heritage. The "Palestinian Dabke" is the beating heart of the street, a strong and enthusiastic group dance where feet pound the ground forcefully expressing rootedness, accompanied by the Yarghoul and Shababa instruments. In village weddings and Zaffas, the art of "Hida" emerges, a sung Zajal dialogue between two poets (Hadayeen) walking ahead of the groom\'s procession. Farmers also carry a great singing heritage chanted during the "Olive Harvest Season", chants and songs that ease the fatigue of work and sing of the tree\'s blessing and the farmer\'s steadfastness.', 
+        link: 'https://mugtama.com/articles/%D8%A7%D9%84%D9%81%D9%86%D9%88%D9%86_%D8%A7%D9%84%D8%B4%D8%B9%D8%A8%D9%8A%D8%A9_%D8%A7%D9%84%D9%81%D9%84%D8%B3%D8%B7%D9%8A%D9%86%D9%8A%D8%A9_%D9%88%D8%A7%D9%84%D8%AD%D9%81%D8%A7%D8%B8_%D8%B9%D9%84_%D8%A7%D9%84%D9%87%D9%88%D9%8A%D8%A9_2' },
+      { id: 'architecture', icon: Landmark, title_ar: 'العمارة والمعالم', title: 'Architecture', 
+        desc_ar: 'تحوي فلسطين كنوزاً معمارية ومعالم روحانية وتاريخية هي الأقدس في العالم. في قلب القدس القديمة يتلألأ "المسجد الأقصى" المبارك، وتخطف "قبة الصخرة" المشرفة الأنظار بعمارتها الأموية الذهبية وفسيفسائها العبقرية. وعلى بعد خطوات تقف "كنيسة القيامة" كأقدس المعالم المسيحية المليئة بالقناطر والزخارف. أما العمارة المدنية (الحارات القديمة) فتتميز بـ "الحجر القدسي" الصلب، والممرات المسقوفة (القناطر والأقواس) التي تربط بيوت العائلات المتلاصقة، والتي بُنيت لتوفير الظل في الصيف والحماية والتكافل الأمني بين الجيران منذ مئات السنين.', 
+        desc: 'Palestine contains architectural treasures and spiritual, historical landmarks that are the holiest in the world. In the heart of the Old City of Jerusalem shines the blessed "Al-Aqsa Mosque", and the honorable "Dome of the Rock" catches the eye with its golden Umayyad architecture and brilliant mosaics. Steps away stands the "Church of the Holy Sepulchre" as the holiest Christian landmark full of arches and decorations. Civil architecture (old quarters) is characterized by solid "Jerusalem Stone", and roofed passageways (arches and vaults) connecting adjacent family homes, built hundreds of years ago to provide summer shade, protection, and security solidarity among neighbors.', 
+        link: 'https://www.travelpalestine.ps/ar/Category/7/destinations-&-attractions' },
+      { id: 'clothing', icon: Shirt, title_ar: 'الأزياء التقليدية', title: 'Clothing', 
+        desc_ar: 'الزي الفلسطيني ليس مجرد قماش، بل هو وثيقة تاريخية وإثبات هوية. تبرز المرأة الفلسطينية بـ "الثوب الفلاحي المطرز"، والمذهل أن كل مدينة وقرية لها لون ونقشة (غرزة) خاصة بها؛ فثوب رام الله يُطرز بخيوط حمراء داكنة على قماش فاتح، بينما يتميز ثوب الخليل بكثافة التطريز وتعدد الألوان، وثوب يافا يعكس زهور البرتقال في نقوشه. أما الرجل الفلسطيني فيرتبط زيه ارتباطاً وثيقاً برمزه الوطني "الكوفية الفلسطينية" (الحطة) ذات النقوش السوداء والبيضاء التي تعبر عن شبك الصيد وأوراق الزيتون، وأصبحت رمزاً عالمياً للتضامن والصمود.', 
+        desc: 'Palestinian attire is not just fabric, but a historical document and proof of identity. The Palestinian woman stands out with the "Embroidered Fellahi Thobe", and astonishingly, every city and village has its own specific color and stitch pattern; the Ramallah dress is embroidered with dark red threads on light fabric, while the Hebron dress features dense, multi-colored embroidery, and the Jaffa dress reflects orange blossoms in its patterns. The Palestinian man\'s attire is closely linked to his national symbol, the "Palestinian Keffiyeh" (Hatta) with black and white patterns representing fishing nets and olive leaves, becoming a global symbol of solidarity and steadfastness.', 
+        link: 'https://www.aljazeera.net/family/2025/9/5/%D8%A7%D9%84%D8%A3%D8%AB%D9%88%D8%A7%D8%A8-%D8%A7%D9%84%D9%81%D9%84%D8%B3%D8%B7%D9%8A%D9%86%D9%8A%D8%A9-%D8%B0%D8%A7%D9%83%D8%B1%D8%A9-%D9%88%D8%B7%D9%86-%D8%AA%D8%B7%D8%B1%D8%B2' },
+      { id: 'traditions', icon: Users, title_ar: 'التقاليد الاجتماعية', title: 'Traditions', 
+        desc_ar: 'يتميز المجتمع الفلسطيني بالتعاون اللامحدود للحفاظ على بقائه. يتجسد ذلك في تقليد "العونة"، حيث يتنادى جميع أهالي القرية بشكل طوعي لمساعدة أي فلاح في مواسم حصاد القمح أو قطف الزيتون وبناء المنازل، مما يخلق روحاً من التكافل الصلب. في الزواج، تبدأ الأفراح قبل أسبوع وتُختتم بـ "الزفة الفلسطينية" ومراسم "حمام العريس" حيث يتكفل الأصدقاء بتجهيزه وسط الأهازيج والدبكة في شوارع الحارة. كما أن الكرم في تقديم ولائم "المناسف" أو "المسخن" للضيوف يعتبر واجباً مقدساً لا يقبل التهاون فيه للتعبير عن الفرحة وإكرام الوافدين.', 
+        desc: 'Palestinian society is characterized by unlimited cooperation to ensure its survival. This is embodied in the "Ounah" tradition, where all village residents voluntarily call upon each other to help any farmer during wheat harvest or olive picking seasons and building houses, creating a spirit of solid interdependence. In marriage, festivities begin a week prior and conclude with the "Palestinian Zaffa" and the "Groom\'s Bath" ceremony where friends take charge of preparing him amidst chants and Dabke in the neighborhood streets. Generosity in serving "Mansaf" or "Musakhan" feasts to guests is considered a sacred, uncompromising duty to express joy and honor arrivals.', 
+        link: 'https://taqaled.com/s/%D9%85%D8%A7-%D9%8A%D8%AC%D8%A8-%D8%A3%D9%86-%D8%AA%D8%B9%D8%B1%D9%81%D9%87-%D8%B9%D9%86-%D8%A7%D9%84%D8%B9%D8%A7%D8%AF%D8%A7%D8%AA-%D9%88%D8%A7%D9%84%D8%AA%D9%82%D8%A7%D9%84%D9%8A%D8%AF-%D8%A7%D9%84%D9%81%D9%84%D8%B3%D8%B7%D9%8A%D9%86%D9%8A%D8%A9' }
+    ]
+  },
+
+  // ---------------- شمال أفريقيا ----------------
+  {
+    code: 'EG', region: 'North Africa', name_ar: 'مصر', name: 'Egypt', flag: '🇪🇬', flag_image_url: 'https://flagcdn.com/w1280/eg.png',
+    video_id: 'kjsML1ERa3s', video_title_ar: 'وثائقي: أم الدنيا', video_title: 'Documentary: Mother of the World',
+    dish: { name_ar: 'الكشري والملوخية', name: 'Koshary & Molokhia', image: 'https://images.unsplash.com/photo-1541518763669-27fef04b14ea?q=80&w=600' },
+    details: [
+      { id: 'cuisine', icon: Utensils, title_ar: 'المطبخ التقليدي', title: 'Cuisine', 
+        desc_ar: 'المطبخ المصري هو مطبخ شعبي متجذر يعتمد على البقوليات والخضار البلدية. يتربع "الكشري" كوجبة وطنية لا تُنافس، يجمع بين الأرز، المعكرونة، العدس، الحمص، ويُغطى بصلصة الطماطم والبصل المقرمش ودقة الثوم الخل. ولا تخلو مائدة مصرية من طبق "الملوخية" الخضراء مع "الطشة" (الثوم والكزبرة) التي تمنحها رائحة نفاذة، وتُؤكل مع الدجاج أو الأرانب. الإفطار المصري مقدس ويعتمد على "الفول المدمس" المطهو ببطء لساعات، و"الطعمية" (الفلافل) التي تُصنع من الفول المطحون والخضرة وليس الحمص. ولعشاق اللحوم، يعتبر "الحواوشي" والفتة بالخل والثوم من الأساسيات.', 
+        desc: 'Egyptian cuisine is a deeply rooted popular cuisine based on legumes and local vegetables. "Koshary" reigns as the unrivaled national dish, combining rice, macaroni, lentils, chickpeas, topped with tomato sauce, crispy onions, and garlic-vinegar "Daqqa". No Egyptian table is without green "Molokhia" with the "Tasha" (garlic and coriander) giving it a pungent aroma, eaten with chicken or rabbit. The Egyptian breakfast is sacred, relying on slow-cooked "Foul Medames", and "Taameya" (Falafel) made from ground fava beans and greens, not chickpeas. For meat lovers, "Hawawshi" and Fatteh with vinegar and garlic are essentials.', 
+        link: 'https://www.inside-egypt.com/blog/favorite-egyptian-dishes-your-full-guide-to-delicious-egyptian-cuisine.html' },
+      { id: 'crafts', icon: Hammer, title_ar: 'الحرف اليدوية', title: 'Crafts', 
+        desc_ar: 'مصر هي ورشة فنية كبرى مستمرة منذ العهد الفاطمي والمملوكي. في شارع "الخيامية" التاريخي بالقاهرة، يبدع الحرفيون في فن التطريز وتركيب الأقمشة (الأبليك) لصناعة خيام السرادقات الرمضانية والاحتفالية المزخرفة بأشكال لوتسية وخطوط إسلامية. وفي حواري "خان الخليلي"، تُسمع دقات مطارق النحاسين الذين ينقشون آيات قرآنية وتصاميم عربية دقيقة على الأطباق والفوانيس النحاسية والفضية. صناعة السجاد اليدوي (الكليم) تزدهر في قرى مثل الحرانية، إضافة إلى صناعة "الزجاج المعشق" وتركيبه مع الجص لتزيين النوافذ لتمرير الضوء بشكل ساحر للمساجد والقصور.', 
+        desc: 'Egypt is a grand continuous art workshop since the Fatimid and Mamluk eras. In the historic "Khayamiya" street in Cairo, artisans excel in embroidery and fabric appliqué to make Ramadan and celebratory tent pavilions decorated with lotus shapes and Islamic calligraphy. In the alleys of "Khan el-Khalili", the striking of coppersmiths\' hammers is heard, engraving Quranic verses and intricate arabesque designs on brass and silver plates and lanterns. Handmade carpet (Kilim) weaving flourishes in villages like Harrania, in addition to "Stained Glass" crafting fitted with gypsum to decorate windows, magically filtering light into mosques and palaces.', 
+        link: 'https://sis.gov.eg/ar/%D9%85%D8%B5%D8%B1/%D8%A7%D9%84%D8%AB%D9%82%D8%A7%D9%81%D8%A9/%D8%AA%D9%86%D9%88%D8%B9-%D8%A7%D9%84%D8%AB%D9%82%D8%A7%D9%81%D8%A9-%D8%A7%D9%84%D9%85%D8%B5%D8%B1%D9%8A%D8%A9/%D8%A7%D9%84%D8%AB%D9%82%D8%A7%D9%81%D8%A9-%D8%A7%D9%84%D8%B4%D8%B9%D8%A8%D9%8A%D8%A9/' },
+      { id: 'folklore', icon: Music, title_ar: 'الفنون والفلكلور', title: 'Folklore', 
+        desc_ar: 'الفلكلور المصري حيوي جداً ويعكس طبائع مناطقه المتعددة. في صعيد مصر، تعتبر لعبة "التحطيب" فنّاً ورقصاً تراثياً يستعرض فيه الرجال مهاراتهم في استخدام العصا (الشومة) على نغمات المزمار الصعيدي العالي والطبل البلدي لبيان القوة والتوازن. في قاهرة المعز، تجذب "التنورة الصوفية" الأنظار، حيث يدور الراقص حول نفسه لفترات طويلة بأثوابه الثقيلة والمتعددة الألوان ليمثل حركة الكون والتجلي الروحي. أما في مدن القناة (بورسعيد والسويس والإسماعيلية)، فتسيطر آلة "السمسمية" الوترية المرحة على الأجواء، ترافقها رقصة "البمبوطية" المعبرة عن حياة الصيادين والبحر.', 
+        desc: 'Egyptian folklore is highly vital and reflects the nature of its multiple regions. In Upper Egypt, the "Tahtib" game is a heritage art and dance where men showcase their skills using a heavy stick (Shouma) to the tunes of the loud Saidi Mizmar and Baladi drum to display strength and balance. In Fatimid Cairo, the "Sufi Tanoura" captivates eyes, where the dancer spins around himself for long periods in heavy, multi-colored skirts representing cosmic movement and spiritual manifestation. In the Canal cities (Port Said, Suez, Ismailia), the cheerful stringed "Simsimiyya" instrument dominates the atmosphere, accompanied by the "Bamboutia" dance expressing fishermen\'s lives.', 
+        link: 'https://artsandculture.google.com/story/mwVRdm0uaaIR3w?hl=ar' },
+      { id: 'architecture', icon: Landmark, title_ar: 'العمارة والمعالم', title: 'Architecture', 
+        desc_ar: 'مصر هي متحف العالم المفتوح. حضارة الفراعنة تقف بشموخ متمثلة في "أهرامات الجيزة" وأبو الهول، و"معابد الكرنك والأقصر" التي تُعد أكبر دور عبادة شيدها الإنسان القديم وتتميز بالمسلات والأعمدة الشاهقة المحفورة بالهيروغليفية. في العصر الإسلامي، برزت القاهرة بلقب "مدينة الألف مئذنة"، وتتربع "قلعة صلاح الدين" على جبل المقطم لتحرس المدينة، بينما يزخر شارع المعز بالمساجد والمدارس المملوكية والفاطمية الغنية بـ "المشربيات" الخشبية التي تمنح الخصوصية للمنازل وتُلطف الهواء. وفي أقصى الجنوب، تتميز "قرى النوبة" ببيوتها المقببة المطلية بألوان زاهية ورموز تعكس فرحة الحياة.', 
+        desc: 'Egypt is the world\'s open museum. The Pharaonic civilization stands proudly represented by the "Giza Pyramids", the Sphinx, and the "Karnak and Luxor Temples", considered the largest places of worship built by ancient man, featuring towering obelisks and columns carved with hieroglyphics. In the Islamic era, Cairo emerged as the "City of a Thousand Minarets", with "Saladin Citadel" sitting atop Mokattam Mountain guarding the city, while Al-Muizz Street teems with Mamluk and Fatimid mosques and schools rich with wooden "Mashrabiyas" providing privacy and cooling the air. In the deep south, "Nubian villages" feature domed houses painted in bright colors and symbols reflecting the joy of life.', 
+        link: 'https://artsandculture.google.com/story/mwVRdm0uaaIR3w?hl=ar' },
+      { id: 'clothing', icon: Shirt, title_ar: 'الأزياء التقليدية', title: 'Clothing', 
+        desc_ar: 'يتنوع الزي التقليدي في مصر بتنوع أقاليمها. في صعيد مصر وريفها، يرتدي الفلاح والرجل الصعيدي "الجلابية" الفضفاضة والمريحة ذات الأكمام الواسعة والتي تُصنع من القطن المصري الخالص صيفاً والصوف الداكن شتاءً، ويعتمر فوق رأسه "العمامة" (العمة) التي تدل على الهيبة والوقار، ويلف خصره بـ "الشال". بالنسبة للنساء في القرى، ترتدي المرأة "الجلابية الفلاحي" ذات الألوان المبهجة والمطرزة بورد وزخارف بسيطة، أو "المَلَس" الأسود الواسع فوق الملابس عند الخروج. وفي واحة سيوة والنوبة، تزداد الأزياء النسائية تعقيداً بتطريزات يدوية كثيفة وحلي فضية معقدة (الشكة).', 
+        desc: 'Traditional clothing in Egypt varies with its provinces. In Upper Egypt and the countryside, the farmer and Saidi man wear the loose, comfortable "Galabiya" with wide sleeves, made of pure Egyptian cotton in summer and dark wool in winter, wearing a "Turban" (Emma) on his head indicating prestige and dignity, wrapping his waist with a "Shawl". As for women in villages, they wear the "Falahi Galabiya" with cheerful colors embroidered with flowers and simple motifs, or the wide black "Mallas" over clothes when going out. In Siwa Oasis and Nubia, women\'s outfits become more complex with heavy hand embroidery and intricate silver jewelry (Shakka).', 
+        link: 'https://taqaled.com/s/%D8%B9%D8%A7%D8%AF%D8%A7%D8%AA-%D9%88%D8%AA%D9%82%D8%A7%D9%84%D9%8A%D8%AF-%D9%85%D8%B5%D8%B1-%D9%81%D9%8A-%D8%A7%D9%84%D9%84%D8%A8%D8%A7%D8%B3' },
+      { id: 'traditions', icon: Users, title_ar: 'التقاليد الاجتماعية', title: 'Traditions', 
+        desc_ar: 'يعشق المصريون الحياة الاجتماعية الصاخبة والنكتة والاحتفال. "المقهى الشعبي" (القهوة) هو قلب الشارع النابض، حيث يلتقي الرجال لشرب الشاي بالنعناع أو القهوة المظبوطة ولعب "الطاولة" (النرد) والدومينو ومناقشة كل شيء. من أقدم التقاليد المستمرة منذ الفراعنة هو الاحتفال بـ "شم النسيم" (عيد الربيع)، حيث تخرج العائلات للحدائق وضفاف النيل لتناول الفسيخ (السمك المملح)، البصل الأخضر، وتلوين البيض. كما يعكس المصريون حبهم للاحتفالات الدينية من خلال إقامة شوادر ومراجيح وزفات صوفية مهيبة في "المولد النبوي" وموالد الأولياء، حيث تُوزع "حلاوة المولد" الملونة والمكسرات وعروسة المولد.', 
+        desc: 'Egyptians adore bustling social life, humor, and celebration. The "Popular Cafe" (Ahwa) is the beating heart of the street, where men meet to drink mint tea or perfect coffee, play Backgammon (Tawla) and dominoes, and discuss everything. One of the oldest traditions continuing since the Pharaohs is celebrating "Sham Ennessim" (Spring Festival), where families go out to parks and Nile banks to eat Feseekh (salted fish), green onions, and color eggs. Egyptians also reflect their love for religious celebrations by setting up pavilions, swings, and majestic Sufi processions during "Moulid El-Nabi" and saints\' Moulids, distributing colorful "Moulid Sweets", nuts, and the Moulid Doll.', 
+        link: 'https://taqaled.com/s/%D9%85%D8%A7-%D9%87%D9%8A-%D8%A3%D8%A8%D8%B1%D8%B2-%D8%B9%D8%A7%D8%AF%D8%A7%D8%AA-%D9%88%D8%AA%D9%82%D8%A7%D9%84%D9%8A%D8%AF-%D9%85%D8%B5%D8%B1' }
+    ]
+  },
+  {
+    code: 'LY', region: 'North Africa', name_ar: 'ليبيا', name: 'Libya', flag: '🇱🇾', flag_image_url: 'https://flagcdn.com/w1280/ly.png',
+    video_id: 'cLzLBrdqAg0', video_title_ar: 'وثائقي: عروس البحر المتوسط', video_title: 'Documentary: Bride of the Mediterranean',
+    dish: { name_ar: 'المبكبكة الليبية', name: 'Libyan Mbakbaka', image: 'https://images.unsplash.com/photo-1599869152285-8025232810fb?q=80&w=600' },
+    details: [
+      { id: 'cuisine', icon: Utensils, title_ar: 'المطبخ التقليدي', title: 'Cuisine', 
+        desc_ar: 'يتميز المطبخ الليبي بطابعه الحار والدسم كونه يمزج بين تقاليد الطبخ البدوية والأمازيغية والتأثيرات الإيطالية. تعتبر "المبكبكة" الطبق الأشهر والأسرع في الرحلات (الزرادي)، وهي معكرونة تُسلق في مرق لحم غني بالطماطم والبهارات والفلفل الحار حتى تُصدر صوتاً (تبقبق). "البازين" هو الوجبة التراثية الرسمية والمقدسة في المناسبات، وهو عجينة صلبة من دقيق الشعير تُشكل كقبة وسط الطبق وتُحاط بمرق اللحم والبطاطا والبيض المسلوق. ولا يمكن إغفال "الرشدة" (مكرونة منزلية مقطعة رفيعة)، والكسكسي الليبي، وحلوى "العصيدة" بالرب (دبس التمر) والزبدة كفطور تقليدي ولذيذ.', 
+        desc: 'Libyan cuisine is known for its spicy and hearty nature, blending Bedouin and Amazigh cooking traditions with Italian influences. "Mbakbaka" is the most famous and quickest dish for picnics (Zaradi), which is pasta boiled in a rich meat broth with tomatoes, spices, and hot peppers until it makes a bubbling sound. "Bazin" is the official and sacred heritage meal for occasions; a hard dough of barley flour shaped like a dome in the center of the dish, surrounded by meat stew, potatoes, and boiled eggs. One cannot overlook "Reshta" (thinly sliced homemade pasta), Libyan Couscous, and the "Asida" sweet with Rub (date syrup) and butter as a delicious traditional breakfast.', 
+        link: 'https://libyanheritagehouse.org/arts-culture/libyan-cuisine' },
+      { id: 'crafts', icon: Hammer, title_ar: 'الحرف اليدوية', title: 'Crafts', 
+        desc_ar: 'تتميز الحرف اليدوية الليبية بطابعها الصحراوي والبدوي العتيق الذي يعتمد على المواد الطبيعية. يبرز نسيج الصوف كأهم الحرف لإنتاج "الجرد الليبي" (الحولي) للرجال والبطانيات والأكلمة التي تتميز بزخارف هندسية أمازيغية متقنة تتحمل قسوة مناخ الصحراء المتقلب. وفي سوق المشير بمدينة طرابلس القديمة، تبهرك صناعة "السروج الليبية" الفاخرة لتزيين الخيول، والمطرزة بخيوط الفضة والذهب. كما تتفنن أنامل الصناع في دباغة الجلود وصناعة الأحذية (البلغة الليبية) والمحافظ الجلدية الملونة، وصناعة الحلي الفضية الأمازيغية (الفكارين) التي تتزين بها النساء في الأعراس.', 
+        desc: 'Libyan handicrafts are characterized by their ancient desert and Bedouin nature relying on natural materials. Wool weaving stands out as the most important craft to produce the "Libyan Jered" (Houli) for men, blankets, and kilims characterized by intricate Amazigh geometric motifs that withstand the harsh, fluctuating desert climate. In Souq Al-Musheer in the old city of Tripoli, the crafting of luxurious "Libyan Saddles" to decorate horses, embroidered with silver and gold threads, dazzles you. Artisans also master leather tanning, making shoes (Libyan Balgha) and colorful leather wallets, and crafting Amazigh silver jewelry (Fakkareen) that women adorn at weddings.', 
+        link: 'https://bahu.ly/blog/ar/%D8%A7%D9%84%D8%B5%D9%86%D8%A7%D8%B9%D8%A7%D8%AA-%D8%A7%D9%84%D8%AD%D8%B1%D9%81%D9%8A%D8%A9-%D9%81%D9%8A-%D9%84%D9%8A%D8%A8%D9%8A%D8%A7/' },
+      { id: 'folklore', icon: Music, title_ar: 'الفنون والفلكلور', title: 'Folklore', 
+        desc_ar: 'تتنوع الموسيقى والفلكلور في ليبيا لتغطي مساحتها الشاسعة الشاسعة. في الشرق الليبي (بنغازي والبيضاء) يطغى فن "المرسكاوي"، وهو فن طربي عاطفي يعتمد على الأكورديون والآلات الوترية والدربوكة، ويُغنى بقصائد شجية عن الحب والفراق. في الغرب الليبي، يُستخدم مزمار "الزكرة" المبهج (قربة هوائية) لإشعال الأجواء الحماسية في الأعراس والمناسبات الوطنية. ومن أقوى الفنون التعبيرية رقصة "الكاسكا"، وهي رقصة حرب قديمة يؤديها الرجال بخفة ورشاقة باستخدام العصي أو البنادق لتمثيل معارك الشجاعة، بالإضافة إلى غناء "الزمزامات" النسائي الذي يضفي طابعاً فريداً على حفلات الحناء.', 
+        desc: 'Music and folklore in Libya vary to cover its vast, expansive area. In eastern Libya (Benghazi and Al Bayda), the "Merskaoui" art dominates, an emotional Tarab art relying on the accordion, stringed instruments, and Darbuka, singing melancholic poems about love and separation. In western Libya, the cheerful "Zokra" flute (bagpipe) is used to ignite enthusiastic atmospheres at weddings and national events. One of the most powerful expressive arts is the "Kaska" dance, an ancient war dance performed by men with agility and grace using sticks or rifles to represent battles of courage, in addition to the women\'s "Zamzamat" singing that adds a unique touch to henna parties.', 
+        link: 'https://www.culture.gov.ly/history-of-arts-2/' },
+      { id: 'architecture', icon: Landmark, title_ar: 'العمارة والمعالم', title: 'Architecture', 
+        desc_ar: 'تحتضن ليبيا أطلالاً مهيبة تقف كشاهد على عظمتها التاريخية. على ساحل البحر المتوسط، تعتبر مدينة "لبدة الكبرى" (Leptis Magna) أضخم وأجمل المدن الرومانية الأثرية المحفوظة في العالم بمسرحها الدائري وأقواسها وحماماتها الفخمة. وفي الجبل الأخضر، تنقلك آثار مدينة "شحات" (قورينا) للحضارة الإغريقية العريقة. أما العمارة الإسلامية والصحراوية فتبلغ قمة عبقريتها في مدينة "غدامس" (لؤلؤة الصحراء) جنوباً، والمدرجة عالمياً لدى اليونسكو، حيث بيوتها الطينية متلاصقة بممرات سفلية مظللة بالكامل لحماية الأهالي من شمس الصحراء اللافحة، ومزينة من الداخل بنقوش وطلاء أحمر وزخارف استثنائية.', 
+        desc: 'Libya embraces majestic ruins standing as a witness to its historical greatness. On the Mediterranean coast, the city of "Leptis Magna" is considered the largest and most beautiful preserved Roman archaeological city in the world with its amphitheater, arches, and luxurious baths. In the Green Mountain, the ruins of "Cyrene" (Shahat) transport you to the ancient Greek civilization. Islamic and desert architecture reach the peak of their genius in the city of "Ghadames" (Pearl of the Desert) in the south, globally listed by UNESCO, where its clay houses are interconnected with fully shaded lower passageways to protect residents from the scorching desert sun, internally decorated with exceptional red paint and motifs.', 
+        link: 'https://mirathlibya.blogspot.com/2026/04/blog-post_5.html' },
+      { id: 'clothing', icon: Shirt, title_ar: 'الأزياء التقليدية', title: 'Clothing', 
+        desc_ar: 'الزي التراثي الليبي يحمل وقاراً وبهاءً يعكس التمسك بالهوية. يرتدي الرجل الليبي "البدلة العربية" الكاملة؛ وتتألف من سروال فضفاض، صدرية (فرملة) مطرزة بالخيوط الحريرية، وجاكيت خارجي يُدعى (الزبون)، ويُلف جسده كاملاً بـ "الجرد" أو "الحولي" المصنوع من الصوف الأبيض النقي بطريقة ربط كلاسيكية تعود للحقبة الرومانية، ويعتمر الشاشية الحمراء أو السوداء. أما المرأة الليبية فتتميز بارتداء "الفراشية"، وهي قطعة قماش بيضاء ناصعة ومحاكة من الحرير أو النايلون تلف بها جسدها كاملاً بطريقة تُبرز عيناً واحدة فقط عند الخروج وتمنحها حشمة وسحراً خاصاً، وتتزين بأثقل وأفخم أطقم الذهب في الأعراس (الصدرة).', 
+        desc: 'The traditional Libyan dress carries dignity and splendor reflecting adherence to identity. The Libyan man wears the complete "Arab Suit"; comprising loose trousers, a vest (Fermla) embroidered with silk threads, and an outer jacket called (Zaboun). His entire body is wrapped in the "Jered" or "Houli" made of pure white wool in a classic tying method dating back to the Roman era, wearing a red or black Chechia. The Libyan woman is distinguished by wearing the "Farashia", a pure white piece of fabric woven from silk or nylon wrapping her entire body in a way that reveals only one eye when going out, granting her modesty and special charm, adorned with the heaviest, most luxurious gold sets at weddings (Sadra).', 
+        link: 'https://bahu.ly/blog/ar/%D8%A7%D9%84%D8%B2%D9%8A-%D8%A7%D9%84%D8%AA%D9%82%D9%84%D9%8A%D8%AF%D9%8A-%D9%81%D9%8A-%D9%84%D9%8A%D8%A8%D9%8A%D8%A7/' },
+      { id: 'traditions', icon: Users, title_ar: 'التقاليد الاجتماعية', title: 'Traditions', 
+        desc_ar: 'تتميز التقاليد الليبية بالكرم الفياض والاحتفاء بالجماعة والقبيلة. من أجمل الطقوس اليومية جلسة "شاهي العالة"؛ وهو طقم متكامل لتحضير الشاي الأخضر على الفحم، ويُصب ثلاث مرات (أدوار)، حيث يُصنع بمهارة ليحتوي على طبقة كثيفة من الرغوة (الكشكوشة)، ويُقدم مع الفول السوداني (الكاوكاو) أو اللوز كرمز أساسي للترحيب والضيافة والتجمع العائلي. في المناسبات الكبرى، تقام احتفالات "الميز" أو عروض الفروسية الشعبية، حيث يلبس الفرسان زيهم التراثي ويصطفون بخيولهم العربية الأصيلة المسرجة بأفخر السروج للركض السريع المتزامن وإطلاق النار في الهواء (البارود) ابتهاجاً وإظهاراً للشجاعة.', 
+        desc: 'Libyan traditions are characterized by overflowing generosity and celebration of the community and tribe. One of the most beautiful daily rituals is the "Shahi Al-Ala" session; a complete set for preparing green tea over charcoal, poured three times (rounds), skillfully made to contain a thick layer of foam (Kashkousha), and served with peanuts (Kawkaw) or almonds as a primary symbol of welcome, hospitality, and family gathering. On major occasions, "Al-Meez" celebrations or popular equestrian shows are held, where knights wear their heritage attire and line up with their pure Arabian horses saddled with the finest saddles for a synchronized fast sprint and firing guns into the air (gunpowder) in joy and display of courage.', 
+        link: 'https://www.independentarabia.com/node/644980/%D9%85%D9%86%D9%88%D8%B9%D8%A7%D8%AA/%D8%B7%D9%82%D9%88%D8%B3-%D8%A7%D9%84%D8%B9%D9%8A%D8%AF-%D9%81%D9%8A-%D9%84%D9%8A%D8%A8%D9%8A%D8%A7-%D9%88%D8%AD%D8%AF%D8%A9-%D8%A7%D8%AC%D8%AA%D9%85%D8%A7%D8%B9%D9%8A%D8%A9-%D9%88%D8%AA%D9%86%D9%88%D8%B9-%D8%AB%D9%82%D8%A7%D9%81%D9%8A' }
+    ]
+  },
+  {
+    code: 'TN', region: 'North Africa', name_ar: 'تونس', name: 'Tunisia', flag: '🇹🇳', flag_image_url: 'https://flagcdn.com/w1280/tn.png',
+    video_id: 'dHavYGKlipo', video_title_ar: 'وثائقي: تونس الخضراء', video_title: 'Documentary: Green Tunisia',
+    dish: { name_ar: 'الكسكسي التونسي', name: 'Tunisian Couscous', image: 'https://images.unsplash.com/photo-1628151015968-3a4429e9ef04?q=80&w=600' },
+    details: [
+      { id: 'cuisine', icon: Utensils, title_ar: 'المطبخ التقليدي', title: 'Cuisine', 
+        desc_ar: 'المطبخ التونسي هو مزيج متوسطي حار زاخر بالنكهات المعتمدة على معجون "الهريسة" الحارة وزيت الزيتون البكر. "الكسكسي" هو الطبق الوطني الأهم، ويتميز في تونس بلونه الأحمر (لوجود صلصة الطماطم) ويُطبخ ببراعة مع أسماك البحر الطازجة أو لحم العلوش (الخروف) والخضار. من أشهر أكلات الشارع التونسي "اللبلابي"، وهو حساء حمص دافئ وحار يُخلط مع قطع الخبز، التونة، البيض المسلوق، والكمون. ولا ننسى "البريك" التونسي المقرمش (عجينة رقيقة تُقلى وبداخلها بيضة غير ناضجة وتونة وبقدونس). أما "الطاجين التونسي" فهو أقرب لعجة مخبوزة بالفرن باللحم والجبن ويختلف تماماً عن الطاجين المغربي.', 
+        desc: 'Tunisian cuisine is a spicy Mediterranean blend full of flavors based on spicy "Harissa" paste and virgin olive oil. "Couscous" is the most important national dish, characterized in Tunisia by its red color (due to tomato sauce) and masterfully cooked with fresh sea fish or lamb (Allouch) and vegetables. One of the most famous Tunisian street foods is "Lablebi", a warm, spicy chickpea soup mixed with bread pieces, tuna, boiled eggs, and cumin. Not forgetting the crispy Tunisian "Brik" (thin pastry fried with a runny egg, tuna, and parsley inside). The "Tunisian Tagine" is closer to a baked omelet with meat and cheese, completely different from the Moroccan Tagine.', 
+        link: 'https://yummy.layalina.com/%D8%A7%D9%84%D9%85%D8%B7%D8%A8%D8%AE-%D8%A7%D9%84%D8%AA%D9%88%D9%86%D8%B3%D9%8A-%D9%86%D9%83%D9%87%D8%A7%D8%AA-%D9%85%D8%AA%D9%88%D8%A7%D8%B1%D8%AB%D8%A9-%D8%B9%D8%A8%D8%B1-%D8%A7%D9%84%D8%AA%D8%A7%D8%B1%D9%8A%D8%AE-766694.html' },
+      { id: 'crafts', icon: Hammer, title_ar: 'الحرف اليدوية', title: 'Crafts', 
+        desc_ar: 'تمتد الحرف التونسية لقرون محتفظة برونقها وجمالها الأندلسي والأمازيغي. أقدمها صناعة "الشاشية" (القبعة الصوفية الحمراء التقليدية) التي تُصنع بعملية طويلة ودقيقة تمتد لأشهر من غزل الصوف وتلبيده وصبغه باللون الأحمر العنابي. مدينة "نابل" الساحلية هي عاصمة "الخزف والفخار" ذو الطلاء الملون والنقوش الجميلة والمزخرفة. بينما تتفرد مدينة "القيروان" العريقة بصناعة النحاسيات المحفورة يدوياً مثل الصواني والأباريق، بالإضافة إلى حياكة "الزربية القيروانية" (السجاد اليدوي المليء بالوحدات الزخرفية التاريخية) التي تصنعها نساء تونس بمهارة لتنافس أجود أنواع السجاد العالمي.', 
+        desc: 'Tunisian crafts stretch back centuries, retaining their Andalusian and Amazigh charm and beauty. The oldest is the making of the "Chechia" (the traditional red wool cap), made through a long, precise process spanning months of spinning, felting, and dyeing the wool in a deep burgundy red. The coastal city of "Nabeul" is the capital of "Ceramics and Pottery" with colored glaze and beautiful, decorated patterns. Meanwhile, the ancient city of "Kairouan" is uniquely known for hand-engraved copperware like trays and pitchers, in addition to weaving the "Kairouan Carpet" (Zarbiya, a handwoven rug full of historical decorative motifs) skillfully made by Tunisian women to compete with the finest global carpets.', 
+        link: 'https://artisanat.nat.tn/artisanats/artisanat' },
+      { id: 'folklore', icon: Music, title_ar: 'الفنون والفلكلور', title: 'Folklore', 
+        desc_ar: 'يتشبع الفلكلور التونسي بتراث المهاجرين الأندلسيين والتقاليد الصوفية. تعتبر موسيقى "المالوف" التونسي الرمز الأول للطرب الكلاسيكي، وهي موسيقى أندلسية راقية تُعزف بآلات العود والكمان والقانون وتُنشد بقصائد وموشحات رقيقة. في المهرجانات والأفراح الشعبية، تُشعل آلة "المزود" (آلة نفخ هوائية تصنع من جلد الماعز) الأجواء بطاقتها الراقصة وإيقاعاتها السريعة التي لا تقاوم. ومن الجوانب الروحانية القوية نجد عروض "الحضرة والعيساوية"، وهي ابتهالات وأناشيد صوفية تُقام في مقامات الأولياء مصحوبة بالدفوف والبنادير، تعكس حالة من الانتشاء والسمو الروحي المتوارث.', 
+        desc: 'Tunisian folklore is saturated with the heritage of Andalusian immigrants and Sufi traditions. "Malouf" music is the primary symbol of classical Tunisian Tarab, a refined Andalusian music played with Oud, Violin, and Qanun, sung with delicate poems and Muwashshahat. In popular festivals and weddings, the "Mezoued" instrument (a wind instrument made of goat skin) ignites the atmosphere with its dancing energy and irresistible fast rhythms. From the strong spiritual aspects, we find "Hadhra and Aissawa" performances, which are Sufi invocations and chants held at saints\' shrines accompanied by tambourines and bendirs, reflecting a state of inherited ecstasy and spiritual elevation.', 
+        link: 'https://turathy.tn/ar/page/%D8%A7%D9%84%D8%AB%D9%82%D8%A7%D9%81%D8%A9-%D8%A7%D9%84%D9%85%D8%A7%D8%AF%D9%8A%D8%A9/%D8%A7%D9%84%D9%81%D9%88%D9%84%D9%83%D9%84%D9%88%D8%B1' },
+      { id: 'architecture', icon: Landmark, title_ar: 'العمارة والمعالم', title: 'Architecture', 
+        desc_ar: 'تونس لوحة معمارية مفتوحة تتنقل بين العصور الفينيقية، الرومانية، والإسلامية الأندلسية. في مدينة "قرطاج" العريقة المطلة على البحر تقف أعمدة الحمامات الرومانية والأطلال الفينيقية. في قلب تونس تقف "قرية سيدي بوسعيد" الخلابة التي تسلب الألباب بأزقتها المرصوفة وعمارتها الموحدة باللونين الأزرق السماوي والأبيض الساطع وأبوابها الخشبية المقوسة والمرصعة بالمسامير. وفي الجنوب، يبرز "مسرح الجم" كثاني أضخم مدرج مسرحي روماني في العالم بعد الكولوسيوم والمحفوظ بشكل مدهش. أما العمارة الإسلامية فتتجلى في "جامع عقبة بن نافع" في القيروان بأعمدته وأقواسه المهيبة الذي يُعد منارة الإسلام الأولى في إفريقيا.', 
+        desc: 'Tunisia is an open architectural canvas transitioning between Phoenician, Roman, and Andalusian Islamic eras. In the ancient city of "Carthage" overlooking the sea stand the columns of Roman baths and Phoenician ruins. In the heart of Tunisia stands the breathtaking "Sidi Bou Said village", captivating minds with its paved alleys, uniform architecture in sky blue and bright white, and its arched wooden doors studded with nails. In the south, the "El Djem Amphitheatre" emerges as the second largest Roman amphitheater in the world after the Colosseum, astonishingly preserved. Islamic architecture is evident in the "Great Mosque of Uqba" in Kairouan with its majestic columns and arches, considered the first beacon of Islam in Africa.', 
+        link: 'https://movenpick.accor.com/ar/africa/tunisia/tunis/things-to-do/history-archaeology-architecture.html' },
+      { id: 'clothing', icon: Shirt, title_ar: 'الأزياء التقليدية', title: 'Clothing', 
+        desc_ar: 'تحتفظ أزياء تونس بأناقة الأجداد ولا تزال حية بقوة في الأعراس والمناسبات الوطنية. اللباس الرسمي للرجل التونسي هو "الجبة التونسية"، وهي ثوب واسع بدون أكمام طويلة يُخاط من أقمشة الحرير أو الصوف ويُطرز عند الصدر بعناية (الطريزة)، وتُرتدى فوق القميص والسروال، مع انتعال "البلغة" (حذاء جلدي أصفر). أما لباس المرأة التاريخي فهو "السفساري"، وهو غطاء حريري أبيض لامع يلتحفن به عند الخروج من المنزل ويضفي وقاراً ملائكياً على السيدات. كما تتزين الفتيات بـ "الفوطة والبلوزة" (قطعتان مطرزتان تظهران الخصر) في الأفراح، والتي تُعتبر رمزاً للأنوثة والأصالة التونسية.', 
+        desc: 'Tunisian clothing retains the elegance of ancestors and remains strongly alive in weddings and national events. The official dress for the Tunisian man is the "Tunisian Jebba", a wide, sleeveless garment tailored from silk or wool fabrics and carefully embroidered at the chest (Tariza), worn over a shirt and trousers, paired with the "Balgha" (yellow leather shoe). The historical dress for women is the "Sefsari", a shiny white silk cover they wrap themselves in when leaving the house, adding an angelic dignity to ladies. Girls also adorn themselves with the "Fouta and Blouza" (two embroidered pieces revealing the waist) at weddings, considered a symbol of Tunisian femininity and authenticity.', 
+        link: 'https://www.scribd.com/document/919063912/%D9%85%D9%84%D8%A7%D8%A8%D8%B3-%D8%AA%D9%82%D9%84%D9%8A%D8%AF%D9%8A%D8%A9-%D8%A8%D8%AA%D9%88%D9%86%D8%B3' },
+      { id: 'traditions', icon: Users, title_ar: 'التقاليد الاجتماعية', title: 'Traditions', 
+        desc_ar: 'يغلب على الشعب التونسي طابع الانفتاح والمرح وحب التجمعات والفنون. من العادات الصيفية الأصيلة تقديم "مشموم الياسمين" (باقة صغيرة ودقيقة من أزهار الياسمين) كعربون للمحبة والترحيب بالضيف ويوضع عادة خلف الأذن للتعطر برائحته الزكية في المساء. المقاهي العتيقة في الأزقة القديمة هي مركز التجمع للرجال للعب أوراق الكوتشينة (الورق) أو ارتشاف القهوة الخضراء والشاي بالصنوبر أو النعناع. كما تعتز تونس بشدة بالمهرجانات الثقافية والصيفية التي تُقام في المعالم الأثرية، كمهرجان قرطاج، والتي تجمع العائلات بأكملها للاستمتاع بالموسيقى والمسرح تحت النجوم المضيئة.', 
+        desc: 'The Tunisian people are characterized by openness, cheerfulness, and a love for gatherings and arts. An authentic summer custom is offering the "Machmoum Jasmine" (a small, meticulous bouquet of jasmine flowers) as a token of love and welcoming a guest, usually placed behind the ear to be perfumed by its sweet scent in the evening. Ancient cafes in old alleys are the gathering center for men to play cards (Koutchina) or sip green coffee and tea with pine nuts or mint. Tunisia also deeply cherishes cultural and summer festivals held in archaeological sites, like the Carthage Festival, bringing entire families together to enjoy music and theater under the bright stars.', 
+        link: 'https://www.britannica.com/place/Tunisia/Daily-life-and-social-customs' }
+    ]
+  },
+  {
+    code: 'DZ', region: 'North Africa', name_ar: 'الجزائر', name: 'Algeria', flag: '🇩🇿', flag_image_url: 'https://flagcdn.com/w1280/dz.png',
+    video_id: 'H1YUaV1r6UA', video_title_ar: 'وثائقي: تراث الجزائر', video_title: 'Documentary: Algerian Heritage',
+    dish: { name_ar: 'الشخشوخة', name: 'Chakhchoukha', image: 'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=600' },
+    details: [
+      { id: 'cuisine', icon: Utensils, title_ar: 'المطبخ التقليدي', title: 'Cuisine', 
+        desc_ar: 'المطبخ الجزائري مطبخ أصيل وغني يتنوع بشكل كبير لتنوع مناخ البلاد وتاريخها الأمازيغي والأندلسي والفرنسي. يتسيد "الكسكسي الجزائري" الموائد في الجمع والولائم، ويُسقى بمرق اللحم والخضار الطازجة. من أهم الأطباق العريقة "الشخشوخة" التي تُقدم للضيوف وتتكون من رقائق عجين ممزقة (مسمن) مسقية بمرق أحمر حار ولحم الضأن. في العاصمة يبرز "الرشتة" (معكرونة خيطية طازجة بمرق أبيض ودجاج)، و"المثوم" بكرات اللحم المفروم والثوم. ولتحلية القهوة، لا يُعلى على "مقروط اللوز" العاصمي الذي يذوب في الفم، وحلوى "القلب اللوز" (الشامية) الرمضانية، والبقلاوة الجزائرية ذات الطبقات المقرمشة.', 
+        desc: 'Algerian cuisine is an authentic and rich cuisine that varies greatly due to the country\'s diverse climate and its Amazigh, Andalusian, and French history. "Algerian Couscous" dominates tables on Fridays and feasts, drenched in meat and fresh vegetable broth. One of the most important ancient dishes is "Chakhchoukha" served to guests, consisting of torn dough flakes (Msemen) soaked in spicy red broth and lamb. In the capital, "Rechta" (fresh string pasta with white broth and chicken) and "Mtewem" with meatballs and garlic stand out. For sweetening coffee, the Algiers "Makrout El Louz" that melts in the mouth is unparalleled, along with Ramadan\'s "Qalb El Louz" (Chamha), and crispy layered Algerian Baklava.', 
+        link: 'https://yummy.layalina.com/%D8%A7%D9%84%D9%85%D8%B7%D8%A8%D8%AE-%D8%A7%D9%84%D8%AC%D8%B2%D8%A7%D8%A6%D8%B1%D9%8A-%D8%B1%D8%AD%D9%84%D8%A9-%D8%A8%D9%8A%D9%86-%D8%A7%D9%84%D9%86%D9%83%D9%87%D8%A7%D8%AA-%D8%A7%D9%84%D8%A3%D8%B5%D9%8A%D9%84%D8%A9-%D9%88%D8%A7%D9%84%D8%AA%D8%B1%D8%A7%D8%AB-%D8%A7%D9%84%D8%B9%D8%B1%D9%8A%D9%82-767265.html' },
+      { id: 'crafts', icon: Hammer, title_ar: 'الحرف اليدوية', title: 'Crafts', 
+        desc_ar: 'تتميز الجزائر بصناعات تقليدية تعتبر من أجود الحرف اليدوية في إفريقيا. تشتهر منطقة وادي ميزاب وغرداية بصناعة "السجاد الجزائري" (الزرابي) المنسوجة يدوياً من صوف الأغنام الخالص، والمزينة برموز أمازيغية وهندسية تروي قصصاً من عمق الصحراء. في جبال منطقة القبائل وجرجرة، تبدع الأيادي في صياغة "الحلي الفضية الأمازيغية" المطعمة بالمرجان والمينا بألوان الأزرق والأصفر والأخضر الزاهية. أما في مدينة الجسور المعلقة (قسنطينة)، فيتربع حرفيو النحاس (النحاسون) بأسواقهم العتيقة ليطرقوا وينقشوا أروع الأواني النحاسية والأباريق والمقاريج التي تُزين وتُستخدم يومياً في كل بيت جزائري.', 
+        desc: 'Algeria features traditional industries considered among the finest handicrafts in Africa. The M\'zab Valley and Ghardaia region are famous for making "Algerian Carpets" (Zarabi) handwoven from pure sheep\'s wool, decorated with Amazigh and geometric symbols telling stories from deep within the desert. In the mountains of the Kabylia region and Djurdjura, hands creatively craft "Amazigh Silver Jewelry" inlaid with coral and enamel in bright blue, yellow, and green colors. In the City of Suspension Bridges (Constantine), coppersmiths reign in their ancient markets, hammering and engraving the most magnificent copper vessels, pitchers, and Mahbas that decorate and are used daily in every Algerian home.', 
+        link: 'https://alger.mta.gov.dz/%D8%A7%D9%84%D8%B5%D9%86%D8%A7%D8%B9%D8%A9-%D8%A7%D9%84%D8%AA%D9%82%D9%84%D9%8A%D8%AF%D9%8A%D8%A9/' },
+      { id: 'folklore', icon: Music, title_ar: 'الفنون والفلكلور', title: 'Folklore', 
+        desc_ar: 'فلكلور الجزائر هو لوحة متعددة الألحان والنغمات. تعتبر موسيقى "الراي" التي نشأت في الغرب الجزائري (وهران) الفن الأقرب للشباب والذي وصل للعالمية بإيقاعاته الصاخبة وكلماته العفوية. في العاصمة، يُطرب "الشعبي العاصمي" أسماع المستمعين بقصائد الحكمة وقصص الغراميات الشعبية مصحوباً بآلة المندول الوترية. وفي الغرب أيضا، تتفرد "رقصة العلاوي" الحماسية التي يؤديها الرجال بخبطات الأرجل على الأرض وتدوير الأكتاف تعبيراً عن الانتصار. ولا تكتمل الأعراس دون غناء "الحوفي" والتراث الأندلسي الذي حافظت عليه مدن تلمسان وقسنطينة في زواياها وتكاياها الثقافية العريقة.', 
+        desc: 'Algerian folklore is a canvas of multiple melodies and tunes. "Rai" music, which originated in western Algeria (Oran), is considered the art closest to youth, reaching global fame with its loud rhythms and spontaneous lyrics. In the capital, "Algiers Chaabi" delights listeners with poems of wisdom and popular romance stories accompanied by the stringed Mandole instrument. In the west as well, the enthusiastic "Allaoui Dance" stands out, performed by men stomping their feet on the ground and rolling their shoulders to express victory. Weddings are incomplete without "Houfi" singing and the Andalusian heritage preserved by cities like Tlemcen and Constantine in their ancient cultural corners and Tekkeyas.', 
+        link: 'https://embwashington.mfa.gov.dz/ar/discover-algeria-1/arts-and-culture-1' },
+      { id: 'architecture', icon: Landmark, title_ar: 'العمارة والمعالم', title: 'Architecture', 
+        desc_ar: 'تحتضن الجزائر العاصمة "حي القصبة" الأسطوري، وهو مدينة عتيقة مبنية على تلة تنحدر نحو البحر المتوسط، يتألف من شبكة متاهية من الأزقة الضيقة والسلالم والبيوت البيضاء المتقاربة، وقد اختيرت كموقع تراث عالمي واعتبرت الحصن المنيع لثوار الاستقلال. في مدينة قسنطينة، تُبهر "الجسور المعلقة" (مثل جسر سيدي مسيد) الزوار، حيث تربط بين صخرتين عظيمتين يقسمهما وادي الرمال السحيق لتشكل منظراً معمارياً نادراً. وفي الجنوب الشاسع، تخبئ "جبال الطاسيلي" أكبر متحف للنقوش الصخرية في العالم لما قبل التاريخ، بينما تقدم مدينة غرداية نموذجاً استثنائياً לעمّارة التكيف الصحراوية بألوانها الترابية.', 
+        desc: 'Algiers embraces the legendary "Casbah district", an ancient city built on a hill sloping towards the Mediterranean Sea, consisting of a labyrinthine network of narrow alleys, stairs, and closely clustered white houses, designated as a World Heritage site and considered the impregnable fortress for independence revolutionaries. In the city of Constantine, the "Suspension Bridges" (like Sidi M\'Cid Bridge) dazzle visitors, connecting two great rocks divided by the deep Rhumel gorge to form a rare architectural view. In the vast south, the "Tassili Mountains" hide the world\'s largest museum of prehistoric rock art, while the city of Ghardaia presents an exceptional model of desert adaptation architecture in earthy colors.', 
+        link: 'https://algerie-architecture.com/en/' },
+      { id: 'clothing', icon: Shirt, title_ar: 'الأزياء التقليدية', title: 'Clothing', 
+        desc_ar: 'الأزياء التقليدية الجزائرية تُصنف كتحف فنية مذهلة، وكل منطقة لها زيها الخاص الفاخر الذي يُعرض في موكب زفاف العروس (التصديرة). تتصدر القائمة "الكاراكو العاصمي" المكون من سترة قطيفية (مخملية) مطرزة بخيوط الذهب الخالص (المجبود) مع سروال الشلقة، ليعكس الأرستقراطية القديمة. كما تتألق المرأة بـ "الملحفة الشاوية" في الشرق، و"البلوزة الوهرانية" ذات القماش الرقيق المزين بالأحجار في الغرب، و"الشدة التلمسانية" الملكية. أما الرجال، فالرمز الرسمي هو "البرنوس"، وهو عباءة صوفية ذات قلنسوة بيضاء أو بُنية، إلى جانب القشابية والعمامة التي تعبر عن الهيبة ورجولة الجزائري ووقاره في المناسبات.', 
+        desc: 'Traditional Algerian attire is classified as stunning masterpieces, with each region having its own luxurious dress displayed in the bride\'s wedding procession (Tasdira). Topping the list is the "Algiers Karakou", consisting of a velvet jacket embroidered with pure gold threads (Majboud) and a Chelka trouser, reflecting ancient aristocracy. Women also shine in the "Chaoui Melhfa" in the east, the "Orani Blouza" of fine fabric decorated with stones in the west, and the royal "Tlemcen Chedda". As for men, the official symbol is the "Burnous", a woolen cloak with a hood in white or brown, alongside the Kachabia and Turban, expressing the prestige and manhood of the Algerian in occasions.', 
+        link: 'https://www.pinterest.com/missoumissa18/%D8%A7%D8%B2%D9%8A%D8%A7%D8%A1-%D8%AA%D8%B1%D8%A7%D8%AB%D9%8A%D8%A9-%D8%AC%D8%B2%D8%A7%D8%A6%D8%B1%D9%8A%D8%A9/' },
+      { id: 'traditions', icon: Users, title_ar: 'التقاليد الاجتماعية', title: 'Traditions', 
+        desc_ar: 'تتميز التقاليد الجزائرية بتمجيد الشجاعة والتلاحم الأسري الشديد. من أعظم الطقوس الاحتفالية هي عروض "الفانتازيا" للفروسية التراثية، حيث ينطلق الفرسان بالبرنوس الأبيض على ظهور الخيل العربية الأصيلة بسرعات جنونية ويطلقون البارود من بنادقهم في الهواء بتناغم وصوت واحد يُدوي في الأفراح والمواسم. كما أن ثقافة "حمامات البخار" الشعبية تُعد طقساً أسبوعياً للتنظيف وتجاذب أطراف الحديث للرجال والنساء. ولتسهيل المهام الشاقة (مثل جني الزيتون أو التحضير لعرس أو بناء بيت)، يعتمد المجتمع بشدة على نظام "التويزة"، وهو عمل تطوعي وجماعي يشارك فيه كل الجيران والأقارب بمحبة دون مقابل مادي.', 
+        desc: 'Algerian traditions are distinguished by glorifying courage and intense family cohesion. One of the greatest celebratory rituals is the "Fantasia" traditional equestrian shows, where knights in white Burnous ride purebred Arabian horses at breakneck speeds and fire gunpowder from their rifles into the air in harmony and a single deafening sound during weddings and seasons. The culture of popular "Steam Hammams" is a weekly ritual for cleansing and chatting for men and women. To facilitate arduous tasks (like olive picking, preparing for a wedding, or building a house), society heavily relies on the "Twiza" system, a voluntary collective work where neighbors and relatives lovingly participate without financial compensation.', 
+        link: 'https://www.britannica.com/place/Algeria/Cultural-life' }
+    ]
+  },
+  {
+    code: 'MA', region: 'North Africa', name_ar: 'المغرب', name: 'Morocco', flag: '🇲🇦', flag_image_url: 'https://flagcdn.com/w1280/ma.png',
+    video_id: 'eU5qui0Wqk0', video_title_ar: 'وثائقي: روعة المغرب', video_title: 'Documentary: Splendor of Morocco',
+    dish: { name_ar: 'الطاجين والكسكس', name: 'Tagine & Couscous', image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?q=80&w=600' },
+    details: [
+      { id: 'cuisine', icon: Utensils, title_ar: 'المطبخ التقليدي', title: 'Cuisine', 
+        desc_ar: 'يُعتبر المطبخ المغربي من أرقى المطابخ العالمية لتفرده بدمج التوابل (كالزعفران والزنجبيل والقرفة) مع الفواكه المجففة واللحوم. "الطاجين" هو قلب المائدة المغربية، ويُطبخ ببطء في أوانٍ فخارية مخروطية ليحافظ على عصارة ونكهة اللحم أو الدجاج مع الخضار والبرقوق المحمر. يوم الجمعة هو يوم "الكسكس بسبع خضار" الذي يجتمع حوله أفراد الأسرة. ولا تخلو الأفراح من "البسطيلة"، الفطيرة الملكية المغطاة بالسكر الناعم والقرفة والمحشوة باللحم المفروم واللوز أو المأكولات البحرية. في رمضان، تتصدر حساء "الحريرة" الغنية بالعدس والحمص والطماطم الإفطار بجوار حلوى الشباكية المعسلة والتمر.', 
+        desc: 'Moroccan cuisine is considered one of the finest global cuisines for uniquely combining spices (like saffron, ginger, and cinnamon) with dried fruits and meats. "Tagine" is the heart of the Moroccan table, slow-cooked in conical clay pots to retain the juices and flavor of meat or chicken with vegetables and roasted plums. Friday is the day of "Seven-vegetable Couscous", around which family members gather. Weddings are never without "Pastilla", the royal pie covered in powdered sugar and cinnamon, stuffed with minced meat and almonds or seafood. In Ramadan, the rich "Harira" soup with lentils, chickpeas, and tomatoes tops the Iftar alongside honeyed Chebakia sweets and dates.', 
+        link: 'https://www.visitmorocco.com/ar/%D9%85%D8%A3%D9%83%D9%88%D9%84%D8%A7%D8%AA-%D9%85%D8%BA%D8%B1%D8%A8%D9%8A%D8%A9/%D8%A7%D9%84%D9%85%D8%BA%D8%B1%D8%A8' },
+      { id: 'crafts', icon: Hammer, title_ar: 'الحرف اليدوية', title: 'Crafts', 
+        desc_ar: 'يحافظ المغرب على حرف يدوية تعود لمئات السنين وتشكل هويته البصرية. "الزليج المغربي" (الفسيفساء الهندسية الدقيقة المقطعة يدوياً) يغطي جدران القصور والنافورات بلوحات بصرية تسلب العقل بألوانها. مدينة "فاس" هي عاصمة "دباغة الجلود"، حيث تحتضن أقدم دار للدباغة (دار شوارة) لإنتاج أطقم الحقائب والنعال (الشربيل والبلغة) الملونة يدوياً. كما تشتهر مدينة "آسفي" بالخزف والفخار المزين بزخارف نباتية بديعة. ولا يمكن إغفال النجارين الذين يبدعون في "النقش على خشب الأرز" في الأسقف والأبواب، وصناع النحاسيات لإنتاج الفوانيس (الضوايات) والصواني التراثية المحفورة لتقديم الشاي.', 
+        desc: 'Morocco maintains handicrafts dating back hundreds of years that form its visual identity. "Moroccan Zellij" (intricate geometric mosaic hand-cut) covers the walls of palaces and fountains with mind-captivating colorful visual panels. The city of "Fez" is the capital of "Leather Tanning", hosting the oldest tannery (Chouara Tannery) to produce sets of hand-colored bags and slippers (Charbil and Balgha). The city of "Safi" is famous for ceramics and pottery decorated with exquisite floral motifs. We cannot overlook carpenters who excel in "Cedar wood carving" for ceilings and doors, and coppersmiths producing engraved heritage lanterns (Dwayyat) and trays for serving tea.', 
+        link: 'https://www.visitmorocco.com/ar/%D8%A7%D9%84%D8%AD%D8%B1%D9%81-%D8%A7%D9%84%D8%AA%D9%82%D9%84%D9%8A%D8%AF%D9%8A%D8%A9/%D8%A7%D9%84%D9%85%D8%BA%D8%B1%D8%A8' },
+      { id: 'folklore', icon: Music, title_ar: 'الفنون والفلكلور', title: 'Folklore', 
+        desc_ar: 'الفن المغربي هو مزيج صوفي، أندلسي، وإفريقي غني. "موسيقى كناوة" (المصنفة عالمياً) هي موسيقى روحية صوفية تعود جذورها لجنوب الصحراء، وتعتمد على إيقاعات آلة القراقب والكمبري وتهدف للشفاء والتجلي الروحي. الفن الموسيقي الحضري يبرز في "الملحون الأندلسي" والآلة الأندلسية التي تُعزف بآلات وترية كلاسيكية في المدن العتيقة كفاس وتطوان. أما في الجبال ومناطق الأطلس، فتتشارك القبائل الأمازيغية في أداء رقصة "أحواش" و"أحيدوس"، حيث يقف الرجال والنساء في صفوف متقابلة أو دوائر يصدحون بالأشعار التراثية على إيقاع الدفوف (البنادير) كرمز للتكاتف الاجتماعي والفرح المتبادل.', 
+        desc: 'Moroccan art is a rich Sufi, Andalusian, and African mix. "Gnawa music" (globally classified) is spiritual Sufi music with roots in the sub-Sahara, relying on the rhythms of the Qraqeb (castanets) and Guembri aiming for healing and spiritual manifestation. Urban musical art emerges in "Andalusian Malhun" and Andalusian instruments played with classical stringed instruments in ancient cities like Fez and Tetouan. In the mountains and Atlas regions, Amazigh tribes share in performing the "Ahwash" and "Ahidous" dance, where men and women stand in facing rows or circles chanting heritage poems to the rhythm of tambourines (Bendir) as a symbol of social solidarity and mutual joy.', 
+        link: 'https://www.visitmorocco.com/ar/%D8%AA%D9%82%D8%A7%D9%84%D9%8A%D8%AF-%D9%88-%D8%AB%D9%82%D8%A7%D9%81%D8%A9-%D8%BA%D9%86%D9%8A%D8%A9/%D8%A7%D9%84%D9%85%D8%BA%D8%B1%D8%A8' },
+      { id: 'architecture', icon: Landmark, title_ar: 'العمارة والمعالم', title: 'Architecture', 
+        desc_ar: 'مدن المغرب هي متاهات سحرية للعمارة الأندلسية والمغاربية. في العاصمة الرباط، تقف "صومعة حسان" كمنارة تاريخية غير مكتملة تعود لمئات السنين، بينما تحتضن مراكش ساحتها العجيبة "جامع الفنا"، وهي مسرح مفتوح للحكواتيين ومروضي الأفاعي، وخلفها مسجد الكتبية الشامخ. النمط المعماري السكني الأشهر هو "الرياض المغربي"، وهو منزل تقليدي صُمم بحيث تكون واجهته الخارجية خالية من النوافذ للحفاظ على الخصوصية، ويتركز جماله في الفناء الداخلي الواسع المفتوح للسماء والمزين بنوافير الزليج وأشجار الليمون. ولا يمكن نسيان "شفشاون" (المدينة الزرقاء) التي سحرت العالم بأزقتها المطلية بتدرجات الأزرق السماوي لتبعث على السلام.', 
+        desc: 'Morocco\'s cities are magical labyrinths of Andalusian and Moorish architecture. In the capital Rabat, "Hassan Tower" stands as an incomplete historical minaret dating back hundreds of years, while Marrakech hosts its wondrous square "Jemaa el-Fnaa", an open theater for storytellers and snake charmers, backed by the towering Koutoubia Mosque. The most famous residential architectural style is the "Moroccan Riad", a traditional home designed with a windowless exterior facade to maintain privacy, its beauty concentrated in the spacious inner courtyard open to the sky and decorated with Zellij fountains and lemon trees. We cannot forget "Chefchaouen" (the Blue City) that enchanted the world with its alleys painted in shades of sky blue to inspire peace.', 
+        link: 'https://www.visitmorocco.com/ar/%D8%AC%D9%85%D8%A7%D9%84-%D8%A7%D9%84%D8%A3%D8%AD%D8%AC%D8%A7%D8%B1/%D8%A7%D9%84%D9%85%D8%BA%D8%B1%D8%A8' },
+      { id: 'clothing', icon: Shirt, title_ar: 'الأزياء التقليدية', title: 'Clothing', 
+        desc_ar: 'لا يزال الزي المغربي صامداً كرمز حي للأناقة في الشوارع والمناسبات. لباس الشارع اليومي للرجل والمرأة هو "الجلابة" (الجلباب المغربي)، وهو ثوب طويل فضفاض بغطاء للرأس (القب) يوفر الدفء والحشمة، وتلبس معه "البلغة" (خف جلدي تقليدي مدبب). أما في المناسبات والأعراس الكبرى، فالتاج هو "القفطان المغربي" النسائي المذهل، الذي يصنع من أرقى الأقمشة الحريرية ويُطرز يدوياً بعناية فائقة بخيوط الذهب والسفيفة، ويُربط حول الخصر بحزام عريض مزخرف (المضمة) يُبرز القوام والأناقة، مما جعل القفطان لباساً ترتديه الأميرات ونجوم الموضة حول العالم.', 
+        desc: 'Moroccan attire remains resilient as a living symbol of elegance in streets and occasions. The daily street wear for men and women is the "Djellaba" (Moroccan cloak), a long, loose garment with a hood (Qob) providing warmth and modesty, worn with the "Balgha" (traditional pointed leather slipper). For major occasions and weddings, the crown is the stunning women\'s "Moroccan Caftan", made from the finest silk fabrics and meticulously hand-embroidered with gold threads and Sfifa, tied around the waist with a wide, decorated belt (Mdamma) accentuating the figure and elegance, making the Caftan a garment worn by princesses and fashion stars worldwide.', 
+        link: 'https://maroc-patrimoine.blogspot.com/p/blog-page_2731.html' },
+      { id: 'traditions', icon: Users, title_ar: 'التقاليد الاجتماعية', title: 'Traditions', 
+        desc_ar: 'كرم الضيافة في المغرب ينعكس في طقس صب "الشاي بالنعناع" (أتاي)، والذي لا يُعتبر مجرد مشروب بل فن قائم بذاته يُصب من مسافة عالية جداً لإحداث الرغوة (الكشكوشة) في كؤوس زجاجية مزخرفة، ويرافق الضيف منذ دخوله وحتى وداعه مع صينية الحلويات (كعب الغزال وحلوى الكعب). من العادات الأصيلة طقس "الحناء" قبل يوم الزفاف، حيث تُنقش أيدي وأقدام العروس بنقوش فنية دقيقة كرمز لجلب الحظ وطرد العين المليء بالأهازيج النسائية. كما يتميز المغرب بالاحتفال بـ "المواسم"، وهي تجمعات سنوية كبرى حول مقامات الصالحين (الزوايا) تشهد أسواقاً وعروضاً للفروسية (التبوريدة) تمجد التراث الروحي وتجمع شتات القبائل.', 
+        desc: 'Hospitality in Morocco is reflected in the ritual of pouring "Mint Tea" (Atai), which is not just a drink but a standalone art poured from a very high distance to create foam (Kashkousha) in decorated glass cups, accompanying the guest from entry to farewell with a tray of sweets (Kaab el Ghazal). An authentic custom is the "Henna" ritual before the wedding day, where the bride\'s hands and feet are painted with intricate artistic patterns as a symbol of bringing luck and warding off the evil eye, filled with women\'s chants. Morocco is also characterized by celebrating "Moussems", large annual gatherings around the shrines of righteous men (Zawiyas) featuring markets and equestrian shows (Tbourida) glorifying spiritual heritage and uniting tribes.', 
+        link: 'https://www.visitmorocco.com/ar/%D8%A7%D9%84%D8%B6%D9%8A%D8%A7%D9%81%D8%A9-%D8%A7%D9%84%D9%85%D8%BA%D8%B1%D8%A8%D9%8A%D8%A9/%D8%A7%D9%84%D9%85%D8%BA%D8%B1%D8%A8' }
+    ]
+  },
+  {
+    code: 'MR', region: 'North Africa', name_ar: 'موريتانيا', name: 'Mauritania', flag: '🇲🇷', flag_image_url: 'https://flagcdn.com/w1280/mr.png',
+    video_id: 'ZqN9z4U8bE', video_title_ar: 'وثائقي: بلاد المليون شاعر', video_title: 'Documentary: Land of a Million Poets',
+    dish: { name_ar: 'مارو وحوت', name: 'Maru & Hout', image: 'https://images.unsplash.com/photo-1541518763669-27fef04b14ea?q=80&w=600' },
+    details: [
+      { id: 'cuisine', icon: Utensils, title_ar: 'المطبخ التقليدي', title: 'Cuisine', 
+        desc_ar: 'المطبخ الموريتاني هو انعكاس ذكي للبيئة الصحراوية وتلاقي الثقافة السنغالية بالبدوية والمغاربية. يعتمد المطبخ بكثرة على الأرز، اللحوم، والأسماك التي يزخر بها ساحل الأطلسي. يُعد طبق "مارو وحوت" (الأرز المكسر والسمك) ونسخته "التيبيجين" الأشهر بلا منازع، حيث يُطهى السمك بتوابل ثقيلة وزيت غني ويُقدم مع الأرز والخضروات كالجزر والكرنب. وتعتبر لحوم الإبل والضأن المشوية والمجففة (القديد) أساسية للبدو المترحلين. وجبة "العيش" (دقيق الذرة المطبوخ) مع المرق هي الطعام اليومي المريح. وفي كل بيت، يُقدم المشروب البدوي "الزريق"، وهو حليب النوق الطازج والمحلى والممزوج بالماء كضيافة منعشة ترطب قسوة الصحراء.', 
+        desc: 'Mauritanian cuisine is a smart reflection of the desert environment and the intersection of Senegalese, Bedouin, and Maghrebi culture. The cuisine relies heavily on rice, meat, and fish abundant on the Atlantic coast. The dish "Maru & Hout" (broken rice and fish) and its version "Thieboudienne" are unquestionably the most famous, where fish is cooked with heavy spices and rich oil, served with rice and vegetables like carrots and cabbage. Grilled and dried camel and lamb meat (Qadeed) are essential for nomadic Bedouins. The "Eish" meal (cooked cornmeal) with broth is comforting daily food. In every home, the Bedouin drink "Zrig" is served, fresh sweetened camel milk mixed with water as a refreshing hospitality that soothes the desert\'s harshness.', 
+        link: 'https://www.alarabiya.net/north-africa/2025/03/29/%D8%A7%D9%84%D9%85%D8%B7%D8%A8%D8%AE-%D8%A7%D9%84%D9%85%D9%88%D8%B1%D9%8A%D8%AA%D8%A7%D9%86%D9%8A-%D9%86%D9%83%D9%87%D8%A7%D8%AA-%D9%85%D8%BA%D8%A7%D8%B1%D8%A8%D9%8A%D8%A9-%D9%88%D8%B0%D9%88%D9%82-%D8%A3%D9%81%D8%B1%D9%8A%D9%82%D9%8A' },
+      { id: 'crafts', icon: Hammer, title_ar: 'الحرف اليدوية', title: 'Crafts', 
+        desc_ar: 'الحرف في موريتانيا هي أدوات بقاء وتعبير فني في آن واحد. تشتهر البلاد بالصناعات الجلدية المتقنة، حيث تقوم مجموعات الحرفيين (لمعلمين) بصناعة أغلفة المخطوطات القديمة، والمحابر الجلدية الملونة، والسروج، ووسائد الخيام البدوية باستخدام نقوش غائرة وبارزة تُظهر مهارة نادرة. وفي مجال الحلي، يتم ابتكار خواتم وأساور من النحاس والفضة وتُطعم أحياناً بخرز الأبنوس (الخشب الأسود) أو الأحجار الكريمة بأسلوب إفريقي-عربي مميز. كما تُعد صناعة "الخيمة الموريتانية" الواسعة وحياكة حصائرها الملونة من القش والشعر حرفة نسائية أصيلة تضمن المسكن المرن الذي يسهل نقله في البوادي وتنقله القوافل.', 
+        desc: 'Crafts in Mauritania are survival tools and artistic expression at once. The country is famous for meticulous leather industries, where artisan groups (Lem\'allemin) make covers for ancient manuscripts, colorful leather inkwells, saddles, and Bedouin tent pillows using embossed and engraved motifs showing rare skill. In jewelry, brass and silver rings and bracelets are innovated, sometimes inlaid with ebony beads (black wood) or gemstones in a distinctive Afro-Arab style. Making the spacious "Mauritanian Tent" and weaving its colorful mats from straw and hair is an authentic women\'s craft ensuring flexible housing that is easily transported in the deserts and moved by caravans.', 
+        link: 'https://www.aljazeera.net/ebusiness/2017/10/31/%D9%85%D9%88%D8%B1%D9%8A%D8%AA%D8%A7%D9%86%D9%8A%D8%A7-%D8%A7%D9%84%D8%AD%D8%B1%D9%81-%D8%A7%D9%84%D8%AA%D9%82%D9%84%D9%8A%D8%AF%D9%8A%D8%A9-%D8%AA%D9%86%D8%AD%D8%B3%D8%B1-%D8%A3%D9%85%D8%A7%D9%85' },
+      { id: 'folklore', icon: Music, title_ar: 'الفنون والفلكلور', title: 'Folklore', 
+        desc_ar: 'الفلكلور الموريتاني هو عالم من الطرب الذي يُنقل شفوياً (الإيغ)، وهو معقد وله مقامات وقواعد دقيقة تُسمى "الظهور" و"الكرور". يُحتكر العزف على طبقة من الموسيقيين المتخصصين (إيغاون). الآلة الوطنية الأولى للرجل هي "التيدينيت" (آلة وترية خشبية تُصدر صوتاً عميقاً وشجياً)، بينما تعزف المرأة ببراعة على آلة "الآردين" (آلة وتدية كالقيثارة ذات صندوق طنين نصفي). هذه الموسيقى لا تُعزف للرقص فقط، بل تُرافق دائماً إنشاد السير والملاحم والأشعار الفصحى التي تمجد أبطال القبائل والتغني بالكرم والأخلاق الحميدة في الأمسيات المقمرة وسط رمال الصحراء الكبرى.', 
+        desc: 'Mauritanian folklore is a world of Tarab transmitted orally (Al-Igh), which is complex with precise scales and rules called "Dhuhoor" and "Kurour". Playing is monopolized by a class of specialized musicians (Ighawen). The primary national instrument for men is the "Tidinit" (a wooden string instrument emitting a deep, melancholic sound), while women masterfully play the "Ardin" (a harp-like string instrument with a half resonator box). This music is not just played for dancing but always accompanies the chanting of epics, sagas, and classical poems glorifying tribal heroes and praising generosity and good morals in moonlit evenings amidst the sands of the Sahara.', 
+        link: 'https://www.tidinit.net/%D8%A7%D9%84%D9%81%D9%86%D9%88%D9%86-%D8%A7%D9%84%D9%8A%D8%AF%D9%88%D9%8A%D8%A9-%D9%81%D9%8A-%D8%A7%D9%84%D9%81%D9%84%D9%83%D9%84%D9%88%D8%B1-%D8%A7%D9%84%D9%85%D9%88%D8%B1%D9%8A%D8%AA%D8%A7%D9%86/' },
+      { id: 'architecture', icon: Landmark, title_ar: 'العمارة والمعالم', title: 'Architecture', 
+        desc_ar: 'العمارة الموريتانية القديمة هي عمارة واحات وقوافل صُممت بعبقرية لمواجهة زحف الرمال القاحلة. تتلألأ في عمق الصحراء مدينة "شنقيط" التاريخية المدرجة في اليونسكو، والمعروفة تاريخياً كمركز إشعاع علمي وتجاري ومحطة استراحة لحجاج غرب إفريقيا؛ وهي تشتهر بمكتباتها العتيقة التي تحفظ آلاف المخطوطات النفيسة في بيوت مبنية من الحجارة الجافة والخشب. وفي أقصى الشرق، تبهر الزوار مدينة "ولاتة" الحمراء التي تنفرد بمنازل طينية هندسية تُزين جدرانها الخارجية والداخلية ومداخل أبوابها بزخارف جصية ورسومات ملونة بالأحمر المائل للون الأرض والطبشور الأبيض بتصاميم غاية في الفن والتميز الإفريقي-الأندلسي.', 
+        desc: 'Ancient Mauritanian architecture is oasis and caravan architecture brilliantly designed to confront the encroachment of arid sands. Deep in the desert shines the historic UNESCO-listed city of "Chinguetti", historically known as a center of scientific and commercial radiation and a rest stop for West African pilgrims; it is famous for its ancient libraries preserving thousands of precious manuscripts in houses built of dry stone and wood. In the far east, the red city of "Oualata" dazzles visitors, unique for geometric clay houses whose exterior and interior walls and door entrances are decorated with stucco motifs and drawings painted in earthy red and white chalk in highly artistic, Afro-Andalusian designs.', 
+        link: 'https://al-ain.com/article/stone-buildings-mauritania-unique-urban-style-art' },
+      { id: 'clothing', icon: Shirt, title_ar: 'الأزياء التقليدية', title: 'Clothing', 
+        desc_ar: 'اللباس الموريتاني هو هوية بصرية قوية تعكس الحشمة وقدرة التكيف مع الحرارة والعواصف الرملية. الرجل يعتمد "الدراعة" بشكل مطلق، وهي ثوب قطني فضفاض جداً ومفتوح من الجانبين بالكامل يسمح بدخول تيارات الهواء الباردة، ويكون لونها عادة إما أزرق سماوي لامع (بازان) أو أبيض ناصع، وتطرز أطراف صدرها بخيوط ذهبية أو بيضاء، ويرافقها السروال الفضفاض والعمامة الطويلة (اللثام) للوقاية من الرمال. أما المرأة الموريتانية فتلبس "الملحفة"، وهي ثوب كامل ومستمر من قماش خفيف يبلغ طوله حوالي 4 أمتار يُلف به الجسد ويُغطى به الرأس، وتتميز الملاحف بألوانها الصارخة والزاهية وتصميماتها (الصبغة) التي تُبرز الجمال البدوي بأبهى صورة.', 
+        desc: 'Mauritanian dress is a strong visual identity reflecting modesty and adaptability to heat and sandstorms. Men absolutely rely on the "Daraa", a very loose cotton garment completely open at the sides allowing cool air currents to enter, usually either shiny sky blue (Bazin) or crisp white, with its chest edges embroidered with gold or white threads, accompanied by baggy trousers and a long turban (Litham) to protect against sand. The Mauritanian woman wears the "Melhfa", a complete, continuous light fabric garment about 4 meters long wrapped around the body and covering the head. Melhfas are characterized by bright, striking colors and dyes (Sabgha) highlighting Bedouin beauty in its best form.', 
+        link: 'https://www.tidinit.net/%D8%A7%D9%84%D8%B2%D9%8A-%D8%A7%D9%84%D8%AA%D9%82%D9%84%D9%8A%D8%AF%D9%8A-%D8%A7%D9%84%D9%85%D8%BA%D8%B1%D8%A8%D9%8A-%D8%B1%D9%85%D9%88%D8%B2-%D8%A7%D9%84%D9%81%D8%AE%D8%B1-%D9%88/' },
+      { id: 'traditions', icon: Users, title_ar: 'التقاليد الاجتماعية', title: 'Traditions', 
+        desc_ar: 'يُعرف الموريتانيون بلقب "شعب المليون شاعر"، حيث يحتل إتقان اللغة العربية الفصحى وإنشاد وتأليف الشعر والنثر رأس الهرم في التقاليد الثقافية، وتُعقد المحافل الأدبية (الندوات) تحت الخيام بشكل مستمر للمطارحات الشعرية التي يحضرها الكبار والصغار وتُنقل شفوياً ببراعة مذهلة. تعكس الحياة البدوية والترحال قيم التسامح والترحيب المفرط بعابر السبيل، فحسن الضيافة وتقديم الشاي الموريتاني المكرر (على الطريقة البدوية الهادئة) هو فرض وواجب. كما يسود مفهوم مجتمعي يدعى "الفتوة"، وهو نظام من المروءة والأخلاق النبيلة وحفظ كرامة الآخر ومساعدة المحتاجين دون طلب، مما يضمن تماسك المجتمع المتناثر في البوادي.', 
+        desc: 'Mauritanians are known as the "People of a Million Poets", where mastering classical Arabic and chanting and composing poetry and prose occupies the top of the cultural traditions pyramid. Literary forums (Symposiums) are continuously held under tents for poetic dueling attended by adults and children and transmitted orally with amazing brilliance. Bedouin and nomadic life reflects values of tolerance and excessive welcoming of the wayfarer; good hospitality and serving repeatedly poured Mauritanian tea (in the calm Bedouin way) is a mandatory duty. A societal concept called "Futuwwa" prevails, a system of chivalry, noble morals, preserving others\' dignity, and helping the needy without being asked, ensuring the cohesion of the scattered desert society.', 
+        link: 'https://www.tidinit.net/%D8%A7%D9%84%D8%A7%D8%AD%D8%AA%D9%81%D8%A7%D9%84%D8%A7%D8%AA-%D8%A7%D9%84%D8%B4%D8%B9%D8%A8%D9%8A%D8%A9-%D9%81%D9%8A-%D9%85%D9%88%D8%B1%D9%8A%D8%AA%D8%A7%D9%86%D9%8A%D8%A7-%D8%AA%D9%82%D8%A7%D9%84/' }
+    ]
+  }
+];
+
+const CountryCard = ({ country, isArabic, isHeritage, isSelected, onClick }) => {
   return (
-    <motion.div
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      onClick={onClick}
-      className={`relative overflow-hidden rounded-2xl cursor-pointer transition-all duration-300 ${
-        isSelected 
-          ? `ring-4 ${isHeritage ? 'ring-[#8D1C1C]' : 'ring-[#1D4ED8]'}`
-          : ''
-      }`}
+    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={onClick}
+      className={`relative overflow-hidden cursor-pointer transition-all duration-300 ${isHeritage ? 'rounded-none' : 'rounded-3xl'} ${isSelected ? `ring-4 ${isHeritage ? 'ring-[#8D1C1C]' : 'ring-[#1D4ED8]'}` : ''}`}
     >
       <SaduCard className="p-0 h-full">
         <div className="p-6">
           <div className="flex items-center gap-4 mb-4">
-            <span className="text-5xl">{country.flag}</span>
-            <div>
-              <h3 className={`text-xl font-bold ${isHeritage ? 'font-serif' : ''}`}>
-                {isArabic ? country.name_ar : country.name}
-              </h3>
-              <p className="text-sm text-muted-foreground line-clamp-2">
-                {isArabic ? country.description_ar : country.description}
-              </p>
-            </div>
+            <span className="text-5xl drop-shadow-md">{country.flag}</span>
+            <div><h3 className={`text-2xl font-bold ${isHeritage ? 'font-serif' : ''}`}>{isArabic ? country.name_ar : country.name}</h3></div>
           </div>
-          
-          {/* Dish Preview */}
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-black/5 dark:bg-white/5">
-            <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
-              <img 
-                src={country.dish?.image} 
-                alt={isArabic ? country.dish?.name_ar : country.dish?.name}
-                className="w-full h-full object-cover"
-              />
+          <div className={`flex items-center gap-3 p-3 bg-black/5 dark:bg-white/5 ${isHeritage ? 'rounded-none border border-[#8D1C1C]/20' : 'rounded-2xl'}`}>
+            <div className={`w-14 h-14 overflow-hidden flex-shrink-0 ${isHeritage ? 'rounded-none' : 'rounded-xl'}`}>
+              <img src={country.dish?.image} alt={isArabic ? country.dish?.name_ar : country.dish?.name} className="w-full h-full object-cover" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs text-muted-foreground">{isArabic ? 'الطبق الوطني' : 'National Dish'}</p>
-              <p className="font-medium truncate">{isArabic ? country.dish?.name_ar : country.dish?.name}</p>
+              <p className="font-bold truncate">{isArabic ? country.dish?.name_ar : country.dish?.name}</p>
             </div>
-            <Utensils className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+            <Utensils className="w-5 h-5 opacity-50 flex-shrink-0" />
           </div>
         </div>
       </SaduCard>
@@ -106,118 +565,93 @@ const CountryCard = ({ country, isArabic, isHeritage, themeColors, isSelected, o
   );
 };
 
-const CountryDetail = ({ country, isArabic, isHeritage, themeColors, onPlayVideo, onClose }) => {
-  if (!country) return null;
+const CountryPageView = ({ country, isArabic, isHeritage, darkMode, onBack, onPlayVideo }) => {
+  const [activeTabId, setActiveTabId] = useState(country.details[0].id);
+  const activeContent = country.details.find(d => d.id === activeTabId);
+
+  const s = isHeritage ? {
+    bg: darkMode ? "bg-[#2C1E12]" : "bg-[#FDF5E6]", text: "text-[#8D1C1C]", border: "border-[#8D1C1C]",
+    card: darkMode ? "bg-[#1A1A1A] border-[#8D1C1C]/50" : "bg-[#F4ECE2] border-[#8D1C1C]",
+    activeTab: "bg-[#8D1C1C] text-[#FDF5E6] rounded-none", inactiveTab: "bg-transparent text-[#8D1C1C] hover:bg-[#8D1C1C]/10 rounded-none",
+    corners: "rounded-none", pattern: { backgroundImage: 'url("https://www.transparenttextures.com/patterns/arabesque.png")' }
+  } : {
+    bg: darkMode ? "bg-[#0B1120]" : "bg-white", text: "text-blue-600", border: "border-blue-500",
+    card: darkMode ? "bg-[#1E293B] border-slate-700" : "bg-slate-50 border-slate-200",
+    activeTab: "bg-blue-600 text-white rounded-xl shadow-[0_0_15px_rgba(37,99,235,0.5)]",
+    inactiveTab: "bg-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl",
+    corners: "rounded-3xl", pattern: {}
+  };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 20 }}
-      className={`rounded-3xl overflow-hidden ${
-        isHeritage 
-          ? 'bg-gradient-to-br from-[#E8DCCA] to-[#D4C4A8]' 
-          : 'bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900'
-      }`}
-    >
-      <div className="p-8">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-8">
-          <div className="flex items-center gap-6">
-            <span className="text-7xl">{country.flag}</span>
-            <div>
-              <h2 className={`text-4xl font-bold mb-2 ${isHeritage ? 'font-serif' : ''}`}>
-                {isArabic ? country.name_ar : country.name}
-              </h2>
-              <p className="text-muted-foreground max-w-xl">
-                {isArabic ? country.description_ar : country.description}
-              </p>
-            </div>
+    <motion.div initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className={`min-h-screen py-8 ${s.bg} transition-colors duration-500`} style={isHeritage ? s.pattern : {}}>
+      <div className="max-w-7xl mx-auto px-4">
+        
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-10">
+          <Button onClick={onBack} variant="outline" className={`gap-2 h-12 px-6 border-2 font-bold text-lg ${isHeritage ? 'rounded-none border-[#8D1C1C] text-[#8D1C1C] hover:bg-[#8D1C1C] hover:text-white' : 'rounded-full border-blue-500 text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-800'}`}>
+            {isArabic ? <ArrowRight size={20} /> : <ArrowLeft size={20} />} {isArabic ? 'العودة للخريطة' : 'Back to Map'}
+          </Button>
+          <div className="flex items-center gap-4">
+            <span className="text-6xl drop-shadow-lg">{country.flag}</span>
+            <h1 className={`text-4xl md:text-5xl font-black ${s.text} ${isHeritage ? 'font-serif' : ''}`}>{isArabic ? country.name_ar : country.name}</h1>
           </div>
-          <button
-            onClick={onClose}
-            className="w-10 h-10 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center transition-colors"
-            data-testid="close-country-detail"
-          >
-            <X className="w-5 h-5" />
-          </button>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Video Section */}
-          <div>
-            <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 ${isHeritage ? 'font-serif' : ''}`}>
-              <Play className="w-5 h-5" style={{ color: themeColors.primary }} />
-              {isArabic ? 'فيديو ثقافي' : 'Cultural Video'}
-            </h3>
-            <div 
-              className="aspect-video rounded-2xl overflow-hidden bg-black/20 cursor-pointer group relative"
-              onClick={onPlayVideo}
-              data-testid={`play-country-video-${country.code}`}
-            >
-              <div className="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/50 transition-colors">
-                <div 
-                  className="w-20 h-20 rounded-full flex items-center justify-center transform group-hover:scale-110 transition-transform"
-                  style={{ backgroundColor: themeColors.primary }}
-                >
-                  <Play className="w-10 h-10 text-white ml-1" fill="white" />
-                </div>
-              </div>
-              <div className="absolute bottom-4 left-4 right-4">
-                <p className="text-white font-medium">
-                  {isArabic ? country.video_title_ar : country.video_title}
-                </p>
-              </div>
-            </div>
+        <div onClick={onPlayVideo} className={`w-full relative overflow-hidden group cursor-pointer mb-12 shadow-2xl border-4 ${s.corners} ${s.border} bg-white/5`}>
+          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent z-10 pointer-events-none" />
+          <div className="w-full h-48 md:h-64 flex items-center justify-center p-4">
+            <img src={country.flag_image_url} alt={country.name} className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-700" />
           </div>
-
-          {/* Dish Section */}
-          <div>
-            <h3 className={`text-xl font-bold mb-4 flex items-center gap-2 ${isHeritage ? 'font-serif' : ''}`}>
-              <Utensils className="w-5 h-5" style={{ color: themeColors.primary }} />
-              {isArabic ? 'الطبق التقليدي' : 'Traditional Dish'}
-            </h3>
-            <div className="rounded-2xl overflow-hidden bg-white dark:bg-gray-800 shadow-lg">
-              <div className="aspect-[16/10] relative">
-                <img 
-                  src={country.dish?.image} 
-                  alt={isArabic ? country.dish?.name_ar : country.dish?.name}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                <div className="absolute bottom-4 left-4 right-4">
-                  <h4 className="text-2xl font-bold text-white mb-1">
-                    {isArabic ? country.dish?.name_ar : country.dish?.name}
-                  </h4>
-                </div>
-              </div>
-              <div className="p-4">
-                <p className="text-muted-foreground">
-                  {isArabic ? country.dish?.description_ar : country.dish?.description}
-                </p>
-              </div>
+          <div className="absolute inset-0 z-20 flex flex-col md:flex-row items-center justify-center md:justify-start px-10 gap-6">
+            <div className={`w-20 h-20 flex items-center justify-center backdrop-blur-md bg-white/20 group-hover:bg-white/40 transition-colors ${isHeritage ? 'rounded-none' : 'rounded-full'}`}>
+              <Play className="w-10 h-10 text-white ml-1 fill-white" />
+            </div>
+            <div className="text-center md:text-left">
+              <p className="text-white/80 font-bold mb-1 flex items-center justify-center md:justify-start gap-2"><Video size={18} /> {isArabic ? 'استكشف' : 'Explore'}</p>
+              <h2 className="text-3xl md:text-4xl font-black text-white drop-shadow-md">{isArabic ? country.video_title_ar : country.video_title}</h2>
             </div>
           </div>
         </div>
 
-        {/* Quick Links */}
-        <div className="mt-8 flex flex-wrap gap-3">
-          {[
-            { icon: BookOpen, label: isArabic ? 'التاريخ والتراث' : 'History & Heritage' },
-            { icon: Users, label: isArabic ? 'العادات والتقاليد' : 'Customs & Traditions' },
-            { icon: MapPin, label: isArabic ? 'الأماكن السياحية' : 'Tourist Spots' }
-          ].map((item, index) => (
-            <Button
-              key={index}
-              variant="outline"
-              className={`gap-2 ${isHeritage ? 'border-[#8D1C1C]/30 hover:bg-[#8D1C1C]/10' : ''}`}
-              data-testid={`country-link-${index}`}
-            >
-              <item.icon className="w-4 h-4" style={{ color: themeColors.primary }} />
-              {item.label}
-              <ExternalLink className="w-3 h-3 opacity-50" />
-            </Button>
-          ))}
+        <div className="flex flex-col lg:flex-row gap-8">
+          <div className="w-full lg:w-1/4 flex flex-col gap-2 shrink-0">
+            {country.details.map((tab) => (
+              <button key={tab.id} onClick={() => setActiveTabId(tab.id)} className={`flex items-center gap-4 w-full p-4 text-lg md:text-xl font-bold transition-all duration-300 border-2 border-transparent ${activeTabId === tab.id ? s.activeTab : s.inactiveTab}`}>
+                <tab.icon className="w-6 h-6 shrink-0" /> <span className="text-right leading-tight">{isArabic ? tab.title_ar : tab.title}</span>
+              </button>
+            ))}
+          </div>
+          <div className={`w-full lg:w-3/4 p-6 md:p-12 border-2 shadow-xl ${s.card} ${s.corners} flex flex-col`}>
+            <AnimatePresence mode="wait">
+              <motion.div key={activeContent.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }} className="flex flex-col h-full">
+                <div className={`w-20 h-20 flex items-center justify-center mb-6 ${isHeritage ? 'bg-[#8D1C1C]/10 rounded-none' : 'bg-blue-500/10 rounded-3xl'}`}>
+                  <activeContent.icon className={`w-10 h-10 ${s.text}`} />
+                </div>
+                <h2 className={`text-3xl md:text-4xl font-black mb-4 ${s.text} ${isHeritage ? 'font-serif' : ''}`}>{isArabic ? activeContent.title_ar : activeContent.title}</h2>
+                <div className={`w-24 h-1.5 mb-6 ${isHeritage ? 'bg-[#8D1C1C]' : 'bg-blue-500 rounded-full'}`} />
+                <p className="text-lg md:text-xl leading-relaxed md:leading-loose text-gray-700 dark:text-gray-300 flex-grow text-justify">
+                  {isArabic ? activeContent.desc_ar : activeContent.desc}
+                </p>
+                {/* زر (اعرف المزيد) الاحترافي مع الرابط المخصص */}
+                {activeContent.link && (
+                  <div className="mt-8 flex justify-start">
+                    <a 
+                      href={activeContent.link} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className={`inline-flex items-center gap-2 px-6 py-3 font-bold transition-all duration-300 ${
+                        isHeritage 
+                          ? 'border-b-2 border-[#8D1C1C] hover:bg-[#8D1C1C]/10 text-[#8D1C1C] uppercase tracking-wider' 
+                          : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50 rounded-full shadow-sm hover:shadow-md'
+                      }`}
+                    >
+                      {isArabic ? '(اعرف المزيد)' : '(Know More)'}
+                      <ExternalLink size={18} className={isArabic ? 'mr-2' : 'ml-2'} />
+                    </a>
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </motion.div>
@@ -226,200 +660,72 @@ const CountryDetail = ({ country, isArabic, isHeritage, themeColors, onPlayVideo
 
 const ArabWorldPage = () => {
   const { isHeritage, darkMode, themeColors } = useTheme();
-  const { isRTL, language } = useLanguage();
+  const { language } = useLanguage();
   const isArabic = language === 'ar';
-  const [countries, setCountries] = useState([]);
+  
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [playingVideo, setPlayingVideo] = useState(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchCountries();
-  }, []);
-
-  const fetchCountries = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/api/content/arab-countries`);
-      setCountries(response.data.countries || []);
-    } catch (error) {
-      console.error('Error fetching countries:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const regions = [
-    {
-      name: isArabic ? 'دول الخليج' : 'Gulf Countries',
-      countries: ['KW', 'SA', 'AE'],
-      color: '#1D4ED8',
-      description: isArabic ? 'تراث بحري وحضارة عريقة' : 'Maritime heritage and ancient civilization'
-    },
-    {
-      name: isArabic ? 'بلاد الشام' : 'Levant',
-      countries: ['LB', 'EG'],
-      color: '#8D1C1C',
-      description: isArabic ? 'مهد الحضارات والثقافات' : 'Cradle of civilizations and cultures'
-    },
-    {
-      name: isArabic ? 'شمال أفريقيا' : 'North Africa',
-      countries: ['MA'],
-      color: '#D97706',
-      description: isArabic ? 'تنوع ثقافي فريد' : 'Unique cultural diversity'
-    }
-  ];
-
-  const handlePlayVideo = (country) => {
-    setPlayingVideo({
-      videoId: country.video_id,
-      title: isArabic ? country.video_title_ar : country.video_title
-    });
+  const s = isHeritage ? {
+    bg: darkMode ? "bg-[#1A1A1A]" : "bg-[#FDF6E3]", card: darkMode ? "bg-[#2C1E12] border-[#8D1C1C]/50" : "bg-[#F4ECE2] border-[#8D1C1C]",
+    text: "text-[#8D1C1C]", corners: "rounded-none", pattern: { backgroundImage: 'url("https://www.transparenttextures.com/patterns/arabesque.png")' }
+  } : {
+    bg: darkMode ? "bg-[#0F172A]" : "bg-[#F8FAFC]", card: darkMode ? "bg-[#1E293B] border-slate-700" : "bg-white border-blue-100",
+    text: "text-blue-600", corners: "rounded-3xl", pattern: {}
   };
 
   return (
-    <div className={`min-h-screen ${darkMode ? (isHeritage ? 'bg-[#1A1A1A]' : 'bg-[#0F172A]') : (isHeritage ? 'bg-[#FDF6E3]' : 'bg-[#F8FAFC]')}`}>
+    <div className={`min-h-screen ${s.bg} transition-colors duration-500`}>
       <AnimatePresence>
-        {playingVideo && (
-          <YouTubeEmbed 
-            videoId={playingVideo.videoId} 
-            title={playingVideo.title}
-            onClose={() => setPlayingVideo(null)} 
-          />
-        )}
+        {playingVideo && <YouTubeEmbed videoId={playingVideo.videoId} title={playingVideo.title} onClose={() => setPlayingVideo(null)} />}
       </AnimatePresence>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-16"
-        >
-          <div className={`w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-6 ${isHeritage ? 'bg-[#8D1C1C]' : 'bg-[#1D4ED8]'}`}>
-            <Globe className="w-10 h-10 text-white" />
-          </div>
-          <h1 className={`text-4xl md:text-5xl font-bold mb-4 ${isHeritage ? 'font-serif' : ''}`} style={{ color: themeColors.primary }}>
-            {isArabic ? 'جناح العالم العربي' : 'Pan-Arab Wing'}
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            {isArabic
-              ? 'اكتشف تنوع وجمال ثقافات وتقاليد العالم العربي من خلال الفيديوهات والأطباق التقليدية.'
-              : 'Discover the diversity and beauty of Arab cultures through videos and traditional dishes.'}
-          </p>
-        </motion.div>
-
-        {/* Regions Overview */}
-        <div className="grid md:grid-cols-3 gap-6 mb-16">
-          {regions.map((region, index) => (
-            <motion.div
-              key={region.name}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <SaduCard className="h-full">
-                <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
-                  style={{ backgroundColor: region.color }}
-                >
-                  <MapPin className="w-6 h-6 text-white" />
-                </div>
-                <h3 className={`text-lg font-bold mb-2 ${isHeritage ? 'font-serif' : ''}`}>
-                  {region.name}
-                </h3>
-                <p className="text-sm text-muted-foreground mb-4">{region.description}</p>
-                <div className="flex flex-wrap gap-2">
-                  {region.countries.map(code => {
-                    const country = countries.find(c => c.code === code);
-                    return country ? (
-                      <span key={code} className="text-2xl" title={isArabic ? country.name_ar : country.name}>
-                        {country.flag}
-                      </span>
-                    ) : null;
-                  })}
-                </div>
-              </SaduCard>
-            </motion.div>
-          ))}
-        </div>
-
-        <SaduDivider className="mb-16" />
-
-        {/* Countries Grid */}
-        <div className="mb-8">
-          <h2 className={`text-2xl font-bold mb-2 ${isHeritage ? 'font-serif' : ''}`}>
-            {isArabic ? 'اختر دولة للاستكشاف' : 'Select a Country to Explore'}
-          </h2>
-          <p className="text-muted-foreground mb-8">
-            {isArabic 
-              ? `${countries.length} دول متاحة - كل دولة بفيديو وطبق تقليدي`
-              : `${countries.length} countries available - each with a video and traditional dish`}
-          </p>
-        </div>
-
-        {loading ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map(i => (
-              <div key={i} className="animate-pulse">
-                <div className={`h-48 rounded-2xl ${darkMode ? 'bg-white/10' : 'bg-gray-200'}`} />
+      <AnimatePresence mode="wait">
+        {!selectedCountry ? (
+          <motion.div key="main-view" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-7xl mx-auto px-4 py-12">
+            <div className="text-center mb-16">
+              <div className={`w-24 h-24 mx-auto flex items-center justify-center mb-6 shadow-xl ${isHeritage ? 'bg-[#8D1C1C] rounded-none rotate-3' : 'bg-gradient-to-br from-blue-500 to-blue-700 rounded-[2rem]'}`}>
+                <Globe className="w-12 h-12 text-white" />
               </div>
-            ))}
-          </div>
+              <h1 className={`text-5xl md:text-6xl font-black mb-6 ${s.text} ${isHeritage ? 'font-serif' : ''}`}>
+                {isArabic ? 'جناح العالم العربي' : 'Pan-Arab Wing'}
+              </h1>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+                {isArabic ? 'اضغط على أي دولة لفتح صفحتها الثقافية المستقلة واستكشاف تراثها العريق.' : 'Click on any country to open its cultural page and explore its deep heritage.'}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {arabCountriesData.map((country, index) => (
+                <motion.div
+                  key={country.code} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}
+                  onClick={() => { window.scrollTo({ top: 0, behavior: 'smooth' }); setSelectedCountry(country); }}
+                  className={`cursor-pointer overflow-hidden border-2 shadow-lg transition-all ${s.card} ${s.corners}`}
+                  style={isHeritage ? s.pattern : {}}
+                >
+                  <div className="p-8 flex items-center gap-6">
+                    <span className="text-7xl drop-shadow-md">{country.flag}</span>
+                    <div>
+                      <p className="text-sm opacity-60 font-bold mb-1 uppercase tracking-wider">{country.region}</p>
+                      <h3 className={`text-3xl font-black ${isHeritage ? 'font-serif' : ''}`}>
+                        {isArabic ? country.name_ar : country.name}
+                      </h3>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            {countries.map((country, index) => (
-              <motion.div
-                key={country.code}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.05 }}
-              >
-                <CountryCard
-                  country={country}
-                  isArabic={isArabic}
-                  isHeritage={isHeritage}
-                  themeColors={themeColors}
-                  isSelected={selectedCountry?.code === country.code}
-                  onClick={() => setSelectedCountry(selectedCountry?.code === country.code ? null : country)}
-                />
-              </motion.div>
-            ))}
-          </div>
-        )}
-
-        {/* Selected Country Detail */}
-        <AnimatePresence mode="wait">
-          {selectedCountry && (
-            <CountryDetail
-              country={selectedCountry}
-              isArabic={isArabic}
-              isHeritage={isHeritage}
-              themeColors={themeColors}
-              onPlayVideo={() => handlePlayVideo(selectedCountry)}
-              onClose={() => setSelectedCountry(null)}
+          <motion.div key="country-view">
+            <CountryPageView 
+              country={selectedCountry} isArabic={isArabic} isHeritage={isHeritage} darkMode={darkMode}
+              onBack={() => setSelectedCountry(null)}
+              onPlayVideo={() => setPlayingVideo({ videoId: selectedCountry.video_id, title: isArabic ? selectedCountry.video_title_ar : selectedCountry.video_title })}
             />
-          )}
-        </AnimatePresence>
-
-        {/* CTA */}
-        <div className="mt-16 text-center">
-          <h3 className={`text-xl font-bold mb-4 ${isHeritage ? 'font-serif' : ''}`}>
-            {isArabic ? 'شارك في إثراء المحتوى' : 'Contribute to Enrich Content'}
-          </h3>
-          <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
-            {isArabic
-              ? 'هل أنت خبير في ثقافة بلدك؟ ساعدنا في توثيق التراث العربي!'
-              : 'Are you an expert in your country\'s culture? Help us document Arab heritage!'}
-          </p>
-          <Button
-            className={`h-12 px-8 ${isHeritage ? 'bg-[#8D1C1C] hover:bg-[#6D1515]' : 'bg-[#1D4ED8] hover:bg-[#0B7A70]'}`}
-            data-testid="contribute-btn"
-          >
-            {isArabic ? 'ساهم الآن' : 'Contribute Now'}
-            <ChevronRight className={`w-5 h-5 ms-2 ${isRTL ? 'rotate-180' : ''}`} />
-          </Button>
-        </div>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -162,13 +162,7 @@ export const Navbar = () => {
   const exploreDropdown = {
     trigger: { icon: Compass, label: isArabic ? 'استكشف' : 'Explore' },
     items: [
-      { 
-        to: '/cooking', 
-        emoji: '👨‍🍳', 
-        label: isArabic ? 'ركن الطبخ' : 'Cooking Corner',
-        description: isArabic ? 'الوصفات والفيديوهات' : 'Recipes & Videos',
-        color: '#EC4899'
-      },
+      // ✅ تم حذف "ركن الطبخ" وإبقاء "المطبخ الذكي" فقط
       { 
         to: '/smart-kitchen', 
         emoji: '🍳', 
@@ -209,7 +203,7 @@ export const Navbar = () => {
     { to: '/youth', emoji: '🚀', label: t('youth'), color: '#1D4ED8' },
     { to: '/kids', emoji: '🎮', label: t('kids'), color: '#F59E0B' },
     { separator: true, label: isArabic ? 'استكشف' : 'Explore' },
-    { to: '/cooking', emoji: '👨‍🍳', label: t('cooking'), color: '#EC4899' },
+    // ✅ تم التعديل هنا أيضاً للجوال
     { to: '/smart-kitchen', emoji: '🍳', label: isArabic ? 'المطبخ الذكي' : 'Smart Kitchen', color: '#F59E0B' },
     { to: '/tourists', emoji: '🗺️', label: t('tourists'), color: '#3B82F6' },
     { to: '/arab-world', emoji: '🌍', label: t('arab_world'), color: '#10B981' },
@@ -223,7 +217,6 @@ export const Navbar = () => {
     navigate('/');
   };
 
-  // إعدادات تصميم قائمة المستخدم المنسدلة
   const userDropdownStyles = isHeritage ? {
     content: darkMode ? "bg-[#2C1E12] border-2 border-[#8D1C1C] rounded-none" : "bg-[#FDF5E6] border-2 border-[#8D1C1C] rounded-none",
     item: "rounded-none hover:bg-[#8D1C1C]/20 focus:bg-[#8D1C1C]/20 transition-colors",
@@ -298,7 +291,6 @@ export const Navbar = () => {
 
           {/* Right Side Actions */}
           <div className="flex items-center gap-1">
-            {/* Language Selector */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-9 w-9">
@@ -324,7 +316,6 @@ export const Navbar = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Theme Toggle */}
             <Button
               variant="ghost"
               size="icon"
@@ -334,7 +325,6 @@ export const Navbar = () => {
               {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </Button>
 
-            {/* Senior Mode */}
             <Button
               variant="ghost"
               size="icon"
@@ -345,7 +335,6 @@ export const Navbar = () => {
               <Eye className="w-4 h-4" />
             </Button>
 
-            {/* Interface Switch */}
             <Button
               variant="ghost"
               size="icon"
@@ -356,7 +345,6 @@ export const Navbar = () => {
               <Palette className="w-4 h-4" />
             </Button>
 
-            {/* Auth User Menu */}
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -374,7 +362,6 @@ export const Navbar = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 
-                {/* 🚀 القائمة المنسدلة الاحترافية والجديدة */}
                 <DropdownMenuContent 
                   align={isRTL ? 'start' : 'end'} 
                   className={`w-56 p-2 mt-1 ${userDropdownStyles.content}`}
@@ -403,7 +390,6 @@ export const Navbar = () => {
               </Button>
             )}
 
-            {/* Mobile Menu */}
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild className="lg:hidden">
                 <Button variant="ghost" size="icon" className="h-9 w-9">
