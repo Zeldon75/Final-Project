@@ -9,10 +9,10 @@ import { Input } from '../components/ui/input';
 import { ScrollArea } from '../components/ui/scroll-area';
 import { SaduCard } from '../components/SaduPattern';
 import { Brain, Send, Bot, User, Loader2, Sparkles, MessageSquare, Lock } from 'lucide-react';
-import axios from 'axios';
 import { toast } from 'sonner';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL;
+// 🚀 مفتاح الذكاء الاصطناعي الذي أرسلته (إذا لم يعمل تأكد أنه يبدأ بـ AIzaSy)
+const GEMINI_API_KEY = "gen-lang-client-0453876994";
 
 // --- مكون الرسائل ---
 const ChatMessage = ({ message, isUser, isArabic }) => {
@@ -40,7 +40,15 @@ const ChatMessage = ({ message, isUser, isArabic }) => {
             ? 'bg-gray-800 text-gray-100 rounded-tl-none border border-gray-700'
             : 'bg-white text-gray-800 rounded-tl-none border border-gray-100'
       }`}>
-        <p className="whitespace-pre-wrap leading-relaxed font-medium">{message}</p>
+        {/* دعم النصوص العريضة والمائلة من الذكاء الاصطناعي */}
+        <div 
+          className="whitespace-pre-wrap leading-relaxed font-medium"
+          dangerouslySetInnerHTML={{ 
+            __html: message
+              .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+              .replace(/\*(.*?)\*/g, '<em>$1</em>')
+          }}
+        />
       </div>
     </motion.div>
   );
@@ -49,19 +57,19 @@ const ChatMessage = ({ message, isUser, isArabic }) => {
 const AIHubPage = () => {
   const { isHeritage, darkMode, themeColors } = useTheme();
   const { t, isRTL, language } = useLanguage();
-  const { isAuthenticated, token } = useAuth();
+  const { isAuthenticated } = useAuth();
   const isArabic = language === 'ar';
   
-  const [selectedModel, setSelectedModel] = useState('gpt-5.2');
+  const [selectedModel, setSelectedModel] = useState('gemini');
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [guestMsgCount, setGuestMsgCount] = useState(0); // عداد رسائل الزوار
-  const MSG_LIMIT = 6; // الحد الأقصى لغير المسجلين
+  const [guestMsgCount, setGuestMsgCount] = useState(0); 
+  const MSG_LIMIT = 6; 
   const messagesEndRef = useRef(null);
 
-  // الرسالة الترحيبية التلقائية
+  // الرسالة الترحيبية التلقائية (تم تغيير role إلى model ليتوافق مع Gemini)
   const initialBotMessage = {
-    role: 'assistant',
+    role: 'model',
     content: isArabic
       ? 'مرحباً بك في منصة "دروازة"! 🌟 أنا مساعدك الذكي ومستعد لمساعدتك في استكشاف تراثنا وتاريخنا، أو إرشادك حول كيفية استخدام الموقع. ما الذي تود معرفته اليوم؟'
       : 'Welcome to the "Darwaza" platform! 🌟 I am your AI assistant, ready to help you explore our heritage and history, or guide you on how to use the site. What would you like to know today?'
@@ -77,10 +85,44 @@ const AIHubPage = () => {
     scrollToBottom();
   }, [messages]);
 
+  // 🚀 دالة الاتصال المباشر بـ Google Gemini
+  const generateGeminiResponse = async (userText, chatHistory) => {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+    
+    // توجيهات ليكون المساعد ملائماً لدروازة
+    const systemInstruction = isArabic 
+      ? "أنت مساعد ذكي في منصة كويتية اسمها 'دروازة' متخصصة في التراث والتاريخ الكويتي. أجب بإيجاز، كن ودوداً، واستخدم بعض الكلمات الكويتية اللطيفة إذا كان مناسباً."
+      : "You are an AI assistant for a Kuwaiti platform called 'Darwaza' focusing on heritage and history. Answer concisely, be friendly, and mention Kuwaiti culture when relevant.";
+
+    // تجهيز تاريخ المحادثة
+    const formattedHistory = chatHistory.map(msg => ({
+      role: msg.role === 'model' ? 'model' : 'user',
+      parts: [{ text: msg.content }]
+    }));
+
+    formattedHistory.push({
+      role: 'user',
+      parts: [{ text: `${systemInstruction}\n\nسؤال المستخدم: ${userText}` }]
+    });
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: formattedHistory })
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error?.message || "API Error");
+    }
+
+    return data.candidates[0].content.parts[0].text;
+  };
+
   const handleSend = async () => {
     if (!input.trim() || loading) return;
     
-    // منع الزائر من الإرسال إذا تجاوز الحد
     if (!isAuthenticated && guestMsgCount >= MSG_LIMIT) return;
 
     const userMessage = input.trim();
@@ -93,17 +135,13 @@ const AIHubPage = () => {
     }
 
     try {
-      const response = await axios.post(
-        `${API_URL}/api/ai/chat`,
-        { content: userMessage, model: selectedModel },
-        { headers: token ? { Authorization: `Bearer ${token}` } : {} } // يرسل التوكن إن وجد
-      );
-      
-      setMessages(prev => [...prev, { role: 'assistant', content: response.data.response }]);
+      // الاتصال بالذكاء الاصطناعي
+      const aiReply = await generateGeminiResponse(userMessage, messages);
+      setMessages(prev => [...prev, { role: 'model', content: aiReply }]);
     } catch (error) {
       console.error('AI Error:', error);
-      toast.error(isArabic ? 'حدث خطأ في الاتصال بالذكاء الاصطناعي' : 'Error connecting to AI');
-      setMessages(prev => [...prev, { role: 'assistant', content: isArabic ? 'عذراً، حدث خطأ. يرجى المحاولة مرة أخرى.' : 'Sorry, an error occurred. Please try again.' }]);
+      toast.error(isArabic ? 'حدث خطأ في الاتصال. تأكد من صحة مفتاح API' : 'Connection error. Check API key');
+      setMessages(prev => [...prev, { role: 'model', content: isArabic ? 'عذراً، حدث خطأ في الاتصال. هل تأكدت من أن مفتاح API يبدأ بـ AIzaSy؟ 🗝️' : 'Sorry, a connection error occurred. Make sure your API key starts with AIzaSy. 🗝️' }]);
     } finally {
       setLoading(false);
     }
@@ -141,7 +179,6 @@ const AIHubPage = () => {
             {isArabic ? 'اختر نموذجك المفضل وابدأ المحادثة الذكية 🧠' : 'Choose your favorite model and start the smart chat 🧠'}
           </p>
 
-          {/* دوائر النيون لاختيار النماذج */}
           <div className="flex justify-center items-center gap-6">
             {Object.entries(modelStyles).map(([id, info]) => {
               const ModelIcon = info.icon;
@@ -168,7 +205,7 @@ const AIHubPage = () => {
         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full">
           <SaduCard className={`h-[650px] flex flex-col shadow-2xl border-0 overflow-hidden ${darkMode ? 'bg-[#1E293B] ring-1 ring-white/10' : 'bg-white ring-1 ring-black/5'}`}>
             
-            {/* Suggested Prompts (أزرار الاختصار) */}
+            {/* Suggested Prompts */}
             <div className={`p-4 flex gap-2 overflow-x-auto custom-scrollbar border-b ${darkMode ? 'border-gray-800 bg-gray-900/50' : 'border-gray-100 bg-gray-50/50'}`}>
               {suggestedPrompts.map((prompt, index) => (
                 <Button key={index} variant="outline" size="sm"
@@ -201,10 +238,9 @@ const AIHubPage = () => {
               </div>
             </ScrollArea>
 
-            {/* Input Area or Auth Requirement */}
+            {/* Input Area */}
             <div className={`p-4 md:p-6 border-t-2 ${darkMode ? 'border-gray-800 bg-gray-900/50' : 'border-gray-100 bg-gray-50/50'}`}>
               {!isAuthenticated && guestMsgCount >= MSG_LIMIT ? (
-                // شاشة انتهاء الرسائل المجانية
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={`p-6 text-center rounded-2xl border-2 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200 shadow-sm'}`}>
                   <Lock className="w-12 h-12 mx-auto mb-4 text-purple-500" />
                   <h3 className={`text-2xl font-black mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
@@ -220,7 +256,6 @@ const AIHubPage = () => {
                   </Link>
                 </motion.div>
               ) : (
-                // حقل الإدخال العادي
                 <div>
                   {!isAuthenticated && (
                     <div className="flex justify-between items-center px-2 mb-2 text-xs font-bold text-muted-foreground">
