@@ -11,8 +11,8 @@ import { SaduCard } from '../components/SaduPattern';
 import { Brain, Send, Bot, User, Loader2, Sparkles, MessageSquare, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 
-// 🚀 مفتاح الذكاء الاصطناعي الحقيقي الخاص بك
-const GEMINI_API_KEY = "AIzaSyCxwFZtbVBHamGxnobnT6AZucetIsFQ2IA";
+// 🚀 الآن المفتاح محمي ومخفي داخل إعدادات Vercel
+const GEMINI_API_KEY = process.env.REACT_APP_GEMINI_API_KEY;
 
 // --- مكون الرسائل ---
 const ChatMessage = ({ message, isUser, isArabic }) => {
@@ -40,7 +40,6 @@ const ChatMessage = ({ message, isUser, isArabic }) => {
             ? 'bg-gray-800 text-gray-100 rounded-tl-none border border-gray-700'
             : 'bg-white text-gray-800 rounded-tl-none border border-gray-100'
       }`}>
-        {/* دعم النصوص العريضة والمائلة من الذكاء الاصطناعي */}
         <div 
           className="whitespace-pre-wrap leading-relaxed font-medium"
           dangerouslySetInnerHTML={{ 
@@ -67,7 +66,6 @@ const AIHubPage = () => {
   const MSG_LIMIT = 6; 
   const messagesEndRef = useRef(null);
 
-  // الرسالة الترحيبية التلقائية 
   const initialBotMessage = {
     role: 'model',
     content: isArabic
@@ -85,30 +83,34 @@ const AIHubPage = () => {
     scrollToBottom();
   }, [messages]);
 
-  // 🚀 دالة الاتصال المباشر بـ Google Gemini (تم التحديث إلى الموديل الجديد gemini-1.5-flash ليعمل بنجاح!)
   const generateGeminiResponse = async (userText, chatHistory) => {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+    // استخدمنا الموديل المستقر
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
     
-    // توجيهات ليكون المساعد ملائماً لدروازة
     const systemInstruction = isArabic 
       ? "أنت مساعد ذكي في منصة كويتية اسمها 'دروازة' متخصصة في التراث والتاريخ الكويتي. أجب بإيجاز، كن ودوداً، واستخدم بعض الكلمات الكويتية اللطيفة إذا كان مناسباً."
       : "You are an AI assistant for a Kuwaiti platform called 'Darwaza' focusing on heritage and history. Answer concisely, be friendly, and mention Kuwaiti culture when relevant.";
 
-    // تجهيز تاريخ المحادثة
-    const formattedHistory = chatHistory.map(msg => ({
-      role: msg.role === 'model' ? 'model' : 'user',
-      parts: [{ text: msg.content }]
-    }));
+    const contents = [];
+    
+    const validHistory = chatHistory.filter((msg, index) => index !== 0); 
 
-    formattedHistory.push({
+    validHistory.forEach(msg => {
+      contents.push({
+        role: msg.role === 'model' ? 'model' : 'user',
+        parts: [{ text: msg.content }]
+      });
+    });
+
+    contents.push({
       role: 'user',
-      parts: [{ text: `${systemInstruction}\n\nسؤال المستخدم: ${userText}` }]
+      parts: [{ text: `${systemInstruction}\n\nالسؤال: ${userText}` }]
     });
 
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: formattedHistory })
+      body: JSON.stringify({ contents: contents })
     });
 
     const data = await response.json();
@@ -135,13 +137,12 @@ const AIHubPage = () => {
     }
 
     try {
-      // الاتصال بالذكاء الاصطناعي
       const aiReply = await generateGeminiResponse(userMessage, messages);
       setMessages(prev => [...prev, { role: 'model', content: aiReply }]);
     } catch (error) {
       console.error('AI Error:', error);
-      toast.error(isArabic ? 'حدث خطأ في الاتصال. تأكد من صحة مفتاح API' : 'Connection error. Check API key');
-      setMessages(prev => [...prev, { role: 'model', content: isArabic ? 'عذراً، حدث خطأ في الاتصال. حاول مرة أخرى. 🗝️' : 'Sorry, a connection error occurred. Try again. 🗝️' }]);
+      toast.error(isArabic ? 'حدث خطأ في الاتصال. حاول مرة أخرى.' : 'Connection error. Try again.');
+      setMessages(prev => [...prev, { role: 'model', content: isArabic ? 'عذراً، حدث خطأ أثناء التفكير. هل يمكنك سؤالي مرة أخرى؟ 🧠' : 'Sorry, an error occurred while thinking. Can you ask again? 🧠' }]);
     } finally {
       setLoading(false);
     }
@@ -159,7 +160,6 @@ const AIHubPage = () => {
     'What are famous Kuwaiti dishes?'
   ];
 
-  // ألوان النماذج وتأثيرات النيون
   const modelStyles = {
     'gpt-5.2': { color: '#10b981', glow: 'rgba(16, 185, 129, 0.8)', icon: Bot, name: 'ChatGPT' },
     'gemini': { color: '#3b82f6', glow: 'rgba(59, 130, 246, 0.8)', icon: Sparkles, name: 'Gemini' },
@@ -170,7 +170,6 @@ const AIHubPage = () => {
     <div className={`min-h-screen ${darkMode ? (isHeritage ? 'bg-[#1A1A1A]' : 'bg-[#0F172A]') : (isHeritage ? 'bg-[#FDF6E3]' : 'bg-gray-50')} transition-colors duration-500`}>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        {/* Header & Models Neon Selector */}
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
           <h1 className={`text-4xl md:text-5xl font-black mb-4 ${isHeritage ? 'font-serif' : ''}`} style={{ color: themeColors.primary }}>
             {t('ai_hub')}
@@ -201,11 +200,9 @@ const AIHubPage = () => {
           </div>
         </motion.div>
 
-        {/* Chat Area */}
         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full">
           <SaduCard className={`h-[650px] flex flex-col shadow-2xl border-0 overflow-hidden ${darkMode ? 'bg-[#1E293B] ring-1 ring-white/10' : 'bg-white ring-1 ring-black/5'}`}>
             
-            {/* Suggested Prompts */}
             <div className={`p-4 flex gap-2 overflow-x-auto custom-scrollbar border-b ${darkMode ? 'border-gray-800 bg-gray-900/50' : 'border-gray-100 bg-gray-50/50'}`}>
               {suggestedPrompts.map((prompt, index) => (
                 <Button key={index} variant="outline" size="sm"
@@ -218,7 +215,6 @@ const AIHubPage = () => {
               ))}
             </div>
 
-            {/* Messages */}
             <ScrollArea className="flex-1 p-4 md:p-6">
               <div className="space-y-4">
                 {messages.map((msg, index) => (
@@ -238,7 +234,6 @@ const AIHubPage = () => {
               </div>
             </ScrollArea>
 
-            {/* Input Area */}
             <div className={`p-4 md:p-6 border-t-2 ${darkMode ? 'border-gray-800 bg-gray-900/50' : 'border-gray-100 bg-gray-50/50'}`}>
               {!isAuthenticated && guestMsgCount >= MSG_LIMIT ? (
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={`p-6 text-center rounded-2xl border-2 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200 shadow-sm'}`}>
