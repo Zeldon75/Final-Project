@@ -11,8 +11,8 @@ import { SaduCard } from '../components/SaduPattern';
 import { Brain, Send, Bot, User, Loader2, Sparkles, MessageSquare, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 
-// 🚀 مفتاح الذكاء الاصطناعي الذي أرسلته (إذا لم يعمل تأكد أنه يبدأ بـ AIzaSy)
-const GEMINI_API_KEY = "gen-lang-client-0453876994";
+// 🚀 مفتاح الذكاء الاصطناعي الحقيقي الخاص بك
+const GEMINI_API_KEY = "AIzaSyCxwFZtbVBHamGxnobnT6AZucetIsFQ2IA";
 
 // --- مكون الرسائل ---
 const ChatMessage = ({ message, isUser, isArabic }) => {
@@ -67,7 +67,7 @@ const AIHubPage = () => {
   const MSG_LIMIT = 6; 
   const messagesEndRef = useRef(null);
 
-  // الرسالة الترحيبية التلقائية (تم تغيير role إلى model ليتوافق مع Gemini)
+  // الرسالة الترحيبية التلقائية 
   const initialBotMessage = {
     role: 'model',
     content: isArabic
@@ -141,7 +141,7 @@ const AIHubPage = () => {
     } catch (error) {
       console.error('AI Error:', error);
       toast.error(isArabic ? 'حدث خطأ في الاتصال. تأكد من صحة مفتاح API' : 'Connection error. Check API key');
-      setMessages(prev => [...prev, { role: 'model', content: isArabic ? 'عذراً، حدث خطأ في الاتصال. هل تأكدت من أن مفتاح API يبدأ بـ AIzaSy؟ 🗝️' : 'Sorry, a connection error occurred. Make sure your API key starts with AIzaSy. 🗝️' }]);
+      setMessages(prev => [...prev, { role: 'model', content: isArabic ? 'عذراً، حدث خطأ في الاتصال. حاول مرة أخرى. 🗝️' : 'Sorry, a connection error occurred. Try again. 🗝️' }]);
     } finally {
       setLoading(false);
     }
