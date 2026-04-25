@@ -85,9 +85,9 @@ const AIHubPage = () => {
     scrollToBottom();
   }, [messages]);
 
-  // 🚀 دالة الاتصال المباشر بـ Google Gemini
+  // 🚀 دالة الاتصال المباشر بـ Google Gemini (تم التحديث للموديل 1.5 الأسرع)
   const generateGeminiResponse = async (userText, chatHistory) => {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
     
     // توجيهات ليكون المساعد ملائماً لدروازة
     const systemInstruction = isArabic 
